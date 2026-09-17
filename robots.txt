@@ -1,0 +1,3 @@
+# PREVIA do site da alea - nao indexar. O site de verdade e https://www.aleaco.art.br/
+User-agent: *
+Disallow: /

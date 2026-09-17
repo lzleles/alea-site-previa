@@ -1,0 +1,155 @@
+/* =============================================================================
+   config.js — os valores que mudam. Mexe aqui, não no resto do site.
+   =============================================================================
+
+   COMO MEXER (vale para quem não programa)
+   ----------------------------------------
+   Cada linha é  nome: 'valor',  — troque o que está entre aspas e salve.
+   Não apague a vírgula do fim da linha nem as aspas.
+
+   whatsapp ........... só números, com 55 na frente e DDD. Sem espaço, sem traço.
+                        Exemplo: 5564999998888
+   conversao_whatsapp . Google Ads > Metas > Conversões > nova conversão do tipo
+                        "site" > copie o trecho AW-000000000/AbCdEfG e cole aqui.
+   ========================================================================== */
+
+window.ALEA = {
+
+  /* O WhatsApp comercial da ālea. Informado pelo Cassiano em 15/09/2026.
+     Formato: 55 (Brasil) + 64 (DDD de Jataí) + o número que ele mandou (999569994).
+     Ele mandou assim:  64999569994
+     Conferir sempre que mexer: tem que ter 12 ou 13 dígitos, só número, sem espaço e
+     sem traço — é essa a régua que o site.js usa pra decidir se liga os botões. */
+  whatsapp: '5564999569994',
+
+  /* Texto que já vai escrito na conversa. O {produto} é trocado pelo item clicado. */
+  mensagem: 'Oi! Vim pelo site da ālea. Queria saber sobre: {produto}',
+
+  /* ⚠️ Sem "conversao_whatsapp" preenchido o Google Ads NÃO sabe quais cliques viraram
+     conversa — e o lance inteligente fica sem nada pra aprender. A campanha vira
+     aposta. Preencher ANTES de colocar dinheiro, não depois. */
+  conversao_whatsapp: '',
+
+  /* Medição. Vazio = nenhum script de terceiro carrega, e a página não precisa de
+     banner de cookie. Preencher só quando a campanha começar. */
+  google_ads_id: '',          // AW-000000000
+  google_analytics: '',       // G-XXXXXXXXXX
+
+  /* A FRASE DA MARCA. Ela abre o site (escrita letra por letra) e fecha o rodapé.
+     Um lugar só: mudou aqui, mudou nos dois. */
+  assinatura: 'Onde cada impressão começa com um sonho!',
+
+  /* O FEED MOSTRA PRECO?
+     O Cassiano pediu "so o produto e nome". Deixei o preco porque preco no feed tira
+     duvida antes do clique e porque o Google compara o valor do anuncio com o da
+     pagina. Se ele quiser o feed 100% limpo, troque para false: sai so do feed,
+     a pagina de produto continua mostrando. */
+  mostrar_preco_no_feed: true,
+
+  /* Categoria sem nenhum produto aparece no menu como "em breve" (false) ou some do
+     menu (true). Enquanto só a PET tem peça, deixar false é honesto: mostra a régua
+     de linhas que ele já registrou, sem prometer clique que não leva a nada. */
+  esconder_categorias_vazias: false,
+
+  /* Identificação do negócio — o Google exige isto visível na página de destino.
+     ⚠️ CNPJ informado pelo Cassiano em 15/09/2026. Ele fecha metade da exigência de
+     "vendedor identificável" da política de destino do Google Ads; ainda faltam
+     ENDEREÇO COMERCIAL e E-MAIL. Sem conferir: é o número que ele mandou, escrito
+     como ele mandou. */
+  cnpj: '61.338.171/0001-10',
+  marca: 'ālea',
+  responsavel: 'Cassiano Rosado',
+  cidade: 'Jataí',
+  uf: 'GO',
+  email: '',                  // ⚠️ e-mail comercial da ālea — ainda não informado
+  instagram: 'alea.co_',        // trocado em 16/09/2026: o @alea.decor3d deixou de existir; @alea.co_ conferido na API da Meta ("ālea & Co")
+  instagram_canal: 'eaibora.3d',
+
+  /* AS REDES DO RODAPÉ. Endereço vazio = o ícone não aparece — nunca vira link morto.
+     ⚠️ Faltam do Cassiano: YouTube e Twitch. Assim que ele mandar, é colar.
+     17/09/2026 (áudio de 16/09, 23:51): "eu tenho o segundo Instagram, que é do eaibora3d
+     […] o link do Linktree". Os dois entraram: o Linktree é o dele (o mesmo da bio do
+     @eaibora.3d, lido no retrato de 14/09) e o segundo Instagram ganha ícone próprio. */
+  redes: {
+    linktree:  'https://linktr.ee/eaibora.3d',
+    instagram: 'https://www.instagram.com/alea.co_/',
+    instagram_canal: 'https://www.instagram.com/eaibora.3d/',
+    youtube:   '',            // https://www.youtube.com/@...
+    twitch:    ''             // https://www.twitch.tv/...
+  },
+
+  /* A FICHA PADRÃO DA PEÇA (ditada por ele em 15/09/2026).
+     Vale pra todo produto que não escrever a sua própria no produtos.js.
+     `material` fica de fora de propósito: ele é PERGUNTADO peça a peça pelo
+     01_gerar_paginas_v1.py, porque muda de peça pra peça (PLA ou PETG). */
+  ficha_padrao: {
+    personalizacao: 'Nome do pet em baixo relevo na cor do objeto.',
+    producao: 'Sob encomenda, 3 dias úteis após a confirmação de pagamento!',
+    cores: 'Totalmente personalizável, podendo escolher entre filamentos básicos, ' +
+           'foscos ou brilhosos.'
+  },
+
+  /* ADICIONAIS DE PERSONALIZACAO — o que soma no preco da peca.
+     -------------------------------------------------------------------------------
+     id ....... nao muda depois que um pedido ja foi feito com ele (o carrinho guarda)
+     rotulo ... o que aparece no quadrado pra clicar
+     preco .... soma ao valor da peca, na hora, no botao e no carrinho
+     libera ... o campo que so pode ser respondido depois de marcar este adicional
+
+     ⚠️ ORIGEM DO VALOR: R$ 30,00, decidido pelo Cassiano em 15/09/2026, 2a rodada de
+     retorno do site ("colocar um quadrado pra clicar com o titulo Nome Colorido +
+     R$ 30,00, onde a pessoa precisa clicar pra poder responder a cor do nome").
+     Nao e' estimativa nossa. Mudou o preco aqui, muda no anuncio e no que o cliente ve. */
+  adicionais: [
+    { id: 'nome_colorido', rotulo: 'Um detalhe que transforma!', preco: 30, libera: 'cor_nome',
+      detalhe: 'Deixe o nome do seu pet ainda mais especial adicionando cores!' }
+  ],
+
+  /* O TEXTO JURÍDICO DA PEÇA PERSONALIZADA, palavra por palavra como ele mandou.
+     Fica aqui, e não espalhado nas páginas, porque ele aparece em DOIS lugares que
+     não podem divergir: a aba do produto e a trava do carrinho. Texto de consumo que
+     diverge entre a promessa e o aceite não vale nada — e o que o cliente marcou é
+     exatamente isto. */
+  personalizados: {
+    titulo: 'PRODUTOS PERSONALIZADOS',
+    texto: 'Por se tratar de um produto produzido sob encomenda e personalizado ' +
+           'especialmente de acordo com as suas escolhas, pedidos personalizados não ' +
+           'poderão ser cancelados ou devolvidos após a confirmação de pagamento se o ' +
+           'produto já estiver sendo fabricado, ressalvados casos de defeito, vício ' +
+           'ou erro de fabricação.',
+    aceite: 'Declaro que revisei cuidadosamente todas as informações da ' +
+            'personalização, incluindo nome, grafia e cores. Declaro, ainda, estar ' +
+            'ciente e de acordo com as condições acima aplicáveis a produtos ' +
+            'personalizados, inclusive quanto a cancelamentos e devoluções.'
+  },
+
+  /* AS CORES DA PEÇA — deixou de ser um campo de escrita livre (Cassiano, 15/09/2026,
+     3ª rodada). Agora o cliente ESCOLHE quantas cores a peça leva, e o site abre um
+     retângulo numerado para cada uma.
+
+     `campos` é quantas cores aquela escolha pede. O Degradê pede ZERO e mostra um aviso:
+     o filamento é sazonal, e prometer uma cor que pode não existir no dia da impressão é
+     promessa que o CDC cobra depois.
+
+     ⚠️ Ele escreveu "serão 3 opções" e listou QUATRO nomes. Deixei as quatro, porque as
+     quatro estão escritas com todas as letras na mensagem dele e porque três delas é que
+     pedem cor (o Degradê não pede). Se a intenção era outra, é uma linha aqui. */
+  cores_da_peca: {
+    titulo: 'Cores da peça',
+    opcoes: [
+      { id: 'tricolor',      rotulo: 'Tricolor',      campos: 3 },
+      { id: 'bicolor',       rotulo: 'Bicolor',       campos: 2 },
+      { id: 'monocromatico', rotulo: 'Monocromático', campos: 1 },
+      { id: 'degrade',       rotulo: 'Degradê',       campos: 0,
+        aviso: 'Por se tratar de filamentos específicos e sazonais, após a confirmação ' +
+               'de pagamento entraremos em contato pra informar as cores disponíveis!' }
+    ]
+  },
+
+  /* Onde entrega. "a combinar" faz o site dizer "consulte o frete" em vez de prometer
+     entrega que não existe.
+     ⚠️ A palavra "frete" saiu de perto do preço por pedido dele (15/09/2026). Ela
+     continua existindo AQUI e na página de trocas e entrega, porque o CDC exige que o
+     custo do frete seja informado antes da compra — só não fica mais colada no valor. */
+  entrega: 'Jataí-GO com entrega local; demais cidades por transportadora, frete a combinar'
+};
