@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ālea — como fotografar as peças</title>
+<link rel="icon" href="../img/marca/favicon_capivara_32.png" type="image/png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --off:#EAE4DB; --terracota:#924429; --caramelo:#B26E3A; --dourado:#AA9661; --azul:#7695A5;
+    --preto:#14100D; --papel:#1c1713;
+    --titulo:'Outfit',system-ui,sans-serif; --corpo:'Hanken Grotesk',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--preto);color:var(--off);font-family:var(--corpo);font-size:17px;line-height:1.65}
+  .folha{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,64px) clamp(20px,5vw,40px) 90px}
+  header{display:grid;gap:14px;justify-items:start;margin-bottom:38px}
+  header img{height:34px}
+  h1{font-family:var(--titulo);font-weight:500;font-size:clamp(1.7rem,5vw,2.5rem);line-height:1.15;margin:0}
+  .sub{color:rgba(234,228,219,.62);margin:0;max-width:46ch}
+  h2{font-family:var(--titulo);font-weight:500;font-size:clamp(1.15rem,3.4vw,1.5rem);
+     margin:46px 0 10px;padding-top:26px;border-top:1px solid rgba(234,228,219,.14)}
+  h3{font-family:var(--titulo);font-weight:500;font-size:1.02rem;letter-spacing:.06em;
+     text-transform:uppercase;color:var(--dourado);margin:26px 0 6px}
+  p{margin:0 0 14px}
+  strong{color:#fff}
+  .destaque{background:var(--papel);border-left:3px solid var(--caramelo);border-radius:0 12px 12px 0;
+            padding:18px 20px;margin:20px 0}
+  .destaque p:last-child{margin-bottom:0}
+  ul{margin:0 0 16px;padding-left:20px}
+  li{margin-bottom:9px}
+  .sim-nao{display:grid;gap:14px;margin:18px 0}
+  @media(min-width:640px){.sim-nao{grid-template-columns:1fr 1fr}}
+  .cartao{background:var(--papel);border-radius:14px;padding:18px 20px}
+  .cartao h4{margin:0 0 10px;font-family:var(--titulo);font-weight:600;font-size:1rem;letter-spacing:.04em}
+  .cartao.sim h4{color:#8fbf7a} .cartao.nao h4{color:#d8775f}
+  .cartao ul{margin:0;padding-left:18px} .cartao li{margin-bottom:7px;font-size:15.5px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:15.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(234,228,219,.12);vertical-align:top}
+  th{font-family:var(--titulo);font-weight:600;color:var(--dourado);font-size:13.5px;
+     letter-spacing:.08em;text-transform:uppercase}
+  .desenho{background:var(--papel);border-radius:14px;padding:22px;margin:20px 0;overflow-x:auto}
+  .desenho svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .passo{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;margin-bottom:18px}
+  .passo .n{width:34px;height:34px;border-radius:50%;background:var(--terracota);color:#fff;
+            display:grid;place-items:center;font-family:var(--titulo);font-weight:600}
+  .passo p{margin:4px 0 0}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid rgba(234,228,219,.14);
+         color:rgba(234,228,219,.5);font-size:14px}
+  code{background:rgba(234,228,219,.1);padding:2px 6px;border-radius:5px;font-size:.92em}
+</style>
+</head>
+<body>
+<div class="folha">
+
+<header>
+  <img src="../img/marca/alea_logo_claro.svg" alt="ālea">
+  <h1>Como fotografar as peças</h1>
+  <p class="sub">A resposta pras três perguntas do áudio: fundo branco, fundo verde ou foto qualquer?
+  Curta: <strong>nenhuma das três</strong> — e o motivo está aqui embaixo.</p>
+</header>
+
+<h2>1. O laulau não recorta nada</h2>
+<p>A primeira coisa é desfazer um mal-entendido, e ele muda tudo o que vem depois.</p>
+<p>As fotos do laulau parecem "milimetricamente perfeitas, sem nada parecendo que foi uma IA que
+recortou" por um motivo simples: <strong>não foi recortado nada</strong>. Fui medir os pixels do
+fundo das fotos dele — o canto de cima dá RGB 6, o de baixo dá RGB 1. Isso é <strong>preto de
+verdade</strong>, fotografado. A peça foi posta num cenário escuro, com luz controlada, e o site
+dele também é preto: a foto simplesmente <em>encosta</em> no fundo do site e some.</p>
+<div class="destaque">
+  <p><strong>Recorte perfeito não existe. O que existe é foto que não precisa de recorte.</strong>
+  Enquanto a gente recortar foto tirada em cima da mesa, sempre vai sobrar franja, sombra cortada
+  pela metade ou um pedaço da peça comido. Não é limitação da ferramenta: é o que acontece quando o
+  fundo e a peça têm cores parecidas.</p>
+</div>
+
+<h2>2. Respondendo às três perguntas</h2>
+<table>
+  <tr><th>Sua pergunta</th><th>Resposta</th></tr>
+  <tr>
+    <td><strong>"Fundo branco serve?"</strong></td>
+    <td><strong>Serve, e é a melhor opção pras peças escuras.</strong> Branco liso dá o maior
+    contraste possível contra uma peça preta, cinza ou colorida escura.</td>
+  </tr>
+  <tr>
+    <td><strong>"Preciso de fundo verde?"</strong></td>
+    <td><strong>Não. E verde é a pior escolha das três.</strong> O verde reflete na peça — o que o
+    pessoal de vídeo chama de <em>spill</em> — e deixa uma borda esverdeada em tudo que é claro ou
+    brilhante. Em peça impressa, que tem as linhas de camada pegando luz, isso fica pior ainda.
+    Verde foi feito pra vídeo, com iluminação de estúdio, não pra foto de objeto.</td>
+  </tr>
+  <tr>
+    <td><strong>"Posso tirar foto aleatória e você ajeita?"</strong></td>
+    <td><strong>Dá pra ajeitar, mas nunca fica igual ao laulau.</strong> Foto de cena com a peça no
+    meio de outras coisas é justamente onde o recorte automático erra — já aconteceu aqui: numa foto
+    do seu Instagram ele recortou <em>o cachorro</em>, e tecnicamente acertou.</td>
+  </tr>
+</table>
+
+<h2>3. A regra é CONTRASTE, não uma cor fixa</h2>
+<p>Não existe "a cor certa do fundo". Existe <strong>o fundo que a sua peça não tem</strong>:</p>
+<table>
+  <tr><th>A peça é…</th><th>Fundo</th><th>Por quê</th></tr>
+  <tr><td>clara (branco, bege, amarelo, laranja)</td><td><strong>preto fosco</strong></td>
+      <td>é o que o laulau faz, e a foto já sai pronta pro fundo do site</td></tr>
+  <tr><td>escura (preto, cinza, azul-marinho)</td><td><strong>branco liso</strong></td>
+      <td>máximo contraste, recorte limpo sem franja</td></tr>
+  <tr><td>transparente ou muito brilhante</td><td><strong>cinza médio fosco</strong></td>
+      <td>preto some no vidro e branco estoura o brilho</td></tr>
+</table>
+<div class="destaque">
+  <p><strong>Fosco, sempre.</strong> Papel brilhante, vidro, mesa envernizada e tecido de cetim
+  devolvem a luz e criam reflexo — e reflexo é a coisa que mais estraga recorte, porque a borda da
+  peça vira um borrão claro que o programa não sabe se é peça ou fundo.</p>
+</div>
+
+<h2>4. O truque que faz parecer estúdio: fundo sem cantinho</h2>
+<p>É o único "equipamento" que vale a pena: uma folha grande (A2 ou A3, ou um papel cartão de
+papelaria) <strong>curvada</strong> da mesa pra parede, sem dobrar — formando uma rampa. Assim não
+existe a linha do horizonte atrás da peça, e o fundo vira uma parede infinita.</p>
+<div class="desenho">
+  <svg viewBox="0 0 520 210" role="img" aria-label="Desenho da folha curvada da parede para a mesa, com a peça em cima e a luz difusa vindo do lado">
+    <path d="M60 30 C60 130, 120 160, 220 160 L460 160" fill="none" stroke="#EAE4DB" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="250" cy="150" rx="46" ry="12" fill="#000" opacity=".35"/>
+    <rect x="215" y="106" width="70" height="46" rx="10" fill="#B26E3A"/>
+    <rect x="221" y="100" width="58" height="12" rx="6" fill="#AA9661"/>
+    <g stroke="#AA9661" stroke-width="2" opacity=".85">
+      <line x1="392" y1="42" x2="330" y2="86"/><line x1="404" y1="58" x2="342" y2="100"/>
+      <line x1="414" y1="76" x2="352" y2="114"/>
+    </g>
+    <rect x="386" y="18" width="74" height="30" rx="7" fill="none" stroke="#7695A5" stroke-width="2.5"/>
+    <text x="423" y="38" font-family="Outfit,sans-serif" font-size="12" fill="#7695A5" text-anchor="middle">luz difusa</text>
+    <text x="60" y="190" font-family="Outfit,sans-serif" font-size="13" fill="rgba(234,228,219,.6)">a folha sobe pela parede…</text>
+    <text x="300" y="190" font-family="Outfit,sans-serif" font-size="13" fill="rgba(234,228,219,.6)">…e desce sem dobra</text>
+  </svg>
+</div>
+
+<h2>5. O passo a passo, com o celular mesmo</h2>
+
+<div class="passo"><span class="n">1</span><div>
+  <h3 style="margin-top:0">Uma peça por foto</h3>
+  <p>Nada de mão, nada de embalagem, nada de segundo objeto no quadro — e nada do cachorro, por mais
+  bonito que ele esteja. Se quiser a foto com o pet, tire <strong>separada</strong>: ela entra como
+  foto de cena, que é o que aparece quando a pessoa arrasta pro lado no site.</p>
+</div></div>
+
+<div class="passo"><span class="n">2</span><div>
+  <h3 style="margin-top:0">A peça INTEIRA dentro do quadro, com folga</h3>
+  <p>Esta é a regra que mais quebra recorte: se um pedaço da peça encosta na borda da foto, o
+  programa entende que a peça continua fora e devolve pedaço solto flutuando. Deixe uma margem de
+  uns dois dedos em volta.</p>
+</div></div>
+
+<div class="passo"><span class="n">3</span><div>
+  <h3 style="margin-top:0">Luz difusa, nunca luz direta</h3>
+  <p>A melhor luz de graça que existe: <strong>perto de uma janela em dia nublado</strong>, ou com a
+  cortina branca fechada. Sol batendo direto e lâmpada nua criam sombra dura, e sombra dura vira uma
+  mancha preta que o recorte come junto com a peça. Se a sombra de um lado ficar muito escura, um
+  papel branco em pé do outro lado devolve luz e resolve.</p>
+</div></div>
+
+<div class="passo"><span class="n">4</span><div>
+  <h3 style="margin-top:0">A sombra não pode tocar a borda da foto</h3>
+  <p>Ela pode existir — sombra dá volume. Só não pode <em>sair</em> pelo canto do quadro.</p>
+</div></div>
+
+<div class="passo"><span class="n">5</span><div>
+  <h3 style="margin-top:0">Celular na altura da peça, a uns 40–60 cm</h3>
+  <p>Ligeiramente acima, olhando um pouco pra baixo. <strong>Sem zoom</strong> — o zoom do celular
+  corta pixel e deixa a borda mole. Se quiser mais perto, aproxime o corpo, não os dedos.</p>
+</div></div>
+
+<div class="passo"><span class="n">6</span><div>
+  <h3 style="margin-top:0">Toque na peça pra focar, e trave a exposição</h3>
+  <p>No iPhone: toque e segure até aparecer <strong>AE/AF LOCK</strong>. Isso evita a foto clarear e
+  escurecer sozinha entre uma peça e outra — e é o que faz as suas fotos parecerem uma coleção só, em
+  vez de dez fotos diferentes.</p>
+</div></div>
+
+<div class="passo"><span class="n">7</span><div>
+  <h3 style="margin-top:0">Mande o arquivo ORIGINAL</h3>
+  <p>No WhatsApp, foto normal vai comprimida e perde a borda. Mande como <strong>documento</strong>
+  (o clipe → <em>Documento</em> → <em>Escolher arquivo</em>), ou pelo Google Drive. É a diferença
+  entre uma borda limpa e uma borda serrilhada.</p>
+</div></div>
+
+<h2>6. Resumo de geladeira</h2>
+<div class="sim-nao">
+  <div class="cartao sim">
+    <h4>✓ FAZ</h4>
+    <ul>
+      <li>Fundo <strong>liso e fosco</strong>, da cor que a peça não é</li>
+      <li>Folha <strong>curvada</strong>, sem linha do horizonte</li>
+      <li>Peça <strong>inteira</strong>, com folga nas bordas</li>
+      <li>Luz de <strong>janela</strong>, difusa</li>
+      <li>Mesma luz e mesmo enquadramento em <strong>todas</strong> as peças</li>
+      <li>Arquivo <strong>original</strong>, sem compressão</li>
+    </ul>
+  </div>
+  <div class="cartao nao">
+    <h4>✕ NÃO FAZ</h4>
+    <ul>
+      <li>Fundo <strong>verde</strong> (reflete na peça)</li>
+      <li>Fundo <strong>brilhante</strong> ou envernizado</li>
+      <li><strong>Zoom</strong> digital</li>
+      <li><strong>Flash</strong> do celular</li>
+      <li>Peça <strong>cortada</strong> pela borda</li>
+      <li>Foto com <strong>mão</strong>, mesa bagunçada ou outro objeto</li>
+    </ul>
+  </div>
+</div>
+
+<h2>7. O caminho que deixa igualzinho ao laulau</h2>
+<p>Se a meta é <em>"qualidade indiscutível"</em>, tem um caminho melhor do que qualquer foto — e você
+já tem tudo pra fazer: <strong>o modelo 3D da peça</strong>.</p>
+<p>Uma imagem renderizada a partir do próprio <code>.stl</code> / <code>.3mf</code> sai com fundo
+transparente de verdade, borda matematicamente perfeita, luz que você escolhe e nenhum recorte no
+meio do caminho. É tirar foto de uma peça que nunca precisou existir. Serve pra <strong>capa</strong>
+de cada produto; as fotos reais continuam valendo — e valem muito — pras telas de "a peça em uso",
+que é o que dá confiança pra quem vai comprar.</p>
+<div class="destaque">
+  <p>Se topar esse caminho, me fala: eu monto a receita de render pra você (fundo transparente,
+  tamanho e enquadramento já no padrão do site) e você só me manda o arquivo da peça.</p>
+</div>
+
+<footer>
+  <p>ālea &amp; Co · Cassiano Rosado, Jataí/GO &nbsp;·&nbsp; página feita pela ZELES em 17/09/2026,
+  a partir dos seus três áudios das 19:26.<br>
+  Os números do laulau foram medidos, não estimados: fundo da foto dele em RGB 1–18 (preto
+  fotografado, não recortado).</p>
+</footer>
+
+</div>
+</body>
+</html>
