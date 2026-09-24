@@ -5,16 +5,9 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="previa-commit" content="df9b97d">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quem é a ālea — impressão 3D em Jataí-GO</title>
-<meta name="description" content="A ālea faz comedouros e acessórios pet personalizados, impressos em 3D sob encomenda em Jataí, Goiás.">
-<link rel="canonical" href="https://www.aleaco.art.br/a-alea.html">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Quem é a ālea — impressão 3D em Jataí-GO">
-<meta property="og:description" content="A ālea faz comedouros e acessórios pet personalizados, impressos em 3D sob encomenda em Jataí, Goiás.">
-<meta property="og:url" content="https://www.aleaco.art.br/a-alea.html">
-<meta property="og:image" content="img/marca/og_compartilhar.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="img/marca/og_compartilhar.jpg">
+<title>Minha Conta | ālea</title>
+<meta name="description" content="Entre na sua conta da ālea: dados pessoais, endereços, pedidos e lista de desejos.">
+<link rel="canonical" href="https://www.aleaco.art.br/conta.html">
 <link rel="icon" href="img/marca/favicon_circular_32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="img/marca/favicon_circular_48.png" type="image/png" sizes="48x48">
 <link rel="apple-touch-icon" href="img/marca/favicon_circular_180.png">
@@ -22,9 +15,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/estilo.css">
+<link rel="stylesheet" href="css/loja.css">
 </head>
-<body>
-<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<body class="loja">
 <!-- ALEA:TOPO -->
 <header class="topo">
   <!-- ⚠️ O BOTÃO DE VOLTAR PRAS CATEGORIAS MORA AQUI, EMBAIXO DO LOGO.
@@ -67,52 +60,12 @@
   </nav>
 </header>
 <!-- /ALEA:TOPO -->
-<main id="conteudo" class="pagina">
-<div class="embrulho texto">
-  <a class="voltar" href="index.html">← voltar para o feed</a>
-  <h1>Quem é a ālea</h1>
-  <p class="atualizado">Jataí, Goiás · impressão 3D sob encomenda</p>
-
-  <p>
-    A ālea nasceu do <a href="https://www.instagram.com/eaibora.3d/" target="_blank" rel="noopener">eaí, bora?</a>,
-    o canal onde o Cassiano Rosado mostra impressão 3D há anos para milhares de pessoas.
-    Primeiro veio o gosto pela máquina; a marca veio depois, quando ficou claro que dava
-    para fazer uma peça que ninguém mais tem.
-  </p>
-
-  <h2>O que a ālea faz</h2>
-  <p>
-    Comedouros e acessórios para cães, impressos em 3D, com o nome do animal na própria
-    peça. O nome não é adesivo: sai em baixo relevo, na cor do objeto, impresso junto —
-    e por isso não descasca nem sai na lavagem. As cores são escolhidas por você, e o
-    porta-saquinho sai combinando com o comedouro.
-  </p>
-
-  <h2>Por que sob encomenda</h2>
-  <p>
-    Porque cada peça é de um cão só. Nada fica pronto esperando comprador: Sob encomenda, 3 dias úteis após a confirmação de pagamento.
-    É esse tempo que separa um comedouro genérico de um que é do seu cachorro.
-  </p>
-
-  <h2>Quem faz</h2>
-  <p>
-    Cassiano Rosado, em Jataí, Goiás. As impressoras são dele, a arte é feita por ele, e
-    quem responde no WhatsApp é ele. Se algo sair errado, você fala com a pessoa que fez
-    — não com um atendimento.
-  </p>
-
-  <h2>A marca</h2>
-  <p>
-    A capivara geométrica e a paleta de barro, azul e dourado são de autoria da designer
-    Mirella Gaetti, de Jataí. O grafismo facetado que aparece na embalagem é o mesmo
-    desenho que se move nas fotos deste site.
-  </p>
-
-  <p style="margin-top:34px">
-    <a class="botao zap" data-assunto="quero falar sobre uma peça da ālea">Falar com o Cassiano</a>
-  </p>
-</div>
-</main>
+<!-- A CONTA "IGUAL À DA TIFFANY" (pedido do Cassiano, 23/09/2026). Quem desenha é o js/loja-conta.js:
+     sem conta = "Escolha uma opção para entrar"; com conta = "Minha Conta" (#/dados, #/enderecos, #/pedidos,
+     #/autenticacao, #/desejos). -->
+<main data-loja-conta aria-live="polite"><p class="loja-vazio" style="padding:60px 0;text-align:center">Carregando…</p></main>
+<div class="loja-inicio"><a href="index.html">Início</a></div>
+<div class="loja-faixa" aria-hidden="true"></div>
 <!-- ALEA:RODAPE -->
 <footer class="rodape">
   <img class="marca-rodape" src="img/marca/e_co/logo_claro.svg" alt="ālea">
@@ -138,6 +91,7 @@
 <script src="js/produtos.js"></script>
 <script src="js/site.js"></script>
 <script src="js/carrinho.js"></script>
-<script src="js/produto.js"></script>
+<script src="js/loja-dados.js"></script>
+<script src="js/loja-conta.js"></script>
 </body>
 </html>
