@@ -52,7 +52,7 @@ window.ALEA = {
   google_analytics: '',       // G-XXXXXXXXXX
 
   /* A CONTA DE VERDADE E A MEMÓRIA DA VISITA (22/09/2026).
-     api_conta ......... endereço do servidor da conta da ālea (ex.: 'https://api.aleaco.art.br').
+     api_conta ......... endereço do servidor da conta da ālea (ex.: 'https://api.alea3d.co').
                          VAZIO = TUDO DESLIGADO: nenhum script a mais carrega, nenhum aviso
                          aparece, e a gaveta Conta continua sendo a do aparelho, como hoje.
                          Preenchido = a gaveta ganha "Entrar com o Google", a ficha de cadastro
@@ -62,7 +62,7 @@ window.ALEA = {
                          clicar (o "One Tap" do Google). Quem nunca entrou não vê janela nenhuma.
      ⚠️ Só preencher DEPOIS de: servidor da ZELES no ar + app do Google NO NOME DO CASSIANO +
      política de privacidade nova publicada. Ordem em ZELES\Conta_Cliente\_INDICE_DA_PASTA.md. */
-  api_conta: 'https://api.aleaco.art.br',   // ligado em 23/09/2026 (ordem do Lázaro): servidor da ZELES + app Google 'ālea' + política v2
+  api_conta: 'https://api.alea3d.co',   // ligado em 23/09/2026 (ordem do Lázaro): servidor da ZELES + app Google 'ālea' + política v2
   login_automatico: true,
 
   /* 25/09/2026 09:48 — ORDEM DO CASSIANO (áudio, msg 1460), contra o parecer da porta: a tela de conta mostra
