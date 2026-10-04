@@ -112,7 +112,9 @@ window.CATEGORIAS = [
 window.VITRINE = [
   { produto: 'ālea Pet Bowl × Luke',                      nome: 'Luke',    categoria: 'pet', preco: null, pagina: 'luke-bowl',         recorte: false, fotos: ['lukebowl_capaq'] },
   { produto: 'ālea Elevated Pet Bowl × Matteo',           nome: 'Matteo',  categoria: 'pet', preco: null, pagina: 'matteo-texturized', recorte: false, fotos: ['matteotex_9262q'] },
-  { produto: 'ālea Pet Bowl – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: null, pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
+  /* 04/10/2026, msg 6255 do Cassiano: Ayla R$ 299 (sem tamanho). Luke/Matteo/Cláudia têm preço por tamanho M/G em
+     config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
+  { produto: 'ālea Pet Bowl – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
   { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },

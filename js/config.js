@@ -26,6 +26,11 @@
       `ALEA.precoPorEscolha[slug]` (preço por Formato|Tamanho; null = sem preço ainda, áudio 6234). (3) campo NOVO
       `ALEA.parcelamento` (null = a linha da parcela não aparece; pergunta 6245). Lidos pelo produto.js v43 e feed.js.
       A versão anterior está em 03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/.
+   v45-produto (04/10/2026, msg 6255 + áudios 6256/6258/6259 do Cassiano): PREÇOS DOS COMEDOUROS em `precoPorEscolha`
+      (chave só de Tamanho, 'M'/'G': sem Formato, o produto.js v43 monta a chave só com o tamanho). Ele mandou 2 valores
+      por peça; o 1º foi lido como M e o 2º como G (dito a ele na mensagem da prévia). Ayla Pompom, sem tamanho, usa a
+      chave '' (vazia). Caesar (produto futuro, ainda sem página) e Poop Bag (fica fora da vitrine, 6258) NÃO entram.
+      A versão anterior está em 03_site/_versoes_anteriores/precos_comedouros_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -545,7 +550,14 @@ window.ALEA.tamanhos = {
    null = ainda sem preço ("Sob consulta"). Os valores vêm DELE — nunca preencher por conta própria. */
 window.ALEA.precoPorEscolha = {
   // msg 6250 do Cassiano (04/10/2026 17:51): "Stria Orbis Mini 79,00 · P 169,00 · Stria Quadrum P 189,00 · G 289,00"
-  'stria-planter': { 'Orbis|Mini': 79, 'Orbis|Pequeno': 169, 'Quadrum|Pequeno': 189, 'Quadrum|Grande': 289 }
+  'stria-planter': { 'Orbis|Mini': 79, 'Orbis|Pequeno': 169, 'Quadrum|Pequeno': 189, 'Quadrum|Grande': 289 },
+  /* v45 — msg 6255 do Cassiano (04/10/2026 18:08): "Pet Bowl Matteo 149,00 179,00 / Ayla 299,00 / Luke 149,00 189,00 /
+     Claudia 169,00 219,00" (+ Caesar 149/179 e Poop Bag 79, que NÃO entram: Caesar ainda não tem página, 6256; Poop Bag
+     fica fora, 6258). 1º valor = M, 2º = G. Sem Formato, a chave é só o tamanho; sem tamanho (Ayla), a chave é ''. */
+  'luke-bowl':         { 'M': 149, 'G': 189 },
+  'matteo-texturized': { 'M': 149, 'G': 179 },
+  'claudia-wave':      { 'M': 169, 'G': 219 },
+  'ayla-pompom':       { '': 299 }
 };
 /* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada
    na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
