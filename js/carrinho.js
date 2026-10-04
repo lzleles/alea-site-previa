@@ -4,7 +4,7 @@
    objetivo: Mantém carrinho, dados locais e histórico de pedidos e prepara o fechamento da compra pelo WhatsApp.
    entrada: DOM, configuração global e dados do localStorage
    saida: Gavetas, contador, histórico local e mensagem de pedido no WhatsApp
-   status: ativo (28/09/2026: a descrição do item abre com "Tamanho: X" quando o produto tem tamanho — produto.js v36)
+   status: ativo (04/10/2026: sai a frase "Cliente ciente da variação de cor da tela" da descrição do item; 28/09/2026: a descrição do item abre com "Tamanho: X" quando o produto tem tamanho — produto.js v36)
    validado_em: 28/09/2026 (Playwright, 03_site/_testar_tamanhos_v3_2026-09-28.py: sacola e texto do pedido com o tamanho)
 */
 /* =============================================================================
@@ -175,7 +175,10 @@
     /* 26/09/2026 (Cassiano, áudios 2178/2180): o aceite do aviso de cor da janela "Personalize" entra em TODA descrição
        do item — na sacola, no "Resumo do Pedido" do Finalizar Compra (loja-compra.js) e no pedido que chega pra ele.
        Quem marca é o personalizar3d.js (v9); quem grava no item, o produto.js. */
-    if (p.ciente_cor) partes.push('Cliente ciente da variação de cor da tela');
+    /* 04/10/2026 (Cassiano, áudios 6044/6047): a frase SAI dos 3 lugares (sacola, resumo, pedido no WhatsApp) — "eu sei
+       que ele aceitou; se ele não aceitar, não tem como ele comprar". O aviso e o quadradinho da janela Personalize ficam;
+       o `ciente_cor` continua gravado no item, só não vira texto. Antes:
+       if (p.ciente_cor) partes.push('Cliente ciente da variação de cor da tela'); */
     return partes.join(' · ');
   }
 
