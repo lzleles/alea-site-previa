@@ -36,6 +36,10 @@
       vaso (render do 3D dele) e B = símbolo (bolinha no Orbis, quadrado de canto arredondado no Quadrum). Na prévia, o
       `?icone=A` ou `?icone=B` na URL troca a opção (produto.js v44). A versão anterior está em
       03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/js/.
+   v47-produto (04/10/2026, print 6268 + áudios 6269/6271 do Cassiano): escolheu a B (símbolo), "sem preenchimento, só a
+      borda", a bolinha de marcar fica. `modo` vira 'simbolo' e entra o campo `lado` ('antes'|'depois' do nome; "na frente do
+      nome" — conferindo com ele qual dos dois). Na prévia, ?lado=antes|depois troca. A versão anterior está em
+      03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -579,7 +583,8 @@ window.ALEA.formatos = {
    desenhada no CSS v44). Fica o que ELE escolher; até lá a prévia abre na A e o ?icone=B mostra a B. */
 window.ALEA.iconeFormato = {
   'stria-planter': {
-    modo: 'miniatura',
+    modo: 'simbolo',     // v47: escolha dele (6268/6269), só a borda (CSS v45)
+    lado: 'depois',      // v47: "na frente do nome" (6271) — 'antes' ou 'depois' do nome; confirmar com ele
     miniatura: { Orbis: 'img/stria_formato_orbis.png', Quadrum: 'img/stria_formato_quadrum.png' },
     simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
   }

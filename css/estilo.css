@@ -2536,3 +2536,8 @@ body.nome-dourado {
 .formato-peca.icone-simbolo .formato-icone { width: 15px; height: 15px; background: currentColor; }
 .formato-peca.icone-simbolo .formato-redondo { border-radius: 50%; }
 .formato-peca.icone-simbolo .formato-quadrado { border-radius: 4px; }
+
+/* v45 (04/10/2026, print 6268 + áudios 6269/6271 do Cassiano: "sem preenchimento, só a borda, pra ficar bem minimalista";
+   a bolinha de marcar fica). O símbolo da B (v44) perde o recheio: só o contorno, na cor do nome. Substitui o
+   `background: currentColor` do v44. A versão anterior está em 03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/css/. */
+.formato-peca.icone-simbolo .formato-icone { background: none; border: 1.6px solid currentColor; box-sizing: border-box; }

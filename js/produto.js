@@ -4,8 +4,11 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v44 (04/10/2026, ícone ao lado do Formato: miniatura A ou símbolo B)
+   status: ativo — v45 (04/10/2026, símbolo do Formato antes ou depois do nome: ALEA.iconeFormato.lado)
    validado_em: 03/10/2026 (Playwright 390 e 1440)
+   v45 (04/10/2026, áudios 6269/6271 do Cassiano, "na frente do nome"; a v44 está em
+     03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/js/): o símbolo pode ir ANTES ou DEPOIS do nome
+     (ALEA.iconeFormato[slug].lado, config.js v47; ?lado=antes|depois na URL da prévia). Nada mais muda.
    v44 (04/10/2026, ajuste 2 da lista, print 6227 + áudio 6228 do Cassiano; a v43 está em
      03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/js/): o botão do Formato ganha um desenho antes do nome,
      lido de ALEA.iconeFormato[slug] (config.js v46): 'miniatura' (A, imagem do vaso) ou 'simbolo' (B, bolinha/quadrado do
@@ -312,6 +315,9 @@
     var modoIcone = cfgI && cfgI.modo;
     var pedido = (location.search.match(/[?&]icone=([ab])/i) || [])[1];
     if (cfgI && pedido) modoIcone = pedido.toUpperCase() === 'A' ? 'miniatura' : 'simbolo';
+    var ladoIcone = (cfgI && cfgI.lado) || 'antes';   // v45
+    var pedLado = (location.search.match(/[?&]lado=(antes|depois)/i) || [])[1];
+    if (pedLado) ladoIcone = pedLado.toLowerCase();
     function iconeDoFormato(t) {
       if (!cfgI || !modoIcone) return '';
       if (modoIcone === 'miniatura' && cfgI.miniatura && cfgI.miniatura[t])
@@ -325,8 +331,9 @@
     caixaFormato.setAttribute('data-formato-peca', '');
     caixaFormato.innerHTML = '<span class="rotulo-grupo">Formato</span><div class="cores-opcoes">' +
       lista.map(function (t) {
+        var ic = iconeDoFormato(t), nm = '<span class="formato-nome">' + t + '</span>';
         return '<label><input type="radio" name="formato" value="' + String(t).replace(/"/g, '') + '"> ' +
-          iconeDoFormato(t) + '<span class="formato-nome">' + t + '</span></label>';
+          (ladoIcone === 'depois' ? nm + ic : ic + nm) + '</label>';
       }).join('') + '</div>';
     if (modoIcone) caixaFormato.classList.add('com-icone', 'icone-' + modoIcone);
     var antes = caixaTamanho || formF;
