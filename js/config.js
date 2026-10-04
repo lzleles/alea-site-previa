@@ -15,6 +15,8 @@
       03_site/_versoes_anteriores/saboneteira_3d_antes_2026-10-03/js/.
    v41-produto (04/10/2026, msgs 6008-6030): `modelos3d['ephix-vase']` (o vaso, GLB oco do modo vaso) e as fotos do vaso
       em `filamentosPorFoto`. Nenhum campo novo. A versão anterior está em 03_site/_versoes_anteriores/ephix_vase_antes_2026-10-04/js/.
+   v42-produto (04/10/2026, msgs 6048-6096): `modelos3d['vase-prismatic']` (o 3º vaso da HOME) e as fotos dele em
+      `filamentosPorFoto`. Nenhum campo novo. A versão anterior está em 03_site/_versoes_anteriores/vase_prismatic_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -227,7 +229,7 @@ window.ALEA = {
      25/09/2026: a LISTA REAL dele substituiu as de teste (ver o bloco `filamentos` abaixo). */
   filamentos: {
     /* LISTA REAL do Cassiano (25/09/2026, audios 1786-1815, tudo PLA; nomes do site trocados por ele na
-       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779). Gerado por 03_site/07_gerar_filamentos_config_v5_preto_com_azul_2026-10-03.py
+       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079). Gerado por 03_site/07_gerar_filamentos_config_v6_transparente_e_glitter_2026-10-04.py
        a partir de 03_site/_LISTA_FILAMENTOS_DELE_2026-09-25.json + _TEXTURAS_FILAMENTO.json - nao editar a mao.
        hex = cor OFICIAL do fabricante; eSUN Silk Lime = aproximado (medido na foto oficial da eSUN).
        v4 (26/09/2026): `textura` = filamento com efeito (Marmore: foto IMG_0039 da Chica), `hex_oficial` =
@@ -244,7 +246,9 @@ window.ALEA = {
       { site: 'Preto', hex: '#272729', original: 'eSUN · PLA · PLA-Basic · Black' },
       { site: 'Roxo', hex: '#603BA0', original: 'Elegoo · PLA · PLA · Purple' },
       { site: 'Marrom', hex: '#5F3839', original: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' },
-      { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } }
+      { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
+      { site: 'Transparente', hex: '#EEF2F3', original: 'Elegoo · PETG · PETG · Transparente' },
+      { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
     ],
     fosco: [
       { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White' },
@@ -487,6 +491,24 @@ window.ALEA.modelos3d['ephix-vase'] = {
   }
 };
 
+/* 04/10/2026 — ālea Vase Prismatic (msgs 6048-6096 do Cassiano): a mesma janela 3D "Personalize agora" do Ephix Vase.
+   O .glb sai do 3MF que ELE fez (msg 6064, "usa esse"): 33_produtos_novos_2026-10-04/vase_prismatic/"ALEA Vase Prismatic 6064.3mf",
+   objeto 3 (TESSURA vase.stl), pelo 07_render_capa/exportar_glb_configurador_v6_peca_sem_nome_deitada.py ("1=principal",
+   40000 faces, EM PÉ como se usa). NÃO é modo vaso (spiral_mode 0, 2 paredes, 15%): o STL já tem a cavidade, a boca sai
+   aberta sem o glb_modo_vaso_oco. A Logo Circular NEGATIVA fica no fundo (0,5 mm, recorte na cor da peça, medido no GLB:
+   raio até 32,5 mm). Abre em MÁRMORE (a 1ª foto de perto, msg 6049). Sem nome gravado (`semNome`). */
+window.ALEA.modelos3d['vase-prismatic'] = {
+  glb: 'modelos/vaseprismatic.glb?v=2026-10-04',
+  semNome: true,
+  rotuloBotao: 'Personalize agora',
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Mármore' }] },
+  original: {
+    topo:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    principal: { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    base:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' }
+  }
+};
+
 /* TAMANHOS À VENDA (28/09/2026, áudios do Cassiano ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho (...)
    arrumar uma opção lá no site"). A página ganha o grupo "Tamanho" (produto.js v36) logo acima do "Personalize aqui";
    escolher é OBRIGATÓRIO e o tamanho vai no item da sacola, no Resumo do Pedido e na mensagem do pedido ("Tamanho: M").
@@ -598,5 +620,12 @@ window.ALEA.filamentosPorFoto = {
   "img/produtos/ephixvase_3.jpg": ["Elegoo · PLA · Silk · Silk White"],
   "img/produtos/ephixvase_4.jpg": ["Elegoo · PLA · Silk · Silk White"],
   "img/produtos/ephixvase_5.jpg": ["Elegoo · PLA · Silk · Silk White"],
-  "img/produtos/ephixvase_capaq.jpg": ["Elegoo · PLA · Silk · Silk White"]
+  "img/produtos/ephixvase_capaq.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  /* 04/10/2026 — ālea Vase Prismatic: os 4 filamentos que ELE disse (msg 6071), um por foto de perto; as de grupo levam os 4. */
+  "img/produtos/vaseprismatic_capa.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"],
+  "img/produtos/vaseprismatic_1.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/vaseprismatic_2.jpg": ["eSUN · PLA · PLA-Basic · Black"],
+  "img/produtos/vaseprismatic_3.jpg": ["Elegoo · PETG · PETG · Transparente"],
+  "img/produtos/vaseprismatic_4.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"],
+  "img/produtos/vaseprismatic_capaq.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"]
 };

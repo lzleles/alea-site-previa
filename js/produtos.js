@@ -117,7 +117,9 @@ window.VITRINE = [
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
   { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
-  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] }
+  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
+  /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos lado a lado (IMG_2666). */
+  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
@@ -317,6 +319,34 @@ window.PRODUTOS = [
       'Uma peça versátil, delicada e cheia de presença — feita para transformar pequenos espaços em cantinhos especiais.'
     ],
     galeria: ['ephixvase_1', 'ephixvase_3', 'ephixvase_4', 'ephixvase_5']
+  },
+
+  /* ===================================================================================================
+     ālea Vase Prismatic — 3º produto da linha HOME (04/10/2026). Página: 03_site/01_gerar_paginas_v31_vase_prismatic_2026-10-04.py
+     (clone da página do Ephix Vase); fotos: 06_fotos_profissionais_v6_vase_prismatic_2026-10-04.py (as 5 originais dele,
+     msgs 6048-6052); 3D: modelos/vaseprismatic.glb (do 3MF DELE, msg 6064 - ver config.js).
+     - nome (6067), HOME (6014), R$ 89 (6069), monocromático em todas as cores (6080), sem nome gravado (regra 5771),
+       texto DELE palavra por palavra (6096).
+     - material PLA na ficha: 3 dos 4 filamentos das fotos são PLA; o Transparente é PETG (6071) - a confirmar com ele.
+     - medidas do ARQUIVO: 173 x 89,4 x 89,4 mm. Peso: ele fatia e manda - sem peso_g até lá.
+     =================================================================================================== */
+  {
+    slug: 'vase-prismatic',
+    nome: 'ālea Vase Prismatic',
+    linha: 'Home',
+    categoria: 'home',
+    preco: 89,
+    material: 'PLA',
+    capa: 'vaseprismatic_capa',
+    cores_peca: ['monocromatico'],
+    sem_nome: true,
+    resumo: '',
+    paragrafos: [   // msg 6096, texto DELE
+      'O Vase Prismatic é formado por uma sequência de faces marcadas e volumes geométricos que criam diferentes reflexos ao longo de toda a sua superfície. O resultado é um desenho contemporâneo, cheio de movimento, que ganha novas formas conforme o ângulo de quem observa e a incidência da luz.',
+      'Mesmo com uma composição marcante, suas linhas mantêm a peça elegante e fácil de combinar. Sozinho, funciona como um objeto decorativo; com folhagens, flores secas ou arranjos naturais, ganha ainda mais personalidade.',
+      'Uma peça criada para levar textura, forma e um toque de design para pequenos cantos da casa — daqueles detalhes que chamam atenção sem precisar disputar espaço com o restante da decoração.'
+    ],
+    galeria: ['vaseprismatic_1', 'vaseprismatic_2', 'vaseprismatic_3', 'vaseprismatic_4']
   },
 
   /* ===================================================================================================
