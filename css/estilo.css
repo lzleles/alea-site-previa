@@ -2541,3 +2541,34 @@ body.nome-dourado {
    a bolinha de marcar fica). O símbolo da B (v44) perde o recheio: só o contorno, na cor do nome. Substitui o
    `background: currentColor` do v44. A versão anterior está em 03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/css/. */
 .formato-peca.icone-simbolo .formato-icone { background: none; border: 1.6px solid currentColor; box-sizing: border-box; }
+
+/* ---- v46 (04/10/2026, msgs 6339/6343/6345 + áudio 6340 do Cassiano): SUBCATEGORIAS embaixo do título da categoria ----
+   "embaixo do Home vai ter essa subcategoria, no mesmo formato das nossas categorias". Mesma régua do .menu-categorias
+   (fonte, espaçamento, ponto médio, "em breve"); a única diferença é o estado ATIVO (a que está filtrando fica pintada,
+   igual ao hover). A intro tem pointer-events:none (pra não roubar o gesto do feed): a fileira devolve o toque.
+   Antes: 03_site/_versoes_anteriores/subcategorias_home_antes_2026-10-04/css/estilo.css */
+.feed .descricao-categoria .menu-sub {
+  margin: 4px auto 12px; max-width: 94vw; pointer-events: auto; color: inherit;
+  flex-wrap: nowrap;   /* as 5 numa linha só (no 1º print, com o teto de 420 px, a AURA caía sozinha embaixo) */
+}
+.feed .descricao-categoria .menu-sub button {
+  position: relative; font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0;
+  padding: 9px 12px; border-radius: 999px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background .2s ease, color .2s ease;
+}
+.feed .descricao-categoria .menu-sub span { color: inherit; }
+.feed .descricao-categoria .menu-sub button::before {
+  content: '\00b7'; position: absolute; left: -2px; opacity: .45; letter-spacing: 0;
+}
+.feed .descricao-categoria .menu-sub button.ativa,
+.feed .descricao-categoria .menu-sub button:focus-visible { background: var(--terracota); color: var(--off); }
+.feed .descricao-categoria .menu-sub button.ativa::before { opacity: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .feed .descricao-categoria .menu-sub button:hover { background: var(--terracota); color: var(--off); }
+  .feed .descricao-categoria .menu-sub button:hover::before { opacity: 0; }
+}
+/* no celular a linha das 5 cabe com o respiro menor (medido no teste: sem rolagem lateral em 360 e 390) */
+@media (max-width: 520px) {
+  .feed .descricao-categoria .menu-sub { gap: 2px 1px; font-size: clamp(.78rem, 3.5vw, .92rem); letter-spacing: .1em; }
+  .feed .descricao-categoria .menu-sub button, .feed .descricao-categoria .menu-sub span { padding: 8px 7px; }
+}

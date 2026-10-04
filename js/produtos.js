@@ -59,7 +59,12 @@ window.CATEGORIAS = [
   { id: 'custom', nome: 'CUSTOM', descricao: '' },   // sugestão minha: peça sob projeto, do zero
   { id: 'fan',    nome: 'FAN',    descricao: '' },   // sugestão minha: cultura pop, coleção
   { id: 'glow',   nome: 'GLOW',   descricao: '' },   // sugestão minha: filamento que brilha no escuro
-  { id: 'home',   nome: 'HOME',   descricao: '' },   // sugestão minha: casa e decoração
+  /* 04/10/2026 (msgs 6339/6343/6345 + áudio 6340 do Cassiano): SUBCATEGORIAS do HOME, nesta ordem. Tocou em HOME,
+     aparece TUDO; as subcategorias ficam embaixo do título, no formato do menu, e só filtram se a pessoa tocar.
+     Peça liga na subcategoria pelo campo `sub` da VITRINE. Sem peça = "em breve" (igual categoria vazia). */
+  { id: 'home',   nome: 'HOME',   descricao: '',     // sugestão minha: casa e decoração
+    subcategorias: [ { id: 'desk', nome: 'DESK' }, { id: 'decor', nome: 'DECOR' }, { id: 'daily', nome: 'DAILY' },
+                     { id: 'meet', nome: 'MEET' }, { id: 'aura', nome: 'AURA' } ] },
   /* ⚠️ TEXTO PROVISÓRIO (etapa 3, 22/09/2026): o Cassiano pediu um placeholder sobre golden
      retriever "só pra ver o espaçamento do título e da descrição antes das fotos" — ele escreve
      o texto de verdade depois. TROCAR quando ele mandar o definitivo. */
@@ -114,16 +119,16 @@ window.VITRINE = [
   { produto: 'ālea Elevated Pet Bowl × Matteo',           nome: 'Matteo',  categoria: 'pet', preco: null, pagina: 'matteo-texturized', recorte: false, fotos: ['matteotex_9262q'] },
   /* 04/10/2026, msg 6255 do Cassiano: Ayla R$ 299 (sem tamanho). Luke/Matteo/Cláudia têm preço por tamanho M/G em
      config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
-  { produto: 'ālea Pet Bowl – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
+  { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
-  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
+  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
-  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
+  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', sub: 'decor', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
-  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
+  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', sub: 'decor', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
   /* 04/10/2026: 4º produto da HOME (Cassiano, msgs 6122-6153). Capa = IMG_2690 (6146). SEM preço até ele fatiar (6092). */
-  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] }
+  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
@@ -220,7 +225,7 @@ window.PRODUTOS = [
 
   {
     slug: 'ayla-pompom',
-    nome: 'ālea Pet Bowl – Watermelon Edition × Ayla Pompom',
+    nome: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom',
     linha: 'Comedouro',
     categoria: 'pet',
     preco: null,

@@ -8,6 +8,12 @@
    validado_em: TBD
    v34 (27/09/2026, áudio 2308): no card, o nome do "× Nome" vai num <span class="nome"> (o degradê mede o nome, e o
       × fica azul sólido). Antes: 03_site/_versoes_anteriores/x_azul_nome_proporcional_antes_2026-09-27/js/feed.js
+   v40 (04/10/2026, msgs 6339/6343/6345 + áudio 6340 do Cassiano): SUBCATEGORIAS. A categoria com `subcategorias`
+      (hoje só o HOME: DESK · DECOR · DAILY · MEET · AURA) mostra a fileira delas EMBAIXO DO TÍTULO, no formato do menu.
+      Tocou em HOME = aparece TUDO; só filtra se a pessoa tocar numa subcategoria (tocar de novo na mesma solta o filtro).
+      Subcategoria sem peça = "em breve", como categoria vazia. A sub escolhida volta junto com a posição (voltar do
+      produto cai no mesmo filtro); tocar na CATEGORIA num menu sempre zera o filtro. Peça liga pelo `sub` da VITRINE.
+      Antes: 03_site/_versoes_anteriores/subcategorias_home_antes_2026-10-04/js/feed.js
    v39 (04/10/2026, print 6232 + áudio 6234 do Cassiano): produto com preço por variante (ALEA.precoPorEscolha, config.js —
       hoje o Stria Planter) mostra no card "a partir de" bem pequenininho + o MENOR preço; os outros só na página, ao escolher.
       Antes: 03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/feed.js
@@ -92,6 +98,8 @@
   if (!feed || !palco) return;
 
   var categoriaAtual = null;
+  /* v40: a subcategoria que está filtrando (null = tudo) e a categoria que a pessoa TOCOU num menu (zera o filtro) */
+  var subAtual = null, pediuCategoria = null, SUBK = 'alea_feed_sub';
   var itens = [];
   var indice = 0;
   var aberto = false;
@@ -169,6 +177,31 @@
     titulo.className = 'titulo-categoria';
     titulo.textContent = nomeDaCategoria(id);
     el.appendChild(titulo);
+    /* v40: as subcategorias, logo abaixo do título. Botão (não link): trocar o filtro não mexe no endereço. */
+    var subs = (c && c.subcategorias) || [];
+    if (subs.length) {
+      var nav = document.createElement('nav');
+      nav.className = 'menu-categorias menu-sub';
+      nav.setAttribute('aria-label', 'Subcategorias de ' + nomeDaCategoria(id));
+      subs.forEach(function (sc) {
+        var tem = (window.VITRINE || []).some(function (v) { return v.categoria === id && v.sub === sc.id; });
+        var b;
+        if (tem) {
+          b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('data-sub', sc.id);
+          b.setAttribute('aria-pressed', sc.id === subAtual ? 'true' : 'false');
+          if (sc.id === subAtual) b.className = 'ativa';
+          b.textContent = sc.nome;
+        } else {
+          b = document.createElement('span');
+          b.className = 'vazia';
+          b.innerHTML = sc.nome + '<small>em breve</small>';
+        }
+        nav.appendChild(b);
+      });
+      el.appendChild(nav);
+    }
     if (texto) {
       var p = document.createElement('span');
       p.className = 'texto-categoria';
@@ -180,7 +213,9 @@
 
   /* ======================================================================= desenho */
   function desenhar(catId) {
-    var lista = (window.VITRINE || []).filter(function (c) { return c.categoria === catId; });
+    var lista = (window.VITRINE || []).filter(function (c) {
+      return c.categoria === catId && (!subAtual || c.sub === subAtual);   // v40
+    });
     var mostrarPreco = (window.ALEA || {}).mostrar_preco_no_feed !== false;
     palco.innerHTML = '';
 
@@ -558,7 +593,7 @@
   }
 
   function guardarPosicao() {
-    try { sessionStorage.setItem(POS, JSON.stringify({ cat: categoriaAtual, i: indice })); }
+    try { sessionStorage.setItem(POS, JSON.stringify({ cat: categoriaAtual, i: indice, sub: subAtual })); }
     catch (e) { /* aba anônima */ }
   }
 
@@ -619,7 +654,7 @@
   function posicaoGuardada(catId) {
     try {
       var p = JSON.parse(sessionStorage.getItem(POS) || 'null');
-      if (p && p.cat === catId && typeof p.i === 'number') return p.i;
+      if (p && p.cat === catId && typeof p.i === 'number' && (p.sub || null) === subAtual) return p.i;   // v40
     } catch (e) { /* nada */ }
     return null;
   }
@@ -635,7 +670,17 @@
   /* ================================================================ abrir e fechar */
   function abrir(catId, forcarIndice) {
     if (!catId) return;
-    if (catId !== categoriaAtual) desenhar(catId);
+    /* v40: tocou na categoria num menu = TUDO; voltou do produto / recarregou = o filtro de antes */
+    var sub = null;
+    if (pediuCategoria !== catId) {
+      try { var g = JSON.parse(sessionStorage.getItem(SUBK) || 'null'); if (g && g.cat === catId) sub = g.sub || null; }
+      catch (e) { /* aba anônima */ }
+    }
+    pediuCategoria = null;
+    var mudouSub = sub !== subAtual;
+    subAtual = sub;
+    guardarSub(catId);
+    if (catId !== categoriaAtual || mudouSub) desenhar(catId);
     if (!itens.length) return;
 
     /* ⚠️ "ISSO ME MATA DE RAIVA EM QUALQUER SITE" (Cassiano, 14/09/2026, 16:23): clicar
@@ -697,6 +742,37 @@
     document.dispatchEvent(new CustomEvent('alea:feed-aberto'));   // v29: as setas ‹ › do computador se acertam
   }
 
+  /* v40: a subcategoria escolhida fica guardada pra voltar do produto no mesmo filtro */
+  function guardarSub(catId) {
+    try { sessionStorage.setItem(SUBK, JSON.stringify({ cat: catId, sub: subAtual })); } catch (e) { /* aba anônima */ }
+  }
+
+  /* v40: troca o filtro e redesenha a categoria do começo (o 1º produto, com o título e as subcategorias) */
+  function aplicarSub(sub) {
+    var cat = categoriaAtual;
+    if (!cat) return;
+    subAtual = sub;
+    guardarSub(cat);
+    indice = 0;
+    desenhar(cat);
+    abrir(cat, 0);
+    feed.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  /* quem tocou numa CATEGORIA (abertura, rodapé, fim do feed) quer ver tudo dela: marca antes do hashchange */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-categoria]');
+    if (a) pediuCategoria = a.getAttribute('data-categoria');
+  }, true);
+
+  feed.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.menu-sub [data-sub]');
+    if (!b || !aberto) return;
+    e.preventDefault();
+    var id = b.getAttribute('data-sub');
+    aplicarSub(id === subAtual ? null : id);   // tocar de novo na mesma solta o filtro
+  });
+
   function fechar() {
     if (!aberto) return;
     if (olho) { olho.disconnect(); olho = null; }   // fechado, ninguém precisa ser observado
@@ -721,6 +797,8 @@
     var a = e.target.closest && e.target.closest('[data-menu-categorias] a[data-categoria]');
     if (!a || !aberto || a.getAttribute('data-categoria') !== categoriaAtual) return;
     e.preventDefault();
+    pediuCategoria = null;
+    if (subAtual) { aplicarSub(null); return; }   // v40: categoria tocada = tudo de novo
     indice = 0;
     feed.scrollTo({ top: 0, behavior: querMenosMovimento ? 'auto' : 'smooth' });
   });
