@@ -40,6 +40,11 @@
       borda", a bolinha de marcar fica. `modo` vira 'simbolo' e entra o campo `lado` ('antes'|'depois' do nome; "na frente do
       nome" — conferindo com ele qual dos dois). Na prévia, ?lado=antes|depois troca. A versão anterior está em
       03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/js/.
+   v48-produto (04/10/2026, print 6274 + áudio 6275 do Cassiano: "pensando melhor, vamos colocar essa miniatura aí, fica mais
+      bonitinho (…) na frente da palavra (…) a cor dela parece que tá cinza, vamos colocar ela na cor de mármore"): `modo` volta
+      pra 'miniatura', `lado` 'depois' do nome, e as miniaturas img/stria_formato_*.png são refeitas em MÁRMORE + Cáqui
+      (33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v2_marmore.py). As anteriores (cinza) e
+      esta config estão em 03_site/_versoes_anteriores/miniatura_marmore_antes_2026-10-04/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -580,11 +585,12 @@ window.ALEA.formatos = {
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,
-   desenhada no CSS v44). Fica o que ELE escolher; até lá a prévia abre na A e o ?icone=B mostra a B. */
+   desenhada no CSS v44). Fica o que ELE escolher; até lá a prévia abre na A e o ?icone=B mostra a B.
+   Miniatura de 04/10 (v48): em Mármore + Cáqui, pelo miniatura_formato_v2_marmore.py. */
 window.ALEA.iconeFormato = {
   'stria-planter': {
-    modo: 'simbolo',     // v47: escolha dele (6268/6269), só a borda (CSS v45)
-    lado: 'depois',      // v47: "na frente do nome" (6271) — 'antes' ou 'depois' do nome; confirmar com ele
+    modo: 'miniatura',   // v48: "pensando melhor, vamos colocar essa miniatura" (6275); a B (símbolo, só borda) ficou de reserva
+    lado: 'depois',      // v48: "na frente da palavra" (6269/6271/6275) lido como DEPOIS do nome; 'antes' se ele disser o contrário
     miniatura: { Orbis: 'img/stria_formato_orbis.png', Quadrum: 'img/stria_formato_quadrum.png' },
     simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
   }
