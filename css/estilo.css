@@ -2524,3 +2524,15 @@ body.nome-dourado {
   .produto-topo .valor-grande, .produto-topo .valor-final-preco { font-size: 20px; }
   .produto-topo p.parcela { font-size: 13px; }
 }
+
+/* v44 (04/10/2026, ajuste 2 da lista, print 6227 + áudio 6228 do Cassiano: mostrar que o Orbis é redondo e o Quadrum é
+   quadrado; "vamos ver qual fica melhor"). O desenho entra ENTRE a bolinha do rádio e o nome (produto.js v44).
+   A = .icone-miniatura: a foto pequenininha do vaso, 40 px. B = .icone-simbolo: só a forma, 15 px, CHEIA na cor do
+   nome (de contorno, a bolinha do Orbis parecia um 2º botão de rádio). A versão anterior está em
+   03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/css/. */
+.formato-peca.com-icone .cores-opcoes label { gap: 8px; }
+.formato-peca .formato-icone { display: inline-block; flex: none; }
+.formato-peca.icone-miniatura .formato-icone { width: 40px; height: 40px; object-fit: contain; }
+.formato-peca.icone-simbolo .formato-icone { width: 15px; height: 15px; background: currentColor; }
+.formato-peca.icone-simbolo .formato-redondo { border-radius: 50%; }
+.formato-peca.icone-simbolo .formato-quadrado { border-radius: 4px; }

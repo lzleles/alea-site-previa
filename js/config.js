@@ -31,6 +31,11 @@
       por peça; o 1º foi lido como M e o 2º como G (dito a ele na mensagem da prévia). Ayla Pompom, sem tamanho, usa a
       chave '' (vazia). Caesar (produto futuro, ainda sem página) e Poop Bag (fica fora da vitrine, 6258) NÃO entram.
       A versão anterior está em 03_site/_versoes_anteriores/precos_comedouros_antes_2026-10-04/js/.
+   v46-produto (04/10/2026, ajuste 2 da lista, print 6227 + áudio 6228 do Cassiano: "vamos ver qual fica melhor"): campo NOVO
+      `ALEA.iconeFormato[slug]` — o desenho ao lado do nome no botão Formato. Duas opções pra ele escolher: A = miniatura do
+      vaso (render do 3D dele) e B = símbolo (bolinha no Orbis, quadrado de canto arredondado no Quadrum). Na prévia, o
+      `?icone=A` ou `?icone=B` na URL troca a opção (produto.js v44). A versão anterior está em
+      03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -567,6 +572,17 @@ window.ALEA.parcelamento = null;
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
 window.ALEA.formatos = {
   'stria-planter': ['Orbis', 'Quadrum']
+};
+/* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
+   (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
+   33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,
+   desenhada no CSS v44). Fica o que ELE escolher; até lá a prévia abre na A e o ?icone=B mostra a B. */
+window.ALEA.iconeFormato = {
+  'stria-planter': {
+    modo: 'miniatura',
+    miniatura: { Orbis: 'img/stria_formato_orbis.png', Quadrum: 'img/stria_formato_quadrum.png' },
+    simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
+  }
 };
 
 /* 04/10/2026 — ālea Stria Planter (msgs 6122-6148 do Cassiano). UMA PEÇA 3D POR ESCOLHA (áudio 6127: "se ela colocou o

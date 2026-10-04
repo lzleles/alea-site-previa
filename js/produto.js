@@ -4,8 +4,12 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v43 (04/10/2026, ajustes da prévia: tamanho por formato, preço por escolha, preço acima dos botões, sacola não abre a janela)
+   status: ativo — v44 (04/10/2026, ícone ao lado do Formato: miniatura A ou símbolo B)
    validado_em: 03/10/2026 (Playwright 390 e 1440)
+   v44 (04/10/2026, ajuste 2 da lista, print 6227 + áudio 6228 do Cassiano; a v43 está em
+     03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/js/): o botão do Formato ganha um desenho antes do nome,
+     lido de ALEA.iconeFormato[slug] (config.js v46): 'miniatura' (A, imagem do vaso) ou 'simbolo' (B, bolinha/quadrado do
+     CSS v44). Na prévia, ?icone=A ou ?icone=B na URL escolhe a opção pra ele comparar. Nada mais muda.
    v43 (04/10/2026, ajustes da prévia do Cassiano, msgs 6219-6243; a v42 está em
      03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/):
      (1) vídeo 6219 + áudio 6220, VALE PRA TODOS: sem personalizar, a sacola/Encomendar NÃO abre mais a janela sozinha —
@@ -303,13 +307,28 @@
     var lista = slugF && ((window.ALEA || {}).formatos || {})[slugF];
     var formF = document.querySelector('[data-personalizar]');
     if (!lista || !lista.length || !formF) return;
+    /* v44 (áudio 6228): o desenho do formato — A miniatura do vaso ou B símbolo; ?icone=A|B na URL troca (prévia) */
+    var cfgI = ((window.ALEA || {}).iconeFormato || {})[slugF] || null;
+    var modoIcone = cfgI && cfgI.modo;
+    var pedido = (location.search.match(/[?&]icone=([ab])/i) || [])[1];
+    if (cfgI && pedido) modoIcone = pedido.toUpperCase() === 'A' ? 'miniatura' : 'simbolo';
+    function iconeDoFormato(t) {
+      if (!cfgI || !modoIcone) return '';
+      if (modoIcone === 'miniatura' && cfgI.miniatura && cfgI.miniatura[t])
+        return '<img class="formato-icone" src="' + cfgI.miniatura[t] + '" alt="" width="40" height="40" loading="lazy">';
+      if (modoIcone === 'simbolo' && cfgI.simbolo && cfgI.simbolo[t])
+        return '<span class="formato-icone formato-' + cfgI.simbolo[t] + '" aria-hidden="true"></span>';
+      return '';
+    }
     caixaFormato = document.createElement('div');
     caixaFormato.className = 'cores-peca tamanho-peca formato-peca';
     caixaFormato.setAttribute('data-formato-peca', '');
     caixaFormato.innerHTML = '<span class="rotulo-grupo">Formato</span><div class="cores-opcoes">' +
       lista.map(function (t) {
-        return '<label><input type="radio" name="formato" value="' + String(t).replace(/"/g, '') + '"> ' + t + '</label>';
+        return '<label><input type="radio" name="formato" value="' + String(t).replace(/"/g, '') + '"> ' +
+          iconeDoFormato(t) + '<span class="formato-nome">' + t + '</span></label>';
       }).join('') + '</div>';
+    if (modoIcone) caixaFormato.classList.add('com-icone', 'icone-' + modoIcone);
     var antes = caixaTamanho || formF;
     antes.parentNode.insertBefore(caixaFormato, antes);
     caixaFormato.addEventListener('change', function () {
