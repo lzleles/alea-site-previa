@@ -2582,3 +2582,10 @@ body.nome-dourado {
   .feed .descricao-categoria .menu-sub { font-size: clamp(.39rem, 1.75vw, .46rem); }
   .feed .descricao-categoria .menu-sub button, .feed .descricao-categoria .menu-sub span { padding: .55em .5em; }
 }
+/* ---- v48 (04/10/2026, msg 6354 do Cassiano: "entre o último tamanho e esse"): a letra das subcategorias no MEIO do
+   caminho entre a v46 (cheia) e a v47 (metade) = 3/4 da cheia (13,44 px no computador, 10,24 px no celular de 390).
+   A v47 está em _versoes_anteriores/subcategorias_home_antes_2026-10-04/css/estilo_v47_subcategorias_metade.css */
+.feed .descricao-categoria .menu-sub { font-size: clamp(.69rem, 1.425vw, .84rem); }
+@media (max-width: 520px) {
+  .feed .descricao-categoria .menu-sub { font-size: clamp(.585rem, 2.625vw, .69rem); }
+}
