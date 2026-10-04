@@ -2495,3 +2495,32 @@ body.nome-dourado {
    palavras, exterior e interior". Produto com `modelos3d[slug].soUmModo` (produto.js v42) esconde a linha
    Tricolor/Bicolor/Monocromático: o único modo vem marcado pela capa e o cliente só vê as caixas Exterior e Interior. */
 .cores-peca.so-um-modo > .cores-opcoes { display: none; }
+
+/* v43 (04/10/2026, áudio 6243 do Cassiano — "vou na sua recomendação, vamos colocar a esquerda e faz essas cores aí,
+   esses tamanhos que você falou"; SUBSTITUI o v41 acima, que jogava o preço pra direita). A régua saiu da pesquisa de
+   04/10/2026 (9 páginas de produto medidas no Chrome, 1440 e 390: Cartier, Bottega Veneta, Aesop, Vivara, Osklen, Animale,
+   Farm, Tok&Stok, Westwing — 8 de 9 com o preço à esquerda, nenhum centralizado; 7 de 9 em preto/quase preto; parcela
+   11-14 px, mais clara, logo abaixo). Dados: 33_produtos_novos_2026-10-04/pesquisa_preco_luxo_2026-10-04/.
+   - PREÇO (em cima e o de baixo, acima de "Encomendar agora"): à esquerda, marrom quase preto #2B2420 (contraste 12,1:1 no
+     creme), peso 500, 24 px no computador e 20 px no celular. Terracota fica só no botão (no preço, briga com ele e
+     lembra promoção — vermelho = desconto, Puccinelli et al., Journal of Retailing, 2013).
+   - "a partir de": bem pequenininho (6234), na cor da parcela.
+   - PARCELA: 13-14 px, marrom acinzentado #6B5F57 (4,9:1), 4 px abaixo do preço; só aparece com ALEA.parcelamento. */
+.produto-topo .valor-grande,
+.produto-topo .valor-final-preco {
+  text-align: left; font-family: var(--fonte-titulo); font-weight: 500; color: #2B2420;
+  font-size: 24px; line-height: 1.2; margin: 0; font-variant-numeric: tabular-nums;
+}
+.produto-topo .valor-grande { margin: 0 0 4px; }
+.produto-topo .valor-grande small, .produto-topo .valor-final-preco small { font-size: .7em; }
+.produto-topo small.a-partir, .feed small.a-partir {
+  font-family: var(--fonte-corpo, inherit); font-size: 12px; font-weight: 400; letter-spacing: .02em; color: #6B5F57; margin-right: 2px;
+}
+.feed small.a-partir { color: inherit; opacity: .75; }
+.produto-topo p.parcela { text-align: left; font-size: 14px; line-height: 1.3; color: #6B5F57; margin: 0 0 10px; }
+.produto-topo .valor-final { margin: 6px 0 14px; }
+.produto-topo .valor-final p.parcela { margin: 4px 0 0; }
+@media (max-width: 600px) {
+  .produto-topo .valor-grande, .produto-topo .valor-final-preco { font-size: 20px; }
+  .produto-topo p.parcela { font-size: 13px; }
+}

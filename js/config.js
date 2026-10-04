@@ -20,6 +20,12 @@
    v43-produto (04/10/2026, msgs 6122-6148, ālea Stria Planter): `ALEA.formatos` (grupo Formato) + 'stria-planter' em
       `tamanhos` + `modelos3d['stria-planter']` com os campos NOVOS `glbPorEscolha`, `partesCor` e `soUmModo` (produto.js v42)
       + as fotos em `filamentosPorFoto`. A versão anterior está em 03_site/_versoes_anteriores/stria_variantes_antes_2026-10-04/js/.
+   v44-produto (04/10/2026, msgs 6228-6243, ajustes da prévia): (1) `tamanhos['stria-planter']` vira POR FORMATO
+      ({ Orbis: ['Mini','Pequeno'], Quadrum: ['Pequeno','Grande'] }, áudio 6228 + "Isso" 6231): o Orbis P de antes é o
+      Mini e o Orbis G é o Pequeno; as chaves de `glbPorEscolha` mudam junto (os .glb são os mesmos). (2) campo NOVO
+      `ALEA.precoPorEscolha[slug]` (preço por Formato|Tamanho; null = sem preço ainda, áudio 6234). (3) campo NOVO
+      `ALEA.parcelamento` (null = a linha da parcela não aparece; pergunta 6245). Lidos pelo produto.js v43 e feed.js.
+      A versão anterior está em 03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -529,8 +535,22 @@ window.ALEA.tamanhos = {
   'luke-bowl':         ['M', 'G'],
   'matteo-texturized': ['M', 'G'],   // era ['P','G'] até o áudio 3033
   'claudia-wave':      ['M', 'G'],   // era ['P','G'] até o áudio 3033
-  'stria-planter':     ['Pequeno', 'Grande']   // 04/10/2026, áudio 6127 ("Orbis pequeno", "Quadrum grande")
+  /* POR FORMATO (04/10/2026, áudio 6228: "o Orbis vai ser mini e pequeno e o Quadrum vai ser pequeno e grande"; 6229: o
+     Tamanho só aparece depois do Formato). Lista simples = vale pra qualquer formato; objeto = a lista de cada formato. */
+  'stria-planter':     { Orbis: ['Mini', 'Pequeno'], Quadrum: ['Pequeno', 'Grande'] }
 };
+/* PREÇO POR ESCOLHA (04/10/2026, áudio 6234 do Cassiano): produto com variantes de preço diferente. A chave é
+   'Formato|Tamanho' (a mesma do glbPorEscolha). Antes da escolha, a página e o feed mostram "a partir de" + o MENOR preço
+   preenchido; escolhido, a página mostra o preço daquela escolha (em cima e logo acima de "Encomendar agora", 6237).
+   null = ainda sem preço ("Sob consulta"). Os valores vêm DELE — nunca preencher por conta própria. */
+window.ALEA.precoPorEscolha = {
+  // msg 6250 do Cassiano (04/10/2026 17:51): "Stria Orbis Mini 79,00 · P 169,00 · Stria Quadrum P 189,00 · G 289,00"
+  'stria-planter': { 'Orbis|Mini': 79, 'Orbis|Pequeno': 169, 'Quadrum|Pequeno': 189, 'Quadrum|Grande': 289 }
+};
+/* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada
+   na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
+   vezes cai até caber). null = a linha não aparece. */
+window.ALEA.parcelamento = null;
 /* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
 window.ALEA.formatos = {
@@ -549,8 +569,8 @@ window.ALEA.formatos = {
 window.ALEA.modelos3d['stria-planter'] = {
   glb: 'modelos/stria_orbis_p.glb?v=2026-10-04',
   glbPorEscolha: {
-    'Orbis|Pequeno':   'modelos/stria_orbis_p.glb?v=2026-10-04',
-    'Orbis|Grande':    'modelos/stria_orbis_g.glb?v=2026-10-04',
+    'Orbis|Mini':      'modelos/stria_orbis_p.glb?v=2026-10-04',   // v44: o Orbis P de antes virou Mini (6231)
+    'Orbis|Pequeno':   'modelos/stria_orbis_g.glb?v=2026-10-04',   // v44: o Orbis G de antes virou Pequeno (6231)
     'Quadrum|Pequeno': 'modelos/stria_quadrum_p.glb?v=2026-10-04',
     'Quadrum|Grande':  'modelos/stria_quadrum_g.glb?v=2026-10-04'
   },

@@ -8,6 +8,9 @@
    validado_em: TBD
    v34 (27/09/2026, áudio 2308): no card, o nome do "× Nome" vai num <span class="nome"> (o degradê mede o nome, e o
       × fica azul sólido). Antes: 03_site/_versoes_anteriores/x_azul_nome_proporcional_antes_2026-09-27/js/feed.js
+   v39 (04/10/2026, print 6232 + áudio 6234 do Cassiano): produto com preço por variante (ALEA.precoPorEscolha, config.js —
+      hoje o Stria Planter) mostra no card "a partir de" bem pequenininho + o MENOR preço; os outros só na página, ao escolher.
+      Antes: 03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/feed.js
    v38 (03/10/2026, áudio 5831 do Cassiano): o cartão de fim ganha, depois do "voltar para a página inicial", a linha
       "© ālea & Co. 2026 — Todos os direitos reservados." (a mesma do rodapé, com a logo escura).
    v37 (03/10/2026, foto 5597 + áudios 5598/5599 do Cassiano): no cartão de fim da categoria "aqui também tem que ter o
@@ -100,6 +103,14 @@
 
   function moeda(v) {
     return (window.aleaDinheiro && window.aleaDinheiro(v)) || 'Sob consulta';
+  }
+  /* v39 (áudio 6234): o preço do card. Com preço por variante, "a partir de" + o menor preço preenchido. */
+  function valorDoCard(c) {
+    if (c.preco !== null && c.preco !== undefined) return moeda(c.preco);
+    var tab = ((window.ALEA || {}).precoPorEscolha || {})[c.pagina];
+    var vs = tab ? Object.keys(tab).map(function (k) { return tab[k]; }).filter(function (v) { return typeof v === 'number'; }) : [];
+    if (!vs.length) return 'Sob consulta';
+    return '<small class="a-partir">a partir de</small> ' + moeda(Math.min.apply(null, vs));
   }
 
   /* ⚠️ ETAPA 10 (22/09/2026): o nome "ālea" tem que sair IGUAL À LOGO — em Defante, MINÚSCULO, com
@@ -247,7 +258,7 @@
             '<span class="produto-mini">' + nomeNoCard(c.produto) + '</span>' +   // v32
             '<a class="ver" href="produto-' + c.pagina + '.html">ver produto →</a>' +
           '</span>' +
-          (mostrarPreco ? '<span class="valor">' + (c.preco === null ? 'Sob consulta' : moeda(c.preco)) + '</span>' : '') +
+          (mostrarPreco ? '<span class="valor">' + valorDoCard(c) + '</span>' : '') +   // v39
         '</div>';
       palco.appendChild(art);
     });

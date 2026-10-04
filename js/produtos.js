@@ -300,8 +300,8 @@ window.PRODUTOS = [
      - nome (6012), HOME (6014: "tudo o que te mandar agora vai pro Home"), R$ 89 (6016), monocromático em todas as cores
        (6020/6021), sem nome gravado (regra 5771), texto DELE palavra por palavra (6023).
      - material PLA: o filamento é Elegoo PLA Silk White (6018) = "Branco Perolizado" no site.
-     - medidas do ARQUIVO (6029): caixa do EPHYX.stl = 179,8 x 159,5 x 85,1 mm (oval). Peso: ele manda depois (6030),
-       nunca estimado — sem peso_g até lá.
+     - medidas do ARQUIVO (6029): caixa do EPHYX.stl = 179,8 x 159,5 x 85,1 mm (oval). Peso FATIADO no Studio desta máquina
+       com o 3MF dele (04/10/2026, msgs 6201/6206): 74 g, 4h53 (fatiar_peso_peca_v2_sem_suporte.py). Ficha só mostra dimensões.
      =================================================================================================== */
   {
     slug: 'ephix-vase',
@@ -330,7 +330,8 @@ window.PRODUTOS = [
      - nome (6067), HOME (6014), R$ 89 (6069), monocromático em todas as cores (6080), sem nome gravado (regra 5771),
        texto DELE palavra por palavra (6096).
      - material PLA na ficha: o Transparente é PETG, mas ele mandou deixar PLA (áudio 6103: "o único PETG que eu uso é esse").
-     - medidas do ARQUIVO: 173 x 89,4 x 89,4 mm. Peso: ele fatia e manda - sem peso_g até lá.
+     - medidas do ARQUIVO: 173 x 89,4 x 89,4 mm. Peso FATIADO aqui (04/10/2026): 139 g, 4h07, sem suporte; o dele deu 128 g e
+       ele mandou ficar o daqui ("pode colocar sempre esse a mais", msg 6206).
      =================================================================================================== */
   {
     slug: 'vase-prismatic',
@@ -355,9 +356,14 @@ window.PRODUTOS = [
      ālea Stria Planter — 4º produto da linha HOME (04/10/2026). Página: 03_site/01_gerar_paginas_v33_stria_planter_2026-10-04.py
      (clone da página do Vase Prismatic); fotos: 06_fotos_profissionais_v8_stria_planter_2026-10-04.py (IMG_2686-2690,
      msgs 6141-6145, capa 2690 por 6146); 3D: modelos/stria_{orbis,quadrum}_{p,g}.glb, 1 por variante MONTADA (6127).
-     - nome (6122/6124/6153): "ālea Stria Planter — Orbis e Quadrum"; formatos Orbis/Quadrum × Pequeno/Grande (config.js).
+     - nome (6122/6124/6153): "ālea Stria Planter — Orbis e Quadrum"; formatos e tamanhos POR FORMATO (config.js, 6228/6231):
+       Orbis Mini e Pequeno (o P e o G de antes), Quadrum Pequeno e Grande.
      - 2 cores só, Exterior (corpo) e Interior (vaso interno + pés + divisória), sem monocromático (6135-6140).
-     - SEM preço (6092): "Sob consulta" até ele fatiar e pesar. Texto DELE (6150), "Vasum" trocado por "Planter" (6153).
+     - PREÇO POR ESCOLHA (msg 6250): Orbis Mini R$ 79 · Orbis Pequeno R$ 169 · Quadrum Pequeno R$ 189 · Quadrum Grande R$ 289,
+       em config.js ALEA.precoPorEscolha (o `preco` daqui fica null; feed.js v39 mostra "a partir de R$ 79,00").
+       Texto DELE (6150), "Vasum" trocado por "Planter" (6153).
+     - Peso FATIADO aqui (04/10/2026, 6207/6208, peça + interno + 4 pés, sem suporte): Orbis Mini (era P) 104 g · Orbis Pequeno (era G) 253 g ·
+       Quadrum P 272 g · Quadrum G 452 g (pé normal fit 1,8 g; pé pequeno 1,0 g).
      =================================================================================================== */
   {
     slug: 'stria-planter',

@@ -4,8 +4,21 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v42 (04/10/2026, Formato + peça 3D por escolha + partes de cor com nome do produto)
+   status: ativo — v43 (04/10/2026, ajustes da prévia: tamanho por formato, preço por escolha, preço acima dos botões, sacola não abre a janela)
    validado_em: 03/10/2026 (Playwright 390 e 1440)
+   v43 (04/10/2026, ajustes da prévia do Cassiano, msgs 6219-6243; a v42 está em
+     03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/):
+     (1) vídeo 6219 + áudio 6220, VALE PRA TODOS: sem personalizar, a sacola/Encomendar NÃO abre mais a janela sozinha —
+         treme o "Personalize agora" e aparece "Por favor, selecione a cor da peça."; a declaração NÃO fica vermelha nessa
+         hora (só treme quando a personalização está completa e falta ela);
+     (2) áudios 6228/6229 + "Isso" 6231: o Tamanho só aparece DEPOIS do Formato, com a lista daquele formato
+         (`ALEA.tamanhos[slug]` pode ser { Orbis: ['Mini','Pequeno'], Quadrum: ['Pequeno','Grande'] }); trocar o formato
+         desmarca o tamanho;
+     (3) áudio 6234: `ALEA.precoPorEscolha[slug]` — antes da escolha, "a partir de" (pequenininho) + o menor preço; escolhido,
+         o preço daquela escolha;
+     (4) áudio 6237 + 6243 ("vamos colocar a esquerda e faz essas cores aí, esses tamanhos"): o preço final se repete logo
+         ACIMA de "Encomendar agora" e da sacola, mudando na hora; os dois preços à ESQUERDA (CSS v43), com a linha da
+         parcela embaixo quando houver `ALEA.parcelamento` (null hoje = não aparece).
    v42 (04/10/2026, ālea Stria Planter, áudios 6127/6135/6136/6138 do Cassiano; a v41 está em
      03_site/_versoes_anteriores/stria_variantes_antes_2026-10-04/js/):
      (1) grupo "Formato" (ALEA.formatos[slug], config.js) logo ACIMA do "Tamanho", mesmo desenho e mesma trava (obrigatório,
@@ -237,18 +250,36 @@
      Pedido e mensagem do pedido ("Tamanho: M", carrinho.js). O "editar" da sacola devolve o tamanho marcado. Sem preço
      por tamanho (decisão do Cassiano/Lázaro; as peças estão "Sob consulta"). */
   var caixaTamanho = null;
+  var tamanhosPorFormato = null;   // v43: { Orbis: [...], Quadrum: [...] } quando o tamanho depende do formato
+  function opcoesDeTamanho(lista) {
+    return (lista || []).map(function (t) {
+      return '<label><input type="radio" name="tamanho" value="' + String(t).replace(/"/g, '') + '"> ' + t + '</label>';
+    }).join('');
+  }
+  /* v43 (áudios 6228/6229): escolheu o formato -> aparece o Tamanho com a lista dele, nada marcado */
+  function desenharTamanhos(formato) {
+    if (!caixaTamanho || !tamanhosPorFormato) return;
+    var lista = tamanhosPorFormato[formato] || [];
+    caixaTamanho.querySelector('.cores-opcoes').innerHTML = opcoesDeTamanho(lista);
+    caixaTamanho.classList.remove('faltou');
+    var rotT = caixaTamanho.querySelector('.rotulo-grupo'); if (rotT) rotT.classList.remove('faltou', 'treme-falta');
+    caixaTamanho.hidden = !lista.length;
+    var rec = document.querySelector('[data-recado-aceite]');
+    if (rec && rec.textContent === 'Por favor, escolha o tamanho.') rec.hidden = true;
+  }
   (function grupoTamanho() {
     var slugT = botaoComprar && botaoComprar.getAttribute('data-slug');
     var lista = slugT && ((window.ALEA || {}).tamanhos || {})[slugT];
     var formT = document.querySelector('[data-personalizar]');
-    if (!lista || !lista.length || !formT) return;
+    /* v43: lista POR FORMATO (objeto) = o grupo nasce vazio e escondido; quem desenha é o Formato (desenharTamanhos) */
+    if (lista && !Array.isArray(lista)) { tamanhosPorFormato = lista; lista = []; }
+    if ((!lista || !lista.length) && !tamanhosPorFormato) return;
+    if (!formT) return;
     caixaTamanho = document.createElement('div');
     caixaTamanho.className = 'cores-peca tamanho-peca';
     caixaTamanho.setAttribute('data-tamanho-peca', '');
-    caixaTamanho.innerHTML = '<span class="rotulo-grupo">Tamanho</span><div class="cores-opcoes">' +
-      lista.map(function (t) {
-        return '<label><input type="radio" name="tamanho" value="' + String(t).replace(/"/g, '') + '"> ' + t + '</label>';
-      }).join('') + '</div>';
+    caixaTamanho.innerHTML = '<span class="rotulo-grupo">Tamanho</span><div class="cores-opcoes">' + opcoesDeTamanho(lista) + '</div>';
+    if (tamanhosPorFormato) caixaTamanho.hidden = true;
     formT.parentNode.insertBefore(caixaTamanho, formT);   // o botão Personalize (abaixo) entra entre este grupo e o formulário
     caixaTamanho.addEventListener('change', function () {
       Array.prototype.forEach.call(caixaTamanho.querySelectorAll('.rotulo-grupo, .cores-opcoes label, .faltou'),
@@ -256,6 +287,7 @@
       caixaTamanho.classList.remove('faltou');
       var rec = document.querySelector('[data-recado-aceite]');
       if (rec && rec.textContent === 'Por favor, escolha o tamanho.') rec.hidden = true;
+      if (window.aleaRepintarPreco) window.aleaRepintarPreco();   // v43: o preço da escolha
     });
   })();
   function tamanhoEscolhido() {
@@ -286,6 +318,8 @@
       caixaFormato.classList.remove('faltou');
       var rec = document.querySelector('[data-recado-aceite]');
       if (rec && rec.textContent === 'Por favor, escolha o formato.') rec.hidden = true;
+      desenharTamanhos(formatoEscolhido());   // v43: o Tamanho aparece só agora, com a lista do formato
+      if (window.aleaRepintarPreco) window.aleaRepintarPreco();
     });
   })();
   function formatoEscolhido() {
@@ -297,7 +331,7 @@
     var f = [];
     [[caixaFormato, formatoEscolhido, 'Por favor, escolha o formato.'],
      [caixaTamanho, tamanhoEscolhido, 'Por favor, escolha o tamanho.']].forEach(function (g) {
-      if (g[0] && !g[1]()) {
+      if (g[0] && !g[0].hidden && !g[1]()) {   // v43: Tamanho escondido (sem formato) não é cobrado — o Formato é
         f.push({ el: g[0].querySelector('.rotulo-grupo') || g[0], texto: g[2] });
         Array.prototype.forEach.call(g[0].querySelectorAll('.cores-opcoes label'), function (l) { f.push({ el: l, texto: null }); });
       }
@@ -1061,16 +1095,74 @@
       });
   }
 
+  /* v43 (áudio 6234): preço por Formato|Tamanho (ALEA.precoPorEscolha, config.js). null = produto sem isso. */
+  var precosEscolha = (function () {
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return sl ? (((window.ALEA || {}).precoPorEscolha || {})[sl] || null) : null;
+  })();
+  function precoDaEscolha() {
+    var chave = [formatoEscolhido(), tamanhoEscolhido()].filter(Boolean).join('|');
+    var v = precosEscolha[chave];
+    return (typeof v === 'number') ? v : null;
+  }
+  function escolhaCompleta() {
+    return (!caixaFormato || !!formatoEscolhido()) && (!caixaTamanho || !!tamanhoEscolhido());
+  }
+  function menorPrecoDaEscolha() {
+    var vs = Object.keys(precosEscolha).map(function (k) { return precosEscolha[k]; })
+      .filter(function (v) { return typeof v === 'number'; });
+    return vs.length ? Math.min.apply(null, vs) : null;
+  }
+
   function precoTotal() {
-    if (precoBase === null) return null;
-    return extrasMarcados().reduce(function (s, x) { return s + x.preco; }, precoBase);
+    var base = precosEscolha ? (escolhaCompleta() ? precoDaEscolha() : null) : precoBase;
+    if (base === null) return null;
+    return extrasMarcados().reduce(function (s, x) { return s + x.preco; }, base);
+  }
+
+  /* v43 (áudio 6237): o preço final se repete logo ACIMA dos botões ("quanto ficou o preço final pra colocar na sacola"),
+     com a linha da parcela embaixo dos DOIS preços quando houver ALEA.parcelamento ({ vezes, minimo }). */
+  var alvoFinal = null, parcelaTopo = null;
+  (function precoAcimaDosBotoes() {
+    var botoesF = document.querySelector('[data-botoes]');
+    if (!alvoValor || !botoesF) return;
+    alvoFinal = document.createElement('div');
+    alvoFinal.className = 'valor-final';
+    alvoFinal.setAttribute('data-valor-final', '');
+    alvoFinal.setAttribute('aria-live', 'polite');
+    alvoFinal.innerHTML = '<p class="valor-final-preco"></p><p class="parcela" hidden></p>';
+    botoesF.parentNode.insertBefore(alvoFinal, botoesF);
+    parcelaTopo = document.createElement('p');
+    parcelaTopo.className = 'parcela parcela-topo';
+    parcelaTopo.hidden = true;
+    alvoValor.parentNode.insertBefore(parcelaTopo, alvoValor.nextSibling);
+  })();
+  function textoParcela(t) {
+    var pc = (window.ALEA || {}).parcelamento;
+    if (!pc || !(pc.vezes > 1) || t === null || !(t > 0)) return '';
+    var n = Math.min(pc.vezes, pc.minimo > 0 ? Math.floor(t / pc.minimo) : pc.vezes);
+    if (n < 2) return '';
+    return 'ou até ' + n + 'x de ' + window.aleaDinheiro(t / n) + ' sem juros';
   }
 
   function repintarPreco() {
     if (!alvoValor) return;
     var t = precoTotal();
-    alvoValor.innerHTML = (t === null) ? '<small>Sob consulta</small>' : window.aleaDinheiro(t);
+    var html, valorParcela = t;
+    if (t !== null) html = window.aleaDinheiro(t);
+    else if (precosEscolha && !escolhaCompleta() && menorPrecoDaEscolha() !== null) {
+      valorParcela = menorPrecoDaEscolha();
+      html = '<small class="a-partir">a partir de</small> ' + window.aleaDinheiro(valorParcela);
+    } else html = '<small>Sob consulta</small>';
+    alvoValor.innerHTML = html;
+    var par = textoParcela(valorParcela);
+    if (parcelaTopo) { parcelaTopo.textContent = par; parcelaTopo.hidden = !par; }
+    if (alvoFinal) {
+      alvoFinal.querySelector('.valor-final-preco').innerHTML = html;
+      var pf = alvoFinal.querySelector('.parcela'); pf.textContent = par; pf.hidden = !par;
+    }
   }
+  window.aleaRepintarPreco = repintarPreco;
 
   /* ⚠️ ETAPA 52 (23/09/2026, 14:03, áudio dele): a COR DO NOME ganha a mesma janelinha das cores da
      peça — Básico · Fosco · Perolizado e, depois, a lista de cores daquele acabamento. O campo de texto
@@ -1523,7 +1615,7 @@
   }
   window.aleaIrParaOsBotoes = irParaOsBotoes;
 
-  function reclamarDoQueFalta(faltas) {
+  function reclamarDoQueFalta(faltas, soAFalta) {   // v43: soAFalta = treme só o que falta, não os botões (áudio 6220)
     Array.prototype.forEach.call(document.querySelectorAll('.faltou'), function (x) { x.classList.remove('faltou'); });
     faltas.forEach(function (f) { if (f.el) f.el.classList.add('faltou'); });
     /* ETAPA 23 (22/09/2026, 20:44): "quero que trema TUDO o que está faltando na tela", não só os
@@ -1541,7 +1633,7 @@
       recado.hidden = false;
     }
     var botoes = document.querySelector('[data-botoes]');
-    if (botoes) {
+    if (botoes && !soAFalta) {
       botoes.classList.remove('tremendo');
       void botoes.offsetWidth;        // reinicia a animação se ele clicar duas vezes
       botoes.classList.add('tremendo');
@@ -1646,15 +1738,15 @@
     var p = item.personalizacao || {};
     var nome = document.querySelector('[data-personalizar] [name="nome_pet"]');
     if (nome) nome.value = p.nome_pet || '';
+    /* v42: o formato volta marcado (v43: ANTES do tamanho — a lista de tamanhos depende dele) */
+    if (caixaFormato && p.formato) {
+      var rf = caixaFormato.querySelector('input[name="formato"][value="' + String(p.formato).replace(/"/g, '') + '"]');
+      if (rf) { rf.checked = true; desenharTamanhos(p.formato); }
+    }
     /* v36: o tamanho volta marcado */
     if (caixaTamanho && p.tamanho) {
       var rt = caixaTamanho.querySelector('input[name="tamanho"][value="' + String(p.tamanho).replace(/"/g, '') + '"]');
       if (rt) rt.checked = true;
-    }
-    /* v42: o formato volta marcado */
-    if (caixaFormato && p.formato) {
-      var rf = caixaFormato.querySelector('input[name="formato"][value="' + String(p.formato).replace(/"/g, '') + '"]');
-      if (rf) rf.checked = true;
     }
     (item.extras || []).forEach(function (x) {
       var rot = document.querySelector('[data-extra][data-extra-id="' + x.id + '"]');
@@ -1794,9 +1886,19 @@
          obrigatória" — faltando SÓ a declaração (que fica na página), treme a página, como antes */
       var formP = document.querySelector('[data-personalizar]');
       var faltaDentro = formP && faltas.some(function (f) { return f.el && formP.contains(f.el); });
-      if (window.aleaAbrirPersonalizar && faltaDentro) {
-        window.aleaAbrirPersonalizar(function () { setTimeout(function () { reclamarDoQueFalta(oQueFalta()); if (window.aleaIrParaFalta) window.aleaIrParaFalta(); }, 60); });
-      } else { reclamarDoQueFalta(faltas); }
+      /* ⚠️ v43 (vídeo 6219 + áudio 6220 do Cassiano, 04/10/2026, VALE PRA TODOS OS ITENS — substitui a ETAPA 55/57 acima):
+         a janela NÃO abre mais sozinha. Faltando Formato/Tamanho (na página), treme o que falta; faltando a personalização,
+         treme SÓ o botão "Personalize agora" e a frase diz "Por favor, selecione a cor da peça.". A declaração NÃO fica
+         vermelha nessa hora: ela só treme quando o resto está completo ("já escolheu a cor, não marcou e apertou de novo"). */
+      var semDeclaracao = faltas.filter(function (f) { return !(f.el && f.el.closest && f.el.closest('[data-aceite]')); });
+      var deEscolha = semDeclaracao.filter(function (f) {
+        return f.el && ((caixaFormato && caixaFormato.contains(f.el)) || (caixaTamanho && caixaTamanho.contains(f.el)));
+      });
+      var botaoP = document.querySelector('.personalizar-3d');
+      if (deEscolha.length) { reclamarDoQueFalta(deEscolha); }
+      else if (faltaDentro && botaoP) {
+        reclamarDoQueFalta([{ el: botaoP, texto: 'Por favor, selecione a cor da peça.' }], true);
+      } else { reclamarDoQueFalta(faltaDentro ? semDeclaracao : faltas); }
       return;
     }
     if (!window.aleaCarrinho) return;
