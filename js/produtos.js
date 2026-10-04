@@ -115,7 +115,9 @@ window.VITRINE = [
   { produto: 'ālea Pet Bowl – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: null, pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
-  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] }
+  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
+  /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
+  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
@@ -285,6 +287,36 @@ window.PRODUTOS = [
       'Produzida em impressão 3D, é uma peça funcional que também faz parte da decoração — porque até os pequenos detalhes merecem ser especiais.'
     ],
     galeria: ['soapdish_2620', 'soapdish_2622', 'soapdish_2624', 'soapdish_2621']
+  },
+
+  /* ===================================================================================================
+     ālea Ephix Vase — 2º produto da linha HOME (04/10/2026). Página: 03_site/01_gerar_paginas_v30_ephix_vase_2026-10-04.py
+     (clone da página da saboneteira); fotos: 06_fotos_profissionais_v5_ephix_vase_2026-10-04.py (os 5 quadros do vídeo
+     IMG_2651 dele, msg 6025); 3D: modelos/ephixvase.glb (modo vaso, oco e de boca aberta - ver config.js).
+     - nome (6012), HOME (6014: "tudo o que te mandar agora vai pro Home"), R$ 89 (6016), monocromático em todas as cores
+       (6020/6021), sem nome gravado (regra 5771), texto DELE palavra por palavra (6023).
+     - material PLA: o filamento é Elegoo PLA Silk White (6018) = "Branco Perolizado" no site.
+     - medidas do ARQUIVO (6029): caixa do EPHYX.stl = 179,8 x 159,5 x 85,1 mm (oval). Peso: ele manda depois (6030),
+       nunca estimado — sem peso_g até lá.
+     =================================================================================================== */
+  {
+    slug: 'ephix-vase',
+    nome: 'ālea Ephix Vase',
+    linha: 'Home',
+    categoria: 'home',
+    preco: 89,
+    material: 'PLA',
+    capa: 'ephixvase_capa',
+    cores_peca: ['monocromatico'],
+    sem_nome: true,
+    resumo: '',
+    paragrafos: [   // msg 6023, texto DELE
+      'Com formas suaves e linhas que percorrem toda a peça, este vaso foi pensado para trazer textura e movimento à decoração de forma leve e elegante.',
+      'Seu desenho arredondado cria um efeito delicado de luz e sombra, valorizando cada detalhe e fazendo com que a peça se destaque mesmo nas composições mais simples.',
+      'Ideal para flores secas, pequenos arranjos ou até mesmo para ser usado sozinho, como objeto decorativo.',
+      'Uma peça versátil, delicada e cheia de presença — feita para transformar pequenos espaços em cantinhos especiais.'
+    ],
+    galeria: ['ephixvase_1', 'ephixvase_3', 'ephixvase_4', 'ephixvase_5']
   },
 
   /* ===================================================================================================

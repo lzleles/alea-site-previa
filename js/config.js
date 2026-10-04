@@ -13,6 +13,8 @@
    v40-produto (03/10/2026, áudios 5800/5801): `modelos3d['soap-dish']` — a saboneteira na janela 3D, com os campos novos
       `semNome` (personalizar3d.js v13) e `rotuloBotao` (produto.js v40). A versão anterior está em
       03_site/_versoes_anteriores/saboneteira_3d_antes_2026-10-03/js/.
+   v41-produto (04/10/2026, msgs 6008-6030): `modelos3d['ephix-vase']` (o vaso, GLB oco do modo vaso) e as fotos do vaso
+      em `filamentosPorFoto`. Nenhum campo novo. A versão anterior está em 03_site/_versoes_anteriores/ephix_vase_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -466,6 +468,24 @@ window.ALEA.modelos3d['soap-dish'] = {
     base:      { site: 'Branco', hex: '#FFFFFF', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Silk · Silk White' }
   }
 };
+/* 04/10/2026 — ālea Ephix Vase (msgs 6008-6030 do Cassiano): a mesma janela 3D "Personalize agora" da saboneteira.
+   O .glb sai de 33_produtos_novos_2026-10-04/IMG_2651/"ALEA Ephix Vase.3mf", objeto 3, pelo
+   07_render_capa/exportar_glb_configurador_v6_peca_sem_nome_deitada.py ("1=principal", 40000 faces, EM PÉ como se usa)
+   e depois pelo 07_render_capa/glb_modo_vaso_oco_v1.py: o arquivo é MODO VASO (spiral_mode=1, 1 parede, 0%, sem topo),
+   então a peça que sai do fatiador é OCA e de BOCA ABERTA, com parede de 0,42 mm (regra 3.1.3: "a peça como sai do
+   fatiador"). A logo NEGATIVA fica no fundo (0,46 mm, recorte na cor da peça). Abre em BRANCO PEROLIZADO = o filamento
+   dele (Elegoo Silk White, msg 6018). Sem nome gravado (`semNome`). */
+window.ALEA.modelos3d['ephix-vase'] = {
+  glb: 'modelos/ephixvase.glb?v=2026-10-04',
+  semNome: true,
+  rotuloBotao: 'Personalize agora',
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'perolizado', cor: 'Branco' }] },
+  original: {
+    topo:      { site: 'Branco', hex: '#FFFFFF', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Silk · Silk White' },
+    principal: { site: 'Branco', hex: '#FFFFFF', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Silk · Silk White' },
+    base:      { site: 'Branco', hex: '#FFFFFF', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Silk · Silk White' }
+  }
+};
 
 /* TAMANHOS À VENDA (28/09/2026, áudios do Cassiano ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho (...)
    arrumar uma opção lá no site"). A página ganha o grupo "Tamanho" (produto.js v36) logo acima do "Personalize aqui";
@@ -571,5 +591,12 @@ window.ALEA.filamentosPorFoto = {
   "img/produtos/soapdish_2622.jpg": ["eSUN · PLA · PLA-Silk · Pink"],
   "img/produtos/soapdish_2624.jpg": ["Bambu Lab · PLA · Silk Dual Color · Phantom Blue"],
   "img/produtos/soapdish_2621.jpg": ["eSUN · PLA · PLA-Silk · Pink", "Bambu Lab · PLA · Silk Dual Color · Phantom Blue", "Elegoo · PLA · Silk · Silk White"],
-  "img/produtos/soapdish_capaq.jpg": ["eSUN · PLA · PLA-Silk · Pink", "Bambu Lab · PLA · Silk Dual Color · Phantom Blue", "Elegoo · PLA · Silk · Silk White"]
+  "img/produtos/soapdish_capaq.jpg": ["eSUN · PLA · PLA-Silk · Pink", "Bambu Lab · PLA · Silk Dual Color · Phantom Blue", "Elegoo · PLA · Silk · Silk White"],
+  /* 04/10/2026 — ālea Ephix Vase: o filamento que ELE disse (msg 6018, "Elegoo Pla Silk White"); as 5 fotos são o mesmo vaso. */
+  "img/produtos/ephixvase_capa.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  "img/produtos/ephixvase_1.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  "img/produtos/ephixvase_3.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  "img/produtos/ephixvase_4.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  "img/produtos/ephixvase_5.jpg": ["Elegoo · PLA · Silk · Silk White"],
+  "img/produtos/ephixvase_capaq.jpg": ["Elegoo · PLA · Silk · Silk White"]
 };
