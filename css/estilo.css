@@ -2485,3 +2485,8 @@ body.nome-dourado {
 @media (max-aspect-ratio: 3/5) {
   .abertura::before, .feed::before { background-size: 1100px auto; background-position: left top; }
 }
+
+/* v41 (04/10/2026, print 6107 + áudio 6108 do Cassiano): "todos os preços de todos os produtos a gente sempre vai jogar
+   para a direita (...) vai ficar no mesmo alinhamento, só alinhar tudo para a direita". Vale pro preço da página do produto
+   (R$ 89,00 e "Sob consulta"), no computador e no celular. Só muda o alinhamento: tamanho, fonte e margem ficam iguais. */
+.produto-topo .valor-grande { text-align: right; }
