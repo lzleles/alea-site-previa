@@ -591,7 +591,7 @@ window.ALEA.iconeFormato = {
   'stria-planter': {
     modo: 'miniatura',   // v48: "pensando melhor, vamos colocar essa miniatura" (6275); a B (símbolo, só borda) ficou de reserva
     lado: 'depois',      // v48: "na frente da palavra" (6269/6271/6275) lido como DEPOIS do nome; 'antes' se ele disser o contrário
-    miniatura: { Orbis: 'img/stria_formato_orbis.png', Quadrum: 'img/stria_formato_quadrum.png' },
+    miniatura: { Orbis: 'img/stria_formato_orbis.png?v=marmore', Quadrum: 'img/stria_formato_quadrum.png?v=marmore' },   // v48: ?v= pra o celular não mostrar a cinza do cache
     simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
   }
 };
