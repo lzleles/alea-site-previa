@@ -119,7 +119,9 @@ window.VITRINE = [
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
   { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
-  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] }
+  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
+  /* 04/10/2026: 4º produto da HOME (Cassiano, msgs 6122-6153). Capa = IMG_2690 (6146). SEM preço até ele fatiar (6092). */
+  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
@@ -347,6 +349,34 @@ window.PRODUTOS = [
       'Uma peça criada para levar textura, forma e um toque de design para pequenos cantos da casa — daqueles detalhes que chamam atenção sem precisar disputar espaço com o restante da decoração.'
     ],
     galeria: ['vaseprismatic_1', 'vaseprismatic_2', 'vaseprismatic_3', 'vaseprismatic_4']
+  },
+
+  /* ===================================================================================================
+     ālea Stria Planter — 4º produto da linha HOME (04/10/2026). Página: 03_site/01_gerar_paginas_v33_stria_planter_2026-10-04.py
+     (clone da página do Vase Prismatic); fotos: 06_fotos_profissionais_v8_stria_planter_2026-10-04.py (IMG_2686-2690,
+     msgs 6141-6145, capa 2690 por 6146); 3D: modelos/stria_{orbis,quadrum}_{p,g}.glb, 1 por variante MONTADA (6127).
+     - nome (6122/6124/6153): "ālea Stria Planter — Orbis e Quadrum"; formatos Orbis/Quadrum × Pequeno/Grande (config.js).
+     - 2 cores só, Exterior (corpo) e Interior (vaso interno + pés + divisória), sem monocromático (6135-6140).
+     - SEM preço (6092): "Sob consulta" até ele fatiar e pesar. Texto DELE (6150), "Vasum" trocado por "Planter" (6153).
+     =================================================================================================== */
+  {
+    slug: 'stria-planter',
+    nome: 'ālea Stria Planter',
+    linha: 'Home',
+    categoria: 'home',
+    preco: null,
+    material: 'PLA',
+    capa: 'striaplanter_capa',
+    cores_peca: ['bicolor'],
+    sem_nome: true,
+    resumo: '',
+    paragrafos: [   // msg 6150, texto DELE (6153: "Stria Planter")
+      'A coleção Stria Planter nasce da combinação entre textura e simplicidade. Suas ranhuras verticais acompanham toda a peça, criando movimento e valorizando a luz e as sombras ao longo da superfície.',
+      'Elevado por pequenos pés, o vaso ganha leveza visual e presença, transformando plantas e flores em parte da composição do espaço.',
+      'Disponível em diferentes formatos e cores, foi criado para se adaptar a diversos ambientes sem perder sua identidade.',
+      'Mais do que acomodar uma planta, Stria Planter foi pensado para fazer parte da decoração.'
+    ],
+    galeria: ['striaplanter_1', 'striaplanter_2', 'striaplanter_3', 'striaplanter_4']
   },
 
   /* ===================================================================================================

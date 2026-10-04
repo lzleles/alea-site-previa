@@ -4,8 +4,19 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v41 (03/10/2026, 'Personalize agora' em todos + 'Cor - N · Em estoque')
+   status: ativo — v42 (04/10/2026, Formato + peça 3D por escolha + partes de cor com nome do produto)
    validado_em: 03/10/2026 (Playwright 390 e 1440)
+   v42 (04/10/2026, ālea Stria Planter, áudios 6127/6135/6136/6138 do Cassiano; a v41 está em
+     03_site/_versoes_anteriores/stria_variantes_antes_2026-10-04/js/):
+     (1) grupo "Formato" (ALEA.formatos[slug], config.js) logo ACIMA do "Tamanho", mesmo desenho e mesma trava (obrigatório,
+         vai no item como personalizacao.formato, volta no "editar" da sacola);
+     (2) "se ela colocou o Orbis pequeno (...) na hora que ela clicar e personalizar, você vai puxar somente aquela escolha
+         dela": com `modelos3d[slug].glbPorEscolha` ({'Orbis|Pequeno': 'modelos/….glb', …}) o "Personalize agora" só abre
+         com Formato e Tamanho escolhidos (senão treme o que falta) e abre a PEÇA daquela escolha, montada;
+     (3) "exterior e interior (...) não vai ter monocromática": `modelos3d[slug].partesCor = {2: ['Exterior', 'Interior']}`
+         troca o nome das caixas de cor (e das frases de falta); `modelos3d[slug].soUmModo` esconde a linha
+         Tricolor/Bicolor/Monocromático (a página só traz o modo que vale, marcado pela capa). As cores vão no item com
+         `partes` (carrinho.js: "Exterior: Mármore, Interior: Cáqui"). Produto sem esses campos = nada muda.
    v41 (03/10/2026, áudios 5817/5818 do Cassiano, na prévia ef685ac): (1) "nos comedouros também (...) todas as
      personalizações vão ser Personalize agora" -> o padrão do botão virou "Personalize agora" (rotuloBotao segue
      valendo pra exceção); (2) "ao invés de 1 disponível (...) aquele mesmo pontinho (...) 1 em estoque, que a pessoa
@@ -252,6 +263,48 @@
     return r ? r.value : '';
   }
 
+  /* v42 (04/10/2026, Stria Planter: Orbis | Quadrum): o grupo "Formato", igual ao Tamanho e logo ACIMA dele (ou do
+     formulário, se o produto não tiver tamanho). Só no produto listado em ALEA.formatos (config.js). */
+  var caixaFormato = null;
+  (function grupoFormato() {
+    var slugF = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lista = slugF && ((window.ALEA || {}).formatos || {})[slugF];
+    var formF = document.querySelector('[data-personalizar]');
+    if (!lista || !lista.length || !formF) return;
+    caixaFormato = document.createElement('div');
+    caixaFormato.className = 'cores-peca tamanho-peca formato-peca';
+    caixaFormato.setAttribute('data-formato-peca', '');
+    caixaFormato.innerHTML = '<span class="rotulo-grupo">Formato</span><div class="cores-opcoes">' +
+      lista.map(function (t) {
+        return '<label><input type="radio" name="formato" value="' + String(t).replace(/"/g, '') + '"> ' + t + '</label>';
+      }).join('') + '</div>';
+    var antes = caixaTamanho || formF;
+    antes.parentNode.insertBefore(caixaFormato, antes);
+    caixaFormato.addEventListener('change', function () {
+      Array.prototype.forEach.call(caixaFormato.querySelectorAll('.rotulo-grupo, .cores-opcoes label, .faltou'),
+        function (x) { x.classList.remove('faltou'); });
+      caixaFormato.classList.remove('faltou');
+      var rec = document.querySelector('[data-recado-aceite]');
+      if (rec && rec.textContent === 'Por favor, escolha o formato.') rec.hidden = true;
+    });
+  })();
+  function formatoEscolhido() {
+    var r = caixaFormato && caixaFormato.querySelector('input[name="formato"]:checked');
+    return r ? r.value : '';
+  }
+  /* v42: as faltas de Formato e Tamanho (na página, acima do Personalize), na ordem da página */
+  function faltasDeEscolha() {
+    var f = [];
+    [[caixaFormato, formatoEscolhido, 'Por favor, escolha o formato.'],
+     [caixaTamanho, tamanhoEscolhido, 'Por favor, escolha o tamanho.']].forEach(function (g) {
+      if (g[0] && !g[1]()) {
+        f.push({ el: g[0].querySelector('.rotulo-grupo') || g[0], texto: g[2] });
+        Array.prototype.forEach.call(g[0].querySelectorAll('.cores-opcoes label'), function (l) { f.push({ el: l, texto: null }); });
+      }
+    });
+    return f;
+  }
+
   /* ⚠️ ETAPA 53 (23/09/2026, 14:27, protótipo): botão "Personalize aqui" -> janela com a peça em 3D, nome
      gravado ao vivo e cores trocando na hora (js/personalizar3d.js). Só aparece no produto que tem modelo 3D
      no config.js; o three.js só é baixado no clique. */
@@ -279,18 +332,33 @@
     form.parentNode.insertBefore(b, form);
     form.classList.add('mora-na-janela');
     var aberto = false;
+    /* v42: produto com uma peça 3D por escolha (Stria: formato + tamanho) — sem as duas, não abre: treme o que falta */
+    function cfgDaEscolha() {
+      if (!cfg3d.glbPorEscolha) return cfg3d;
+      var chave = [formatoEscolhido(), tamanhoEscolhido()].filter(Boolean).join('|');
+      var glb = cfg3d.glbPorEscolha[chave];
+      if (!glb) return null;
+      var c = {}; for (var k in cfg3d) c[k] = cfg3d[k];
+      c.glb = glb;
+      return c;
+    }
     function abrir(depoisDeMontar, opcoes) {
       if (aberto) { if (depoisDeMontar) depoisDeMontar(); return; }
+      var cfgAgora = cfgDaEscolha();
+      if (!cfgAgora) { reclamarDoQueFalta(faltasDeEscolha()); return; }
       aberto = true;
       b.classList.add('carregando');
       import('./personalizar3d.js').then(function (m) {
-        return m.abrirJanela3D(cfg3d, function () { aberto = false; }, depoisDeMontar, opcoes || {});
+        return m.abrirJanela3D(cfgAgora, function () { aberto = false; }, depoisDeMontar, opcoes || {});
       }).catch(function (e) { aberto = false; console.warn('janela 3D', e); })
         .then(function () { b.classList.remove('carregando'); });
     }
     /* v38 (print 5275 + áudio 5277, 02/10/2026 — substitui o "começa vazio" da v31, áudio 2263): cada toque em
        "Personalize aqui" começa com as Cores da peça MARCADAS nas cores da capa (ver aleaAbrirNasCoresDaCapa) */
-    b.addEventListener('click', function () { if (!aberto && window.aleaAbrirNasCoresDaCapa) window.aleaAbrirNasCoresDaCapa(); abrir(); });
+    b.addEventListener('click', function () {
+      if (!cfgDaEscolha()) { reclamarDoQueFalta(faltasDeEscolha()); return; }   // v42: antes de limpar as cores
+      if (!aberto && window.aleaAbrirNasCoresDaCapa) window.aleaAbrirNasCoresDaCapa(); abrir();
+    });
     window.aleaAbrirPersonalizar = abrir;
   })();
   var botaoSacola = document.querySelector('[data-add-carrinho]');
@@ -1167,6 +1235,12 @@
      filamento sazonal não se promete antes de existir. */
   var caixaCores = document.querySelector('[data-cores-peca]');
   var camposCores = document.querySelector('[data-cores-campos]');
+  /* v42 (áudio 6138: "sempre que ele abrir já vai ter só essas duas palavras, exterior e interior"): produto com
+     `soUmModo` esconde a linha Tricolor/Bicolor/Monocromático — o único modo da página é marcado pela capa ao abrir */
+  (function () {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    if (caixaCores && (((window.ALEA || {}).modelos3d || {})[s] || {}).soUmModo) caixaCores.classList.add('so-um-modo');
+  })();
   /* v31 (msg 2268 do Cassiano, 27/09/2026): a frase pequena entre o título "Cores da peça" e as opções. O texto mora
      no config.js (`ALEA.fraseCoresDaPeca`); sem ele, nada entra. */
   (function fraseDasCores() {
@@ -1194,6 +1268,12 @@
   function exemploDeCor(k, quantos) {
     var lista = quantos === 2 ? EXEMPLO_BICOLOR : quantos === 1 ? EXEMPLO_MONO : EXEMPLO_POR_CAIXA;
     return lista[k - 1] || lista[0];
+  }
+
+  /* v42: os nomes das caixas de cor que o produto dá (config.js modelos3d[slug].partesCor), ou null */
+  function partesCorDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).partesCor || null;
   }
 
   function desenharCamposDeCor(radio) {
@@ -1229,9 +1309,12 @@
        linha dela — sem isso o cliente não saberia qual janela é o topo e qual é a base. */
     var FIL = (window.ALEA || {}).filamentos || {};
     var ACAB = (window.ALEA || {}).acabamentos || [];
+    /* v42 (áudio 6138, Stria): "exterior e interior, não vai colocar cor exterior e cor interior" — o produto pode dar o
+       nome das caixas (modelos3d[slug].partesCor[quantos]); sem isso, Topo/Principal/Base como sempre */
+    var nomesDoProduto = (partesCorDoProduto() || {})[quantos];
     for (var k = 1; k <= quantos; k++) {
       var parte = partes[k - 1] || ('Cor ' + k);
-      var titulo = NOME_DA_PARTE[parte] || parte;
+      var titulo = (nomesDoProduto && nomesDoProduto[k - 1]) || NOME_DA_PARTE[parte] || parte;
       var linha = document.createElement('div');
       linha.className = 'campo-cor';
       linha.setAttribute('data-parte', parte.toLowerCase());
@@ -1287,11 +1370,12 @@
        "editar" da sacola remontar as janelas. */
     var FIL = (window.ALEA || {}).filamentos || {};
     var ACAB = (window.ALEA || {}).acabamentos || [];
-    var escolhas = [], lista = [], originais = [];
+    var escolhas = [], lista = [], originais = [], partesNomes = [];
     Array.prototype.forEach.call(camposCores.querySelectorAll('.campo-cor'), function (c) {
       var ac = c.querySelector('.acabamento input:checked');
       var sel = c.querySelector('select');
       if (!ac || !sel || !sel.value) return;
+      partesNomes.push(c.getAttribute('data-titulo') || '');
       var def = ACAB.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
       var fil = (FIL[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
       escolhas.push({ acabamento: ac.value, cor: sel.value });
@@ -1303,6 +1387,8 @@
       cores: lista,
       originais: originais,
       escolhas: escolhas,
+      /* v42: só no produto com partesCor (Stria): o nome de cada caixa, na ordem das cores ("Exterior", "Interior") */
+      partes: partesCorDoProduto() ? partesNomes : undefined,
       a_combinar: !!r.getAttribute('data-aviso'),
       /* v37: true = o cliente apertou "Pronto" sem escolher e as cores são as da FOTO DE CAPA (aleaAssumirCorDaCapa).
          Na sacola e no pedido sai IGUAL à escolha à mão; o campo é só pra quem lê o pedido no servidor (e-mail v3). */
@@ -1348,6 +1434,8 @@
         cores: coresEscolhidas(),
         /* v36: o tamanho que o cliente escolheu na página (M ou G nas 3 peças — áudio 3033: "todos são M e G, não tem P"); '' = produto sem tamanhos */
         tamanho: tamanhoEscolhido(),
+        /* v42: o formato (Stria: Orbis | Quadrum); '' = produto sem formato */
+        formato: formatoEscolhido(),
         /* 26/09/2026: marcou o "Estou ciente da possível variação de cor" na janela Personalize (personalizar3d.js v9) */
         ciente_cor: (function () { if (window.aleaCienteCor) return true; try { return !!sessionStorage.getItem('alea_ciente_cor'); } catch (e) { return false; } })()
       },
@@ -1403,6 +1491,10 @@
           var parte = c.getAttribute('data-parte');
           var qual = parte === 'topo' ? 'da cor do topo' : parte === 'base' ? 'da cor da base' : 'da cor principal';
           var qual2 = parte === 'topo' ? 'a cor do topo' : parte === 'base' ? 'a cor da base' : 'a cor principal';
+          if (partesCorDoProduto()) {   // v42: caixa com nome do produto ("Exterior") -> "a cor do Exterior"
+            var tt = c.getAttribute('data-titulo') || '';
+            qual = 'da cor do ' + tt; qual2 = 'a cor do ' + tt;
+          }
           if (!c.querySelector('.acabamento input:checked')) {
             faltas.push({ el: c, texto: 'Por favor, escolha o acabamento ' + qual + '.' });
           } else if (!c.querySelector('select').value) {
@@ -1413,10 +1505,8 @@
     }
     /* v36: o tamanho (na página, acima do Personalize). Vem DEPOIS das faltas do formulário de propósito: faltando algo lá
        dentro, a janela abre e mostra aquela falta primeiro; resolvido, a página treme no Tamanho. */
-    if (caixaTamanho && !tamanhoEscolhido()) {
-      faltas.push({ el: caixaTamanho.querySelector('.rotulo-grupo') || caixaTamanho, texto: 'Por favor, escolha o tamanho.' });
-      Array.prototype.forEach.call(caixaTamanho.querySelectorAll('.cores-opcoes label'), function (l) { faltas.push({ el: l, texto: null }); });
-    }
+    /* v42: Formato e Tamanho juntos, na ordem da página (faltasDeEscolha) */
+    faltas = faltas.concat(faltasDeEscolha());
     if (!caixaAceite || !caixaAceite.checked) {
       faltas.push({ el: document.querySelector('[data-aceite]'), texto: 'Por favor, aceite os termos da declaração.' });   // ETAPA 32 (21:38): frase dele
     }
@@ -1468,6 +1558,9 @@
                  primeira.el.querySelector('input')) : null;
       if (!alvo && caixaTamanho && caixaTamanho.contains(primeira.el)) {   // v36: o foco vai pra 1ª bolinha do Tamanho
         alvo = caixaTamanho.querySelector('input[name="tamanho"]');
+      }
+      if (!alvo && caixaFormato && caixaFormato.contains(primeira.el)) {   // v42: idem no Formato
+        alvo = caixaFormato.querySelector('input[name="formato"]');
       }
       if (!alvo && caixaCores && primeira.el.classList.contains('rotulo-grupo')) {
         alvo = caixaCores.querySelector('input[name="cores_peca"]');
@@ -1557,6 +1650,11 @@
     if (caixaTamanho && p.tamanho) {
       var rt = caixaTamanho.querySelector('input[name="tamanho"][value="' + String(p.tamanho).replace(/"/g, '') + '"]');
       if (rt) rt.checked = true;
+    }
+    /* v42: o formato volta marcado */
+    if (caixaFormato && p.formato) {
+      var rf = caixaFormato.querySelector('input[name="formato"][value="' + String(p.formato).replace(/"/g, '') + '"]');
+      if (rf) rf.checked = true;
     }
     (item.extras || []).forEach(function (x) {
       var rot = document.querySelector('[data-extra][data-extra-id="' + x.id + '"]');

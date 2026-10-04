@@ -17,6 +17,9 @@
       em `filamentosPorFoto`. Nenhum campo novo. A versão anterior está em 03_site/_versoes_anteriores/ephix_vase_antes_2026-10-04/js/.
    v42-produto (04/10/2026, msgs 6048-6096): `modelos3d['vase-prismatic']` (o 3º vaso da HOME) e as fotos dele em
       `filamentosPorFoto`. Nenhum campo novo. A versão anterior está em 03_site/_versoes_anteriores/vase_prismatic_antes_2026-10-04/js/.
+   v43-produto (04/10/2026, msgs 6122-6148, ālea Stria Planter): `ALEA.formatos` (grupo Formato) + 'stria-planter' em
+      `tamanhos` + `modelos3d['stria-planter']` com os campos NOVOS `glbPorEscolha`, `partesCor` e `soUmModo` (produto.js v42)
+      + as fotos em `filamentosPorFoto`. A versão anterior está em 03_site/_versoes_anteriores/stria_variantes_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -525,7 +528,44 @@ window.ALEA.modelos3d['vase-prismatic'] = {
 window.ALEA.tamanhos = {
   'luke-bowl':         ['M', 'G'],
   'matteo-texturized': ['M', 'G'],   // era ['P','G'] até o áudio 3033
-  'claudia-wave':      ['M', 'G']    // era ['P','G'] até o áudio 3033
+  'claudia-wave':      ['M', 'G'],   // era ['P','G'] até o áudio 3033
+  'stria-planter':     ['Pequeno', 'Grande']   // 04/10/2026, áudio 6127 ("Orbis pequeno", "Quadrum grande")
+};
+/* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
+   "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
+window.ALEA.formatos = {
+  'stria-planter': ['Orbis', 'Quadrum']
+};
+
+/* 04/10/2026 — ālea Stria Planter (msgs 6122-6148 do Cassiano). UMA PEÇA 3D POR ESCOLHA (áudio 6127: "se ela colocou o
+   Orbis pequeno (...) na hora que ela clicar e personalizar, você vai puxar somente aquela escolha dela"; "não quero que você
+   mostre ele desmontado"). Os 4 .glb saem do 3MF DELE (msg 6126, "ALEA Stria Planter.3mf") pelo
+   33_produtos_novos_2026-10-04/stria_planter/montar_stria_v2_duas_zonas_fora_e_dentro.py: corpo + 4 pés nos 4 furos do fundo
+   (Orbis P = pé da placa 1; os outros = "leg normal fit" da placa 6, áudio 6129) + vaso interno dentro (+ divisória no Quadrum G),
+   logo negativa do fundo recortada. Orbis P = placa 1 · Orbis G = placa 2 · Quadrum P = placa 3 · Quadrum G = placas 4+5.
+   DUAS CORES SÓ (áudios 6135/6136/6138): EXTERIOR = o corpo listrado (zona principal); INTERIOR = vaso interno + pés + divisória
+   (zona topo) — "o pezinho tem que ser a mesma cor da parte interna", sem Monocromático. Abre na cor das fotos (msg 6148):
+   Exterior Mármore (SUNLU Marble Chestnut Brown), Interior Cáqui (Bambu Matte Desert Tan). Sem nome gravado. */
+window.ALEA.modelos3d['stria-planter'] = {
+  glb: 'modelos/stria_orbis_p.glb?v=2026-10-04',
+  glbPorEscolha: {
+    'Orbis|Pequeno':   'modelos/stria_orbis_p.glb?v=2026-10-04',
+    'Orbis|Grande':    'modelos/stria_orbis_g.glb?v=2026-10-04',
+    'Quadrum|Pequeno': 'modelos/stria_quadrum_p.glb?v=2026-10-04',
+    'Quadrum|Grande':  'modelos/stria_quadrum_g.glb?v=2026-10-04'
+  },
+  semNome: true,
+  soUmModo: true,
+  partesCor: { 2: ['Exterior', 'Interior'] },
+  bicolor: { principal: 0, topo: 1, base: 0 },   // 1ª caixa (Exterior) = corpo; 2ª (Interior) = vaso interno, pés e divisória
+  rotuloBotao: 'Personalize agora',
+  folgaEnquadrar: 1.1,
+  capa: { modo: 'bicolor', escolhas: [{ acabamento: 'basico', cor: 'Mármore' }, { acabamento: 'fosco', cor: 'Cáqui' }] },
+  original: {
+    topo:      { site: 'Cáqui',   hex: '#E8DBB7', acabamento: 'fosco',  oficial: 'Bambu Lab · PLA · Matte · Desert Tan (11401)' },
+    principal: { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    base:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' }
+  }
 };
 /* A LOGO NUNCA É PINTADA (Cassiano, 28/09/2026 ~02:16: "a logo nunca vai ser pintada. Sempre baixo-relevo (...) a nossa logo
    não muda de cor, não muda de formato, nada"). Conferido no personalizar3d.js v11: a logo está DENTRO do .glb, como parte
@@ -628,5 +668,12 @@ window.ALEA.filamentosPorFoto = {
   "img/produtos/vaseprismatic_2.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
   "img/produtos/vaseprismatic_3.jpg": ["eSUN · PLA · PLA-Basic · Black"],
   "img/produtos/vaseprismatic_4.jpg": ["Elegoo · PETG · PETG · Transparente"],
+  /* ālea Stria Planter (msg 6148): as 5 fotos têm as mesmas 2 cores. Ordem da foto (cima -> baixo, áudio 6101): a borda do
+     vaso interno (Cáqui) aparece primeiro, depois o corpo listrado (Mármore); os pés são Cáqui de novo. */
+  "img/produtos/striaplanter_capa.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/striaplanter_1.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/striaplanter_2.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/striaplanter_3.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/striaplanter_4.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
   "img/produtos/vaseprismatic_capaq.jpg": ["Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black"]
 };
