@@ -621,11 +621,12 @@ window.ALEA.filamentosPorFoto = {
   "img/produtos/ephixvase_4.jpg": ["Elegoo · PLA · Silk · Silk White"],
   "img/produtos/ephixvase_5.jpg": ["Elegoo · PLA · Silk · Silk White"],
   "img/produtos/ephixvase_capaq.jpg": ["Elegoo · PLA · Silk · Silk White"],
-  /* 04/10/2026 — ālea Vase Prismatic: os 4 filamentos que ELE disse (msg 6071), um por foto de perto; as de grupo levam os 4. */
-  "img/produtos/vaseprismatic_capa.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"],
-  "img/produtos/vaseprismatic_1.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
-  "img/produtos/vaseprismatic_2.jpg": ["eSUN · PLA · PLA-Basic · Black"],
-  "img/produtos/vaseprismatic_3.jpg": ["Elegoo · PETG · PETG · Transparente"],
-  "img/produtos/vaseprismatic_4.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"],
-  "img/produtos/vaseprismatic_capaq.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente"]
+  /* 04/10/2026 — ālea Vase Prismatic: os 4 filamentos que ELE disse (msg 6071). ORDEM = a da foto, de cima pra baixo e
+     da esquerda pra direita (áudios 6101/6102). Capa = a da sala (6100): dourado, transparente, mármore, preto. */
+  "img/produtos/vaseprismatic_capa.jpg": ["Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black"],
+  "img/produtos/vaseprismatic_1.jpg": ["Elegoo · PETG · PETG · Transparente", "eSUN · PLA · PLA-Basic · Black", "Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/vaseprismatic_2.jpg": ["SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
+  "img/produtos/vaseprismatic_3.jpg": ["eSUN · PLA · PLA-Basic · Black"],
+  "img/produtos/vaseprismatic_4.jpg": ["Elegoo · PETG · PETG · Transparente"],
+  "img/produtos/vaseprismatic_capaq.jpg": ["Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black"]
 };

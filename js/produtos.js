@@ -118,7 +118,7 @@ window.VITRINE = [
   { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
   { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
-  /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos lado a lado (IMG_2666). */
+  /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
   { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
@@ -323,11 +323,11 @@ window.PRODUTOS = [
 
   /* ===================================================================================================
      ālea Vase Prismatic — 3º produto da linha HOME (04/10/2026). Página: 03_site/01_gerar_paginas_v31_vase_prismatic_2026-10-04.py
-     (clone da página do Ephix Vase); fotos: 06_fotos_profissionais_v6_vase_prismatic_2026-10-04.py (as 5 originais dele,
+     (clone da página do Ephix Vase); fotos: 06_fotos_profissionais_v7_capa_da_sala_2026-10-04.py (as 5 originais dele,
      msgs 6048-6052); 3D: modelos/vaseprismatic.glb (do 3MF DELE, msg 6064 - ver config.js).
      - nome (6067), HOME (6014), R$ 89 (6069), monocromático em todas as cores (6080), sem nome gravado (regra 5771),
        texto DELE palavra por palavra (6096).
-     - material PLA na ficha: 3 dos 4 filamentos das fotos são PLA; o Transparente é PETG (6071) - a confirmar com ele.
+     - material PLA na ficha: o Transparente é PETG, mas ele mandou deixar PLA (áudio 6103: "o único PETG que eu uso é esse").
      - medidas do ARQUIVO: 173 x 89,4 x 89,4 mm. Peso: ele fatia e manda - sem peso_g até lá.
      =================================================================================================== */
   {
