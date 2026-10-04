@@ -2572,3 +2572,13 @@ body.nome-dourado {
   .feed .descricao-categoria .menu-sub { gap: 2px 1px; font-size: clamp(.78rem, 3.5vw, .92rem); letter-spacing: .1em; }
   .feed .descricao-categoria .menu-sub button, .feed .descricao-categoria .menu-sub span { padding: 8px 7px; }
 }
+/* ---- v47 (04/10/2026, áudio 6348 + "sim" 6350 do Cassiano): "metade desse tamanho" = as letras das SUBCATEGORIAS pela
+   metade (era 17,92 px no computador e 13,65 px no celular de 390 -> 8,96 e 6,83 px). O "em breve" desce junto, na mesma
+   proporção, e o respiro do botão acompanha (em `em`). A v46 está em _versoes_anteriores/subcategorias_home_antes_2026-10-04/css/. */
+.feed .descricao-categoria .menu-sub { font-size: clamp(.46rem, .95vw, .56rem); }
+.feed .descricao-categoria .menu-sub button, .feed .descricao-categoria .menu-sub span { padding: .55em .7em; }
+.feed .descricao-categoria .menu-sub .vazia small { font-size: .68em; }
+@media (max-width: 520px) {
+  .feed .descricao-categoria .menu-sub { font-size: clamp(.39rem, 1.75vw, .46rem); }
+  .feed .descricao-categoria .menu-sub button, .feed .descricao-categoria .menu-sub span { padding: .55em .5em; }
+}
