@@ -2589,3 +2589,26 @@ body.nome-dourado {
 @media (max-width: 520px) {
   .feed .descricao-categoria .menu-sub { font-size: clamp(.585rem, 2.625vw, .69rem); }
 }
+
+/* ---- v49 (04/10/2026, POOP BAG, áudios 6281-6290 do Cassiano): a CAIXINHA "Adicionar Poop Bag Holder + R$ 49,00" dos
+   comedouros (produto.js v46). Fica entre o "Personalize agora" e a declaração, com a MINIATURA do porta-saquinho nas
+   cores e com o nome que o cliente montou (personalizar3d.js v14). Mesmo desenho do "Um detalhe que transforma" (.extra).
+   A v48 está em _versoes_anteriores/poop_bag_antes_2026-10-04/css/. */
+.extra.extra-poopbag { margin: 14px 0 4px; padding: 10px 14px; gap: 12px; }
+.extra-poopbag .mini-poopbag {
+  flex: none; width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, #F4EFE7 0%, #E2D9CC 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.extra-poopbag .mini-poopbag img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.extra-poopbag .mini-poopbag.carregando { animation: mini-pulsa 1.1s ease-in-out infinite alternate; }
+.extra-poopbag .mini-poopbag.carregando img { visibility: hidden; }
+@keyframes mini-pulsa { from { opacity: .55; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .extra-poopbag .mini-poopbag.carregando { animation: none; } }
+.extra-poopbag .titulo-extra { font-size: 15px; line-height: 1.25; }
+@media (max-width: 520px) {
+  .extra.extra-poopbag { padding: 9px 11px; gap: 10px; }
+  .extra-poopbag .mini-poopbag { width: 56px; height: 56px; }
+  .extra-poopbag .titulo-extra { font-size: 14px; }
+}
+.extra.extra-poopbag[hidden] { display: none; }   /* v49: o display:flex do .extra venceria o [hidden] */

@@ -45,6 +45,13 @@
       pra 'miniatura', `lado` 'depois' do nome, e as miniaturas img/stria_formato_*.png são refeitas em MÁRMORE + Cáqui
       (33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v2_marmore.py). As anteriores (cinza) e
       esta config estão em 03_site/_versoes_anteriores/miniatura_marmore_antes_2026-10-04/.
+   v49-produto (04/10/2026, POOP BAG, cadastro campo por campo com o Cassiano, msgs 6315-6363, "Pode montar!" 6363):
+      (1) `modelos3d['poop-bag-holder']` — a janela 3D do porta-saquinho (GLB da versão "Negative Name" do 3MF dele, nome
+      GRAVADO pra dentro, de graça, 6330/6334), abrindo nas cores originais Caramelo/Mármore/Marrom (6326/6328);
+      (2) `precoPorEscolha` NÃO muda: o Poop Bag não tem tamanho, o R$ 79 está na página e na VITRINE (produtos.js);
+      (3) campo NOVO `ALEA.extraPoopBag` — a caixinha "Adicionar Poop Bag Holder + R$ 49,00" com a miniatura, nos
+      comedouros Luke/Matteo/Cláudia, só depois do Pronto do Personalize (produto.js v46, personalizar3d.js v14).
+      A versão anterior está em 03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -625,6 +632,54 @@ window.ALEA.modelos3d['stria-planter'] = {
     principal: { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
     base:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' }
   }
+};
+/* v49 — 04/10/2026, ālea Poop Bag Holder (msg 6285 do Cassiano: "ALEA Poop Bag Holder.3mf"; cadastro 6315-6363). O .glb
+   sai da placa 6 "Negative Name" do 3MF dele (corpo obj 22 + tampa obj 17), pelo
+   33_produtos_novos_2026-10-04/poop_bag_extra/glb/exportar_glb_configurador_v6_poopbag_v1.py ("1=principal,2=base,3=topo",
+   sem decimar, --tampa 17 --assento 15.1): o reservatório com a TAMPA ROSQUEADA por cima (montado, 81,7 mm de altura) e a
+   capivara negativa no fundo. Zonas: topo = a tampa · principal = o corpo · base = a faixa de baixo e o fundo.
+   NOME GRAVADO pra dentro, de graça (msgs 6330/6334): o mesmo corte ao vivo dos comedouros, na parede do corpo.
+   NOME COLORIDO = + R$ 10 nesta página (6331/6333; a página traz data-extra-preco="10").
+   ORIGINAL = as cores que ELE disse (6326/6328, "iguais ao Luke" da foto lukebowl_wa182751): tampa Caramelo, corpo Mármore,
+   faixa de baixo Marrom. Bicolor como a placa 11 do arquivo: cor 1 = a tampa, cor 2 = corpo e faixa.
+   ACESSÓRIOS (msg 6367 "B" sobre o áudio 6365 + msg 6369, 04/10/2026): a ARGOLA do arquivo dele (schluesselring v9, obj 35,
+   30 × 30 × 3,16 mm) SEMPRE TRANSPARENTE e uma CORDINHA BEGE passando pelos 2 furinhos do topo da tampa — nenhum dos dois muda
+   com as cores do formulário (personalizar3d.js v14). Malhas em modelos/poopbag_acessorios.glb, geradas por
+   33_produtos_novos_2026-10-04/poop_bag_extra/glb/gerar_acessorios_poopbag_v1.py. TROCAR A COR DA CORDINHA = a linha `cordinha`. */
+window.ALEA.modelos3d['poop-bag-holder'] = {
+  glb: 'modelos/poopbag.glb?v=2026-10-04',
+  acessorios: {
+    glb: 'modelos/poopbag_acessorios.glb?v=2026-10-04',
+    materiais: {
+      argola:   { cor: '#EEF2F3', transparente: true, opacidade: 0.45 },   // PETG transparente (o "Transparente" da lista dele)
+      cordinha: { cor: '#CDB99A' }                                          // bege de cordão de algodão (msg 6369)
+    }
+  },
+  nome: 'modelos/poopbag_nome.json?v=2026-10-04',
+  fonte: 'fonts/defante.otf',
+  zonaNome: 'principal',
+  folgaEnquadrar: 0.95,   // personalizar3d v13: com a alça da cordinha a peça fica alta; 0,82 cortava a alça no computador
+  bicolor: { topo: 0, principal: 1, base: 1 },
+  capa: { modo: 'tricolor', escolhas: [
+    { acabamento: 'fosco', cor: 'Caramelo' }, { acabamento: 'basico', cor: 'Mármore' }, { acabamento: 'basico', cor: 'Marrom' }] },
+  original: {
+    topo:      { site: 'Caramelo', hex: '#D3B7A7', acabamento: 'fosco',  oficial: 'Bambu Lab · PLA · Matte · Latte Brown (11800)' },
+    principal: { site: 'Mármore',  hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    base:      { site: 'Marrom',   hex: '#5F3839', acabamento: 'basico', oficial: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' }
+  }
+};
+/* v49 — A CAIXINHA DO POOP BAG NOS COMEDOUROS (áudios 6281-6290 do Cassiano, 04/10/2026): depois que o cliente aperta
+   "Pronto" no Personalize (sem falta lá dentro), aparece entre o "Personalize agora" e a declaração:
+   [caixinha] [miniatura do Poop Bag nas CORES escolhidas e com o NOME do pet] "Adicionar Poop Bag Holder + R$ 49,00".
+   Marcou = + R$ 49 no item (vai em `extras`, com a miniatura). Comprado junto, o nome colorido do comedouro vale pro Poop
+   Bag sem cobrar de novo (6330): a miniatura já sai com o nome na cor do comedouro, e o pedido diz isso.
+   `slugs` = onde a caixinha existe (a Ayla já vem com o porta-saquinho, fica fora). Quem desenha: produto.js v46;
+   quem fotografa a miniatura: personalizar3d.js v14 (fotoDoPoopBag). Preço DELE (áudios 6281-6290), nunca mexer sem ele. */
+window.ALEA.extraPoopBag = {
+  slugs: ['luke-bowl', 'matteo-texturized', 'claudia-wave'],
+  preco: 49,
+  rotulo: 'Poop Bag Holder',
+  texto: 'Adicionar Poop Bag Holder'
 };
 /* A LOGO NUNCA É PINTADA (Cassiano, 28/09/2026 ~02:16: "a logo nunca vai ser pintada. Sempre baixo-relevo (...) a nossa logo
    não muda de cor, não muda de formato, nada"). Conferido no personalizar3d.js v11: a logo está DENTRO do .glb, como parte

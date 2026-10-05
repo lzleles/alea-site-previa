@@ -4,8 +4,14 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v45 (04/10/2026, símbolo do Formato antes ou depois do nome: ALEA.iconeFormato.lado)
-   validado_em: 03/10/2026 (Playwright 390 e 1440)
+   status: ativo — v46 (04/10/2026, caixinha "Adicionar Poop Bag Holder + R$ 49,00" nos comedouros)
+   validado_em: 04/10/2026 (Playwright 390 e 1440: 03_site/_testar_poop_bag_v1_2026-10-04.py)
+   v46 (04/10/2026, áudios 6281-6290 do Cassiano; a v45 está em 03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/):
+     nos comedouros de ALEA.extraPoopBag.slugs (config.js v49), fechar o Personalize com tudo escolhido lá dentro mostra,
+     entre o "Personalize agora" e a declaração, a caixinha com a miniatura do Poop Bag nas cores e com o nome do cliente
+     (personalizar3d.js v14). Marcada = + R$ 49 e um item em `extras` (rótulo "Poop Bag Holder, nas mesmas cores e com o
+     mesmo nome", com a miniatura); o "editar" da sacola devolve a caixinha marcada. `data-extra-rotulo` (novo, opcional)
+     = o nome do extra na sacola quando não é o texto da caixinha. Ver mostrarCaixaPoopBag().
    v45 (04/10/2026, áudios 6269/6271 do Cassiano, "na frente do nome"; a v44 está em
      03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/js/): o símbolo pode ir ANTES ou DEPOIS do nome
      (ALEA.iconeFormato[slug].lado, config.js v47; ?lado=antes|depois na URL da prévia). Nada mais muda.
@@ -409,7 +415,10 @@
       aberto = true;
       b.classList.add('carregando');
       import('./personalizar3d.js').then(function (m) {
-        return m.abrirJanela3D(cfgAgora, function () { aberto = false; }, depoisDeMontar, opcoes || {});
+        return m.abrirJanela3D(cfgAgora, function () {
+          aberto = false;
+          if (window.aleaDepoisDoPersonalize) window.aleaDepoisDoPersonalize();   // v46: a caixinha do Poop Bag
+        }, depoisDeMontar, opcoes || {});
       }).catch(function (e) { aberto = false; console.warn('janela 3D', e); })
         .then(function () { b.classList.remove('carregando'); });
     }
@@ -1113,11 +1122,16 @@
     return Array.prototype.slice.call(document.querySelectorAll('[data-extra]'))
       .filter(function (l) { return l.querySelector('[data-extra-caixa]').checked; })
       .map(function (l) {
-        return {
+        var x = {
           id: l.getAttribute('data-extra-id'),
-          rotulo: l.querySelector('.titulo-extra').firstChild.nodeValue.trim().replace(/\s*\+\s*R\$.*$/, ''),
+          /* v46: `data-extra-rotulo` = o nome que vai pra sacola/pedido quando não é o texto da caixinha (Poop Bag) */
+          rotulo: l.getAttribute('data-extra-rotulo') ||
+            l.querySelector('.titulo-extra').firstChild.nodeValue.trim().replace(/\s*\+\s*R\$.*$/, ''),
           preco: parseFloat(l.getAttribute('data-extra-preco')) || 0
         };
+        var mi = l.querySelector('img[data-mini]');   // v46: a miniatura do Poop Bag vai junto (sacola e "editar")
+        if (mi && mi.getAttribute('src')) x.miniatura = mi.getAttribute('src');
+        return x;
       });
   }
 
@@ -1343,6 +1357,62 @@
       repintarPreco();
     });
   });
+
+  /* ⚠️ v46 — A CAIXINHA DO POOP BAG NOS COMEDOUROS (áudios 6281-6290 do Cassiano, 04/10/2026; config.js ALEA.extraPoopBag).
+     Depois que o cliente fecha o Personalize com tudo escolhido lá dentro (nome ou "sem nome", cores), aparece entre o
+     "Personalize agora" e a declaração: [caixinha] [miniatura do Poop Bag nas cores e com o nome dele] "Adicionar Poop Bag
+     Holder + R$ 49,00". Marcou = + R$ 49 no preço (é um `data-extra` como o nome colorido: extrasMarcados/precoTotal já
+     somam, e o item leva `extras` com a miniatura). Ela NÃO passa pelo forEach acima (nasce depois dele, com handler
+     próprio): não pode travar/destravar a cor do nome. Fica FORA do formulário (o formulário mora na janela 3D).
+     Faltando algo lá dentro, ela não aparece; se já estava marcada, fica (o cliente decidiu, e a trava de compra cobra
+     o que falta). A miniatura vem do personalizar3d.js v14 (evento 'alea-mini-poopbag'); até chegar, a caixa pulsa. */
+  var caixaPoopBag = null;
+  function extraPoopBagDaPagina() {
+    var ex = (window.ALEA || {}).extraPoopBag;
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (ex && sl && (ex.slugs || []).indexOf(sl) >= 0) ? ex : null;
+  }
+  function pintarMiniPoopBag(url) {
+    if (!caixaPoopBag || !url) return;
+    var img = caixaPoopBag.querySelector('img[data-mini]');
+    img.setAttribute('src', url);
+    caixaPoopBag.querySelector('.mini-poopbag').classList.remove('carregando');
+  }
+  function mostrarCaixaPoopBag(miniatura) {
+    var ex = extraPoopBagDaPagina();
+    if (!ex) return null;
+    if (!caixaPoopBag) {
+      var aceiteP = document.querySelector('[data-aceite]');
+      if (!aceiteP) return null;
+      caixaPoopBag = document.createElement('label');
+      caixaPoopBag.className = 'extra extra-poopbag';
+      caixaPoopBag.setAttribute('data-extra', '');
+      caixaPoopBag.setAttribute('data-extra-id', 'poop_bag');
+      caixaPoopBag.setAttribute('data-extra-preco', String(ex.preco));
+      caixaPoopBag.setAttribute('data-extra-rotulo', ex.rotulo + ', nas mesmas cores e com o mesmo nome');
+      caixaPoopBag.innerHTML = '<input type="checkbox" data-extra-caixa>' +
+        '<span class="mini-poopbag carregando"><img data-mini alt="Poop Bag Holder nas cores escolhidas" width="240" height="240"></span>' +
+        '<span class="titulo-extra">' + ex.texto + ' + ' + window.aleaDinheiro(ex.preco) + '</span>';
+      aceiteP.parentNode.insertBefore(caixaPoopBag, aceiteP);
+      var cxP = caixaPoopBag.querySelector('[data-extra-caixa]');
+      cxP.addEventListener('change', function () {
+        caixaPoopBag.classList.toggle('marcado', cxP.checked);
+        repintarPreco();
+      });
+    }
+    caixaPoopBag.hidden = false;
+    pintarMiniPoopBag(miniatura || window.aleaMiniaturaPoopBag);
+    return caixaPoopBag;
+  }
+  window.addEventListener('alea-mini-poopbag', function (ev) { pintarMiniPoopBag(ev.detail); });
+  window.aleaCaixaPoopBag = mostrarCaixaPoopBag;
+  window.aleaDepoisDoPersonalize = function () {
+    if (!extraPoopBagDaPagina()) return;
+    var formP = document.querySelector('[data-personalizar]');
+    var faltaDentro = oQueFalta().some(function (f) { return f.el && formP && formP.contains(f.el); });
+    if (!faltaDentro) { mostrarCaixaPoopBag(); return; }
+    if (caixaPoopBag && !caixaPoopBag.querySelector('[data-extra-caixa]').checked) caixaPoopBag.hidden = true;
+  };
 
   /* ==================================================== as cores da peça
      "Apagar o quadrado de escrita e colocar as bolinhas igual do Declaro; quando o
@@ -1776,6 +1846,7 @@
     }
     (item.extras || []).forEach(function (x) {
       var rot = document.querySelector('[data-extra][data-extra-id="' + x.id + '"]');
+      if (!rot && x.id === 'poop_bag') rot = mostrarCaixaPoopBag(x.miniatura);   // v46: a caixinha volta marcada, com a miniatura
       var cx = rot && rot.querySelector('[data-extra-caixa]');
       if (cx && !cx.checked) { cx.checked = true; cx.dispatchEvent(new Event('change', { bubbles: true })); }
     });

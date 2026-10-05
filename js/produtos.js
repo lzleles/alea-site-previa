@@ -6,6 +6,9 @@
    saida: Objetos globais de categorias, vitrine e produtos, além de alertas no console
    status: ativo (cabecalho proposto pelo Codex em 2026-09-20, confianca ALTA; conferir na proxima vez que o script rodar)
    validado_em: TBD
+   04/10/2026 (Poop Bag, msgs 6315-6363): o Poop Bag volta à VITRINE depois da Cláudia (R$ 79, poopbag_capaq) e o bloco
+     dele em PRODUTOS ganha o cadastro novo (o de 24/09 fica comentado logo abaixo dele). A versão anterior está em
+     03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/.
 */
 /* =============================================================================
    produtos.js — O CATÁLOGO. É o único arquivo que muda no dia a dia.
@@ -121,6 +124,9 @@ window.VITRINE = [
      config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
   { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
+  /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
+     fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
+  { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 79, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag_capaq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
   { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
@@ -442,28 +448,37 @@ window.PRODUTOS = [
     galeria: ['ayla_1', 'tina_1', 'chica_1', 'matteo_1', 'claudia_1', 'luke_2']
   },
 
+  /* ===================================================================================================
+     ālea Poop Bag Holder — VOLTA à vitrine (04/10/2026, cadastro campo por campo, msgs 6315-6363 do Cassiano).
+     Página: 03_site/_poop_bag_pagina_v1_2026-10-04.py (a página de 24/09 reescrita no lugar); fotos: recortes das fotos dos
+     comedouros (33_produtos_novos_2026-10-04/poop_bag_extra/recortar_fotos_poopbag_v1.py, áudio 6290); 3D: modelos/poopbag.glb.
+     - nome 6315 · Pet 6321 · todas as cores mono/bi/tri 6324 · original Caramelo/Mármore/Marrom 6326/6328 · nome GRAVADO e
+       de graça 6330/6334 · nome colorido + R$ 10 6331/6333 · R$ 79 (msg 6255) · texto DELE 6360 com "low poly" 6361.
+     - medidas do ARQUIVO 3D, montado: 4,5 × 4,5 × 8,2 cm. Peso FATIADO no Studio desta máquina (fatiar_gramas_v1, A1, placa 6):
+       74 g, 5h20 — guardado cru; a ficha mostra só as dimensões, como as outras peças.
+     =================================================================================================== */
   {
     slug: 'poop-bag-holder',
-    /* ⚠ EXEMPLO pra ver o layout (pedido dele, 01:39: "inventa desses dois por enquanto") — NÃO É MEDIDA. Some no ar. */
-    medidas_exemplo: { peso_g: 45, altura_cm: 10, largura_cm: 6, comprimento_cm: 7 },
+    medidas: { peso_g: 74, altura_cm: 8.2, largura_cm: 4.5, comprimento_cm: 4.5 },
     nome: 'ālea Poop Bag Holder',
     linha: 'Passeio',
     categoria: 'pet',
-    preco: 59,
-    capa: 'saquinho_1',
+    preco: 79,
+    capa: 'poopbag_1',
     material: 'PLA',
-    resumo: 'Porta-saquinho que sai na mesma estampa do comedouro.',
-    paragrafos: [
-      'Prende na guia e leva o rolo de saquinhos. Sai combinando com a estampa ' +
-      'escolhida no comedouro — é o mesmo desenho aplicado numa peça menor.',
-      'Também aceita o nome do cão, pelo mesmo processo: em baixo relevo, na cor do ' +
-      'objeto, impresso junto com a peça.'
+    cores_peca: ['tricolor', 'bicolor', 'monocromatico'],
+    resumo: '',
+    paragrafos: [   // msg 6360, texto DELE (6361: "desenho low poly")
+      'Criado para levar os saquinhos higiênicos de forma prática e discreta, este porta-saquinhos combina funcionalidade com um desenho low poly e cheio de personalidade. Seu corpo facetado traz a estética geométrica característica da ālea & Co., enquanto a abertura lateral permite retirar os saquinhos com facilidade durante o passeio.',
+      'Compacto e leve, pode ser preso à guia, mochila ou bolsa pela alça superior, ficando sempre à mão quando você precisar.'
     ],
-    ficha_extra: [
-      ['Combina com', 'A mesma estampa do ālea Bowl Wave']
-    ],
-    galeria: ['saquinho_2', 'saquinho_3', 'chica_2']
+    galeria: ['poopbag_2', 'poopbag_3', 'poopbag_4', 'poopbag_5']
   },
+  /* A VERSÃO DE 24/09 (fora do ar), guardada:
+  { slug: 'poop-bag-holder', medidas_exemplo: { peso_g: 45, altura_cm: 10, largura_cm: 6, comprimento_cm: 7 },
+    nome: 'ālea Poop Bag Holder', linha: 'Passeio', categoria: 'pet', preco: 59, capa: 'saquinho_1', material: 'PLA',
+    resumo: 'Porta-saquinho que sai na mesma estampa do comedouro.', ficha_extra: [['Combina com', 'A mesma estampa do ālea Bowl Wave']],
+    galeria: ['saquinho_2', 'saquinho_3', 'chica_2'] }, */
 
   {
     slug: 'kit',

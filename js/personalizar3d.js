@@ -5,8 +5,8 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v13 (03/10/2026, peça SEM nome gravado — `semNome`, a saboneteira)
-   validado_em: 03/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_saboneteira_3d_v1_2026-10-03.py)
+   status: v14 (04/10/2026, Poop Bag: acessórios fixos + miniatura do Poop Bag pra caixinha dos comedouros)
+   validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
    HISTÓRICO (a v1 da etapa 53 está em 03_site/_versoes_anteriores/js_2026-09-23/)
@@ -97,6 +97,14 @@
       peça" e o Monocromático pinta todas as zonas. Peça sem `semNome` (os comedouros) = exatamente como na v12.
       `folgaEnquadrar` (opcional, padrão 0,82 = o de sempre): a saboneteira é larga e baixa e saía cortada dos lados no
       enquadramento feito pro comedouro (visto no print de 390 e 1440 px); ela usa 1,1.
+   v14 (04/10/2026, ālea Poop Bag Holder, msgs 6281-6369 do Cassiano; a v13 está em
+      03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/):
+      1. `acessorios` no config.js ({ glb, materiais: { malha: { cor, transparente } } }): malhas FIXAS que entram na cena
+         sem passar pela pintura nem pelo corte do nome — no Poop Bag, a argola sempre transparente e a cordinha bege
+         (msgs 6367/6369). Só alargam o enquadramento; o eixo do nome continua o do corpo. Ver montarAcessorios().
+      2. fotoDoPoopBag(cfg, est), exportada: o porta-saquinho montado FORA da tela, nas cores e com o nome do comedouro, pra
+         miniatura da caixinha "Adicionar Poop Bag Holder + R$ 49,00" (produto.js v46). Quem pede: o fechar() da janela,
+         só nos slugs de ALEA.extraPoopBag (pedirMiniaturaPoopBag). Comedouro sem isso = nada muda.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -374,9 +382,39 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       camera.position.copy(antes);
     } catch (e) { /* sem miniatura, a sacola usa a capa */ }
   }
+  /* v14 (Poop Bag, 04/10/2026): o comedouro com a caixinha do Poop Bag (ALEA.extraPoopBag.slugs) fotografa TAMBÉM o
+     porta-saquinho nas cores e com o nome que o cliente acabou de montar — a miniatura da caixinha (produto.js v46).
+     Roda depois de fechar, sem segurar a janela; quando fica pronta: window.aleaMiniaturaPoopBag + evento
+     'alea-mini-poopbag'. Peça 3D ainda não carregada (fechou no aviso de cor) = nada a fotografar. */
+  function pedirMiniaturaPoopBag() {
+    try {
+      var ex = (window.ALEA || {}).extraPoopBag;
+      var bc = document.querySelector('[data-comprar-agora]');
+      var sl = bc && bc.getAttribute('data-slug');
+      var cfgPB = ((window.ALEA || {}).modelos3d || {})['poop-bag-holder'];
+      if (!ex || !cfgPB || !sl || (ex.slugs || []).indexOf(sl) < 0 || !renderer || !mats || !mats.principal) return;
+      var semN = semNome || (form && form.hasAttribute('data-sem-nome'));
+      var est = {
+        zonas: {},
+        nome: semN ? '' : (campoNome ? campoNome.value.trim() : ''),
+        corNome: nomeColorido ? { hex: '#' + matLetra.color.getHexString(), roughness: matLetra.roughness, metalness: matLetra.metalness } : null
+      };
+      ['topo', 'principal', 'base'].forEach(function (z) {
+        est.zonas[z] = { hex: '#' + mats[z].color.getHexString(), roughness: mats[z].roughness, metalness: mats[z].metalness };
+      });
+      setTimeout(function () {
+        fotoDoPoopBag(cfgPB, est).then(function (url) {
+          if (!url) return;
+          window.aleaMiniaturaPoopBag = url;
+          window.dispatchEvent(new CustomEvent('alea-mini-poopbag', { detail: url }));
+        }).catch(function (e) { console.warn('miniatura do Poop Bag', e); });
+      }, 0);
+    } catch (e) { console.warn('miniatura do Poop Bag', e); }
+  }
   function fechar() {
     if (!vivo) return;
     fotografar();
+    pedirMiniaturaPoopBag();
     vivo = false;
     passos.forEach(function (els) { els.forEach(function (el) { el.classList.remove('passo-escondido'); }); });
     var extI = form && form.querySelector('[data-extra]'); if (extI) extI.classList.remove('inativo');
@@ -589,12 +627,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
 
   /* ---------------- a peça e o quadro do nome */
   var semNome = !!cfg.semNome;                                          // v13: peça sem nome gravado (saboneteira)
-  var [gltf, quadro, fonteBin] = await Promise.all([
+  var [gltf, quadro, fonteBin, gltfAcess] = await Promise.all([
     new GLTFLoader().loadAsync(cfg.glb),
     semNome ? null : fetch(cfg.nome).then(function (r) { return r.json(); }),
     /* reversed: a Defante é .otf (curvas CFF) e desenha os contornos no sentido contrário — sem isso o miolo do
        "o" e do "a" saía cheio (visto no "Cassiano", etapa 55) */
-    semNome ? null : new Promise(function (ok, erro) { var L = new TTFLoader(); L.reversed = cfg.fonteInvertida !== false; L.load(cfg.fonte, ok, undefined, erro); })
+    semNome ? null : new Promise(function (ok, erro) { var L = new TTFLoader(); L.reversed = cfg.fonteInvertida !== false; L.load(cfg.fonte, ok, undefined, erro); }),
+    /* v14: acessórios FIXOS (Poop Bag: argola transparente + cordinha bege, msgs 6367/6369) — fora do corte e da pintura */
+    cfg.acessorios ? new GLTFLoader().loadAsync(cfg.acessorios.glb).catch(function (e) { console.warn('acessórios 3D', e); return null; }) : null
   ]);
   if (!vivo) return;
   var fonte = semNome ? null : new Font(fonteBin);
@@ -703,6 +743,9 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
 
   /* sombra macia sob a peça (um disco com degradê) — parte do "fundo de estúdio" */
   var caixa = new THREE.Box3().setFromBufferAttribute(geo.attributes.position);
+  /* v14: os acessórios entram na cena com material PRÓPRIO e FIXO (não seguem o formulário) e só alargam o enquadramento;
+     o eixo do nome continua o da peça (o `eixo` lá em cima é só do corpo) */
+  if (gltfAcess) caixa.union(montarAcessorios(THREE, gltfAcess, cfg.acessorios, cena));
   var centro = caixa.getCenter(new THREE.Vector3()), tam = caixa.getSize(new THREE.Vector3());
   (function sombra() {
     var c = document.createElement('canvas'); c.width = c.height = 128;
@@ -845,4 +888,167 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     renderer.dispose();
   };
   return { gravar: gravar, mats: mats };
+}
+
+/* v14 — A MINIATURA DO POOP BAG (caixinha "Adicionar Poop Bag Holder + R$ 49,00" dos comedouros, áudios 6281-6290 do
+   Cassiano, 04/10/2026). Monta o porta-saquinho FORA da tela (o mesmo .glb, o mesmo _nome.json e a mesma gravação ao vivo
+   da janela: cada ponto da letra desce até a parede de verdade e o nome é cortado com a profundidade do arquivo), pinta
+   cada zona com a cor da MESMA zona do comedouro (tampa = topo, corpo = principal, faixa = base) e devolve uma foto de
+   frente, 240 px, fundo transparente (data:image/webp). Peça e fonte ficam guardadas: a 2ª foto sai sem baixar nada.
+   est = { zonas: { topo|principal|base: { hex, roughness, metalness } }, nome: 'Luke', corNome: null | { hex, ... } } */
+/* v14 — ACESSÓRIOS FIXOS (Poop Bag, msg 6367 "B" + 6369 do Cassiano, 04/10/2026): malhas que NÃO são pintadas pelo
+   formulário nem cortadas pelo nome. cfg = { glb, materiais: { <nome da malha no glb>: { cor, transparente } } }.
+   Transparente = PETG translúcido (vidro fosco leve). Devolve a caixa (Box3) do que entrou, pra o enquadramento. */
+function montarAcessorios(THREE, gltf, cfg, cena) {
+  var caixa = new THREE.Box3();
+  var mats = (cfg && cfg.materiais) || {};
+  gltf.scene.updateMatrixWorld(true);
+  gltf.scene.traverse(function (o) {
+    if (!o.isMesh) return;
+    var def = mats[o.name] || mats[(o.parent && o.parent.name) || ''] || { cor: '#BBBBBB' };
+    var m = def.transparente
+      ? new THREE.MeshPhysicalMaterial({ color: new THREE.Color(def.cor), roughness: 0.25, metalness: 0, transparent: true,
+          opacity: def.opacidade != null ? def.opacidade : 0.45, transmission: 0, clearcoat: 0.6, side: THREE.DoubleSide, depthWrite: false })
+      : new THREE.MeshStandardMaterial({ color: new THREE.Color(def.cor), roughness: def.rugosidade != null ? def.rugosidade : 0.95, metalness: 0 });
+    var g = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    if (!g.attributes.normal) g.computeVertexNormals();
+    var malha = new THREE.Mesh(g, m);
+    malha.renderOrder = def.transparente ? 2 : 0;
+    cena.add(malha);
+    g.computeBoundingBox(); caixa.union(g.boundingBox);
+  });
+  return caixa;
+}
+var POOPBAG_CACHE = null;
+export async function fotoDoPoopBag(cfg, est) {
+  var THREE = await import('three');
+  var { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+  var { TTFLoader } = await import('three/addons/loaders/TTFLoader.js');
+  var { Font } = await import('three/addons/loaders/FontLoader.js');
+  var { TextGeometry } = await import('three/addons/geometries/TextGeometry.js');
+  var { mergeVertices, mergeGeometries } = await import('three/addons/utils/BufferGeometryUtils.js');
+  var { TessellateModifier } = await import('three/addons/modifiers/TessellateModifier.js');
+  var CSG = await import('three-bvh-csg');
+  var BVH = await import('three-mesh-bvh');
+  if (!POOPBAG_CACHE || POOPBAG_CACHE.glb !== cfg.glb) {
+    var [gltf, quadro, fonteBin, acess] = await Promise.all([
+      new GLTFLoader().loadAsync(cfg.glb),
+      fetch(cfg.nome).then(function (r) { return r.json(); }),
+      new Promise(function (ok, erro) { var L = new TTFLoader(); L.reversed = cfg.fonteInvertida !== false; L.load(cfg.fonte, ok, undefined, erro); }),
+      cfg.acessorios ? new GLTFLoader().loadAsync(cfg.acessorios.glb).catch(function () { return null; }) : null
+    ]);
+    POOPBAG_CACHE = { glb: cfg.glb, gltf: gltf, quadro: quadro, fonte: new Font(fonteBin), acess: acess };
+  }
+  var C = POOPBAG_CACHE, quadro = C.quadro, fonte = C.fonte;
+  var ordemZonas = ['topo', 'principal', 'base'];
+  function zonaDoMaterial(n) { return n.indexOf('topo') >= 0 ? 'topo' : n.indexOf('base') >= 0 ? 'base' : 'principal'; }
+  var mats = ordemZonas.map(function (z) {
+    var e = (est.zonas || {})[z] || { hex: cfg.original[z].hex };
+    return new THREE.MeshStandardMaterial({ color: new THREE.Color(e.hex), flatShading: true, side: THREE.DoubleSide,
+      roughness: e.roughness != null ? e.roughness : 0.6, metalness: e.metalness != null ? e.metalness : 0 });
+  });
+  var partes = [], zonaPorGrupo = [];
+  C.gltf.scene.updateMatrixWorld(true);
+  C.gltf.scene.traverse(function (o) {
+    if (!o.isMesh) return;
+    var g = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    Object.keys(g.attributes).forEach(function (a) { if (a !== 'position' && a !== 'normal') g.deleteAttribute(a); });
+    if (!g.attributes.normal) g.computeVertexNormals();
+    g.clearGroups(); partes.push(g);
+    zonaPorGrupo.push(zonaDoMaterial((o.material && o.material.name) || ''));
+  });
+  var geo = mergeGeometries(partes, true);
+  geo.groups.forEach(function (g, i) { g.materialIndex = ordemZonas.indexOf(zonaPorGrupo[i]); });
+  var zonaNome = cfg.zonaNome || 'principal';
+  var mz = mats[ordemZonas.indexOf(zonaNome)];
+  var matLetra = mz.clone();
+  if (est.corNome) {
+    matLetra.color.set(est.corNome.hex);
+    if (est.corNome.roughness != null) matLetra.roughness = est.corNome.roughness;
+    if (est.corNome.metalness != null) matLetra.metalness = est.corNome.metalness;
+  } else {
+    var c0 = mz.color, Lp = 0.2126 * c0.r + 0.7152 * c0.g + 0.0722 * c0.b;
+    if (Lp < 0.18) matLetra.color.copy(c0).lerp(new THREE.Color(0xffffff), 0.12); else matLetra.color.copy(c0).multiplyScalar(0.72);
+  }
+  var cena = new THREE.Scene();
+  var corpo = new THREE.Mesh(geo, mats);
+  var nome = (est.nome || '').trim();
+  if (nome) {
+    var M = new THREE.Matrix4(), q = quadro.matriz_mundo_zup;
+    M.set(q[0][0], q[0][1], q[0][2], q[0][3], q[1][0], q[1][1], q[1][2], q[1][3],
+          q[2][0], q[2][1], q[2][2], q[2][3], q[3][0], q[3][1], q[3][2], q[3][3]);
+    var quadroMundo = new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1), M);
+    var bb = quadro.bbox_local_texto;
+    var centroX = (bb[0][0] + bb[1][0]) / 2, baseY = bb[0][1], altOrig = bb[1][1] - bb[0][1];
+    var geoTexto = function (txt, tamanho, prof) {
+      var g = new TextGeometry(txt, { font: fonte, size: tamanho, depth: prof, curveSegments: 6, bevelEnabled: false });
+      g.computeBoundingBox(); return g;
+    };
+    var ref = geoTexto(quadro.text_info.text || 'Luke', 10, 1);
+    var k = altOrig / (ref.boundingBox.max.y - ref.boundingBox.min.y), baseRef = ref.boundingBox.min.y;
+    THREE.Mesh.prototype.raycast = BVH.acceleratedRaycast;
+    THREE.BufferGeometry.prototype.computeBoundsTree = BVH.computeBoundsTree;
+    var corpoRaio = new THREE.Mesh(geo.clone(), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+    corpoRaio.geometry.computeBoundsTree();
+    var eixo = new THREE.Box3().setFromBufferAttribute(geo.attributes.position).getCenter(new THREE.Vector3());
+    var raio = new THREE.Raycaster(); raio.firstHitOnly = true;
+    var PROF = (parseFloat(quadro.text_info.thickness) || 1.5) / 1000;
+    var escalaMm = new THREE.Vector3().setFromMatrixColumn(quadroMundo, 0).length() * 1000;
+    var t = geoTexto(nome, 10 * k, 1);
+    var largura = t.boundingBox.max.x - t.boundingBox.min.x;
+    t.translate(centroX - (t.boundingBox.min.x + largura / 2), baseY - baseRef * k, 0);
+    t.deleteAttribute('uv');
+    t = new TessellateModifier(0.8 / (escalaMm || 1), 8).modify(t.index ? t.toNonIndexed() : t);
+    t = mergeVertices(t);
+    var pos = t.attributes.position, v = new THREE.Vector3(), plano = new THREE.Vector3(), posPre = [];
+    var fora = new THREE.Vector3(), origem = new THREE.Vector3(), menos = new THREE.Vector3();
+    for (var i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      var naFrente = v.z > 0.5;
+      plano.set(v.x, v.y, 0).applyMatrix4(quadroMundo);
+      fora.set(plano.x - eixo.x, 0, plano.z - eixo.z).normalize();
+      origem.set(eixo.x, plano.y, eixo.z).addScaledVector(fora, 0.5);
+      raio.set(origem, menos.copy(fora).negate());
+      var hit = raio.intersectObject(corpoRaio, false)[0];
+      var S = hit ? hit.point : plano;
+      var pi = S.clone().addScaledVector(fora, naFrente ? -0.00015 : -PROF);
+      posPre.push(pi.x, pi.y, pi.z);
+      v.copy(S).addScaledVector(fora, naFrente ? 0.0015 : -PROF);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    pos.needsUpdate = true; t.computeVertexNormals(); t.clearGroups();
+    if (est.corNome) {
+      var gp = t.clone(); gp.setAttribute('position', new THREE.Float32BufferAttribute(posPre, 3)); gp.computeVertexNormals();
+      cena.add(new THREE.Mesh(gp, matLetra));
+    }
+    var corpoBrush = new CSG.Brush(geo, mats); corpoBrush.updateMatrixWorld();
+    var textoBrush = new CSG.Brush(t, matLetra); textoBrush.updateMatrixWorld();
+    var avaliador = new CSG.Evaluator(); avaliador.useGroups = true; avaliador.attributes = ['position', 'normal'];
+    try {
+      corpo = avaliador.evaluate(corpoBrush, textoBrush, CSG.SUBTRACTION);
+      if (Array.isArray(corpo.material)) corpo.material = corpo.material.map(function (m) { return mats.indexOf(m) >= 0 ? m : matLetra; });
+    } catch (e) { console.warn('miniatura: gravação falhou', e); corpo = new THREE.Mesh(geo, mats); }
+  }
+  cena.add(corpo);
+  cena.add(new THREE.HemisphereLight(0xffffff, 0xb9b2a6, 1.25));
+  var camera = new THREE.PerspectiveCamera(28, 1, 0.01, 10);
+  var luz = new THREE.DirectionalLight(0xffffff, 1.35); luz.position.set(-0.25, 0.35, 0.2);
+  camera.add(luz); camera.add(luz.target); luz.target.position.set(0, 0, -1); cena.add(camera);
+  var caixa = new THREE.Box3().setFromBufferAttribute(geo.attributes.position);
+  if (C.acess) caixa.union(montarAcessorios(THREE, C.acess, cfg.acessorios, cena));   // argola + cordinha, cores fixas
+  var centro = caixa.getCenter(new THREE.Vector3());
+  var raioPeca = caixa.getBoundingSphere(new THREE.Sphere()).radius;
+  var dist = raioPeca * 1.12 / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
+  camera.position.copy(centro).addScaledVector(new THREE.Vector3(0, 0.25, 1).normalize(), dist);
+  camera.lookAt(centro);
+  var cv = document.createElement('canvas'); cv.width = cv.height = 480;
+  var r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(480, 480, false);
+  r.toneMapping = THREE.NeutralToneMapping; r.setClearColor(0x000000, 0);
+  r.render(cena, camera);
+  var c2 = document.createElement('canvas'); c2.width = c2.height = 240;
+  c2.getContext('2d').drawImage(cv, 0, 0, 240, 240);
+  var url = c2.toDataURL('image/webp', 0.85);
+  r.dispose(); if (r.forceContextLoss) r.forceContextLoss();
+  return url;
 }
