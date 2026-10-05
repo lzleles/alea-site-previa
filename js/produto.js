@@ -4,7 +4,10 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v46 (04/10/2026, caixinha "Adicionar Poop Bag Holder + R$ 49,00" nos comedouros)
+   status: ativo — v47 (04/10/2026, nome do Poop Bag limitado ao que cabe no corpo: limiteDoNome)
+   v47 (04/10/2026, msg 6399 do Cassiano, "o máximo de caracteres pra caber SOMENTE na parte do meio"): produto com
+     ALEA.modelos3d[slug].limiteNome (config.js v50, só o Poop Bag) mede o nome na Defante a cada letra e barra a que passar
+     de 41,9 mm, com "Esse é o máximo que cabe na peça.". Ver limiteDoNome(). A v46 é o commit 4f3aeaf da prévia.
    validado_em: 04/10/2026 (Playwright 390 e 1440: 03_site/_testar_poop_bag_v1_2026-10-04.py)
    v46 (04/10/2026, áudios 6281-6290 do Cassiano; a v45 está em 03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/):
      nos comedouros de ALEA.extraPoopBag.slugs (config.js v49), fechar o Personalize com tudo escolhido lá dentro mostra,
@@ -1404,6 +1407,56 @@
     pintarMiniPoopBag(miniatura || window.aleaMiniaturaPoopBag);
     return caixaPoopBag;
   }
+  /* ⚠️ v47 — O NOME CABE SÓ NO CORPO (msg 6399 do Cassiano: "o máximo de caracteres pra caber SOMENTE na parte do meio").
+     Produto com `ALEA.modelos3d[slug].limiteNome` (hoje só o Poop Bag; config.js v50): cada letra digitada é MEDIDA na
+     Defante, na escala do arquivo; se o nome passar do comprimento útil do corpo, a letra a mais não entra e aparece
+     "Esse é o máximo que cabe na peça." por 3 s. Este ouvinte fica no PRÓPRIO campo, então roda antes da janela 3D
+     (que ouve no formulário) — a peça nunca chega a desenhar o nome cortado. Comedouros: sem limiteNome, nada muda. */
+  (function limiteDoNome() {
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lim = (((window.ALEA || {}).modelos3d || {})[sl] || {}).limiteNome;
+    var campoN = document.querySelector('[data-personalizar] [name="nome_pet"]');
+    if (!lim || !campoN) return;
+    var W = lim.larguras['W'] || [10, 0, 10];
+    function medir(t) {
+      var x = 0, ini = null, fim = null;
+      Array.prototype.forEach.call(t, function (ch) {
+        var g = lim.larguras[ch] || W;
+        if (g[2] > g[1]) { ini = ini === null ? x + g[1] : Math.min(ini, x + g[1]); fim = fim === null ? x + g[2] : Math.max(fim, x + g[2]); }
+        x += g[0];
+      });
+      return ini === null ? 0 : fim - ini;
+    }
+    window.aleaMedirNome = medir;
+    var bom = campoN.value, recado = null, timer = null, vezes = 0;
+    function avisar() {
+      var rot = campoN.closest('label') || campoN;
+      if (!recado) {
+        recado = document.createElement('p');
+        recado.className = 'recado-trava recado-limite-nome';
+        recado.setAttribute('role', 'status');
+        recado.setAttribute('data-limite-nome', '');
+        rot.parentNode.insertBefore(recado, rot.nextSibling);
+      }
+      recado.textContent = 'Esse é o máximo que cabe na peça.';
+      recado.hidden = false;
+      var vez = ++vezes;   // um aviso novo cancela o "esconder" do anterior (sem isso, 2 avisos seguidos sumiam)
+      requestAnimationFrame(function () { recado.classList.add('visivel'); });
+      rot.classList.remove('treme-falta'); void rot.offsetWidth; rot.classList.add('treme-falta');
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        recado.classList.remove('visivel');
+        setTimeout(function () { if (vez === vezes) recado.hidden = true; }, 300);
+      }, 3000);
+    }
+    campoN.addEventListener('input', function () {
+      if (medir(campoN.value.trim()) <= lim.mm) { bom = campoN.value; return; }
+      var pos = campoN.selectionStart, a_mais = campoN.value.length - bom.length;
+      campoN.value = bom;
+      try { campoN.setSelectionRange(Math.max(0, pos - a_mais), Math.max(0, pos - a_mais)); } catch (e) {}
+      avisar();
+    });
+  })();
   window.addEventListener('alea-mini-poopbag', function (ev) { pintarMiniPoopBag(ev.detail); });
   window.aleaCaixaPoopBag = mostrarCaixaPoopBag;
   window.aleaDepoisDoPersonalize = function () {

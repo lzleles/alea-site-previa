@@ -719,6 +719,8 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       pos.needsUpdate = true;
       t.computeVertexNormals();
       t.clearGroups();
+      /* v14: a altura (y, em metros) que o nome gravado ocupa na peça — o teste confere que o nome do Poop Bag fica só no corpo */
+      t.computeBoundingBox(); window.aleaNomeFaixaY = [t.boundingBox.min.y, t.boundingBox.max.y];
       /* a LETRA PREENCHIDA do nome colorido: o mesmo texto com a frente 0,15 mm pra dentro da parede. Aparece
          pelo buraco da gravação e garante a palavra inteira à vista mesmo onde o corte falha numa letra
          (visto no "Cassiano" em cor, etapa 55) */
