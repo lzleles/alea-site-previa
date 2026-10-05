@@ -4,10 +4,14 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v47 (04/10/2026, nome do Poop Bag limitado ao que cabe no corpo: limiteDoNome)
+   status: ativo — v48 (04/10/2026, caixinha do Poop Bag: só o quadradinho marca, link pro Poop Bag e voltar no mesmo lugar)
+   v48 (04/10/2026, print 6401 + áudio 6402 do Cassiano): a caixinha do Poop Bag vira <div> (só o quadradinho marca); a
+     miniatura e o texto levam à página do Poop Bag (mesma aba); ao sair por eles a personalização e a altura da tela vão pro
+     sessionStorage e voltam no "voltar" do navegador se ele recarregar a página (bfcache = já volta intacta). Fundo bege e
+     borda terracota: CSS v50. O miolo do "editar" virou preencherComItem(), usado pelos dois. Ver voltarDoPoopBag().
    v47 (04/10/2026, msg 6399 do Cassiano, "o máximo de caracteres pra caber SOMENTE na parte do meio"): produto com
      ALEA.modelos3d[slug].limiteNome (config.js v50, só o Poop Bag) mede o nome na Defante a cada letra e barra a que passar
-     de 41,9 mm, com "Esse é o máximo que cabe na peça.". Ver limiteDoNome(). A v46 é o commit 4f3aeaf da prévia.
+     de 38,9 mm (da faixa à borda da tampa, 2 mm de folga), com "Esse é o máximo que cabe na peça.". Ver limiteDoNome(). A v46 é o commit 4f3aeaf da prévia.
    validado_em: 04/10/2026 (Playwright 390 e 1440: 03_site/_testar_poop_bag_v1_2026-10-04.py)
    v46 (04/10/2026, áudios 6281-6290 do Cassiano; a v45 está em 03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/):
      nos comedouros de ALEA.extraPoopBag.slugs (config.js v49), fechar o Personalize com tudo escolhido lá dentro mostra,
@@ -1387,16 +1391,24 @@
     if (!caixaPoopBag) {
       var aceiteP = document.querySelector('[data-aceite]');
       if (!aceiteP) return null;
-      caixaPoopBag = document.createElement('label');
+      /* v48 (print 6401 + áudio 6402 do Cassiano): SÓ o quadradinho marca. A miniatura e o texto são LINK pra página do Poop
+         Bag (mesma aba: "pra ver que o preço normal é 79 e do que se trata a peça") — por isso a caixa é um <div>, não um
+         <label> (o label marcava com qualquer toque). Ao sair por esse link, a escolha é guardada e volta no "voltar". */
+      caixaPoopBag = document.createElement('div');
       caixaPoopBag.className = 'extra extra-poopbag';
       caixaPoopBag.setAttribute('data-extra', '');
       caixaPoopBag.setAttribute('data-extra-id', 'poop_bag');
       caixaPoopBag.setAttribute('data-extra-preco', String(ex.preco));
       caixaPoopBag.setAttribute('data-extra-rotulo', ex.rotulo + ', nas mesmas cores e com o mesmo nome');
-      caixaPoopBag.innerHTML = '<input type="checkbox" data-extra-caixa>' +
-        '<span class="mini-poopbag carregando"><img data-mini alt="Poop Bag Holder nas cores escolhidas" width="240" height="240"></span>' +
-        '<span class="titulo-extra">' + ex.texto + ' + ' + window.aleaDinheiro(ex.preco) + '</span>';
+      var txt = ex.texto + ' + ' + window.aleaDinheiro(ex.preco);
+      caixaPoopBag.innerHTML = '<label class="marca-poopbag"><input type="checkbox" data-extra-caixa aria-label="' + txt + '"></label>' +
+        '<a class="mini-poopbag carregando" href="' + ex.pagina + '" data-ir-poopbag aria-label="Ver o Poop Bag Holder">' +
+        '<img data-mini alt="Poop Bag Holder nas cores escolhidas" width="240" height="240"></a>' +
+        '<a class="titulo-extra" href="' + ex.pagina + '" data-ir-poopbag>' + txt + '</a>';
       aceiteP.parentNode.insertBefore(caixaPoopBag, aceiteP);
+      Array.prototype.forEach.call(caixaPoopBag.querySelectorAll('[data-ir-poopbag]'), function (a) {
+        a.addEventListener('click', guardarParaVoltar);
+      });
       var cxP = caixaPoopBag.querySelector('[data-extra-caixa]');
       cxP.addEventListener('change', function () {
         caixaPoopBag.classList.toggle('marcado', cxP.checked);
@@ -1877,13 +1889,9 @@
      ⚠ A DECLARAÇÃO volta DESMARCADA de propósito: ela diz "revisei nome, grafia e cores", e depois de
      mexer na personalização o aceite antigo não cobre o que mudou. */
   var editando = null;
-  (function prepararEdicao() {
-    var m = /[?&]editar=([^&]+)/.exec(location.search);
-    if (!m || !window.aleaCarrinho || !botaoComprar) return;
-    var id = decodeURIComponent(m[1]);
-    var item = window.aleaCarrinho.itens().filter(function (i) { return i.quando === id; })[0];
-    if (!item || item.slug !== botaoComprar.getAttribute('data-slug')) return;
-    editando = id;
+  /* v48: o preenchimento do formulário a partir de um item (o da sacola, no "editar", ou o salvo ao sair pro Poop Bag e voltar).
+     Era o miolo do prepararEdicao; separado pra servir aos dois. Não abre a janela nem mexe no `editando`. */
+  function preencherComItem(item) {
     var p = item.personalizacao || {};
     var nome = document.querySelector('[data-personalizar] [name="nome_pet"]');
     if (nome) nome.value = p.nome_pet || '';
@@ -1944,6 +1952,15 @@
       else { var fsn = document.querySelector('[data-personalizar]'); if (fsn) fsn.setAttribute('data-sem-nome', ''); }
     }
     if (p.cores && p.cores.escolhas) window.aleaMiniatura3D = item.miniatura || null;
+  }
+  (function prepararEdicao() {
+    var m = /[?&]editar=([^&]+)/.exec(location.search);
+    if (!m || !window.aleaCarrinho || !botaoComprar) return;
+    var id = decodeURIComponent(m[1]);
+    var item = window.aleaCarrinho.itens().filter(function (i) { return i.quando === id; })[0];
+    if (!item || item.slug !== botaoComprar.getAttribute('data-slug')) return;
+    editando = id;
+    preencherComItem(item);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     function abrirEditando() {
       irParaOsBotoes(false);
@@ -1951,6 +1968,52 @@
     }
     if (document.readyState === 'complete') setTimeout(abrirEditando, 50);
     else window.addEventListener('load', function () { setTimeout(abrirEditando, 50); }, { once: true });
+  })();
+
+  /* ⚠️ v48 — IR VER O POOP BAG E VOLTAR NO MESMO LUGAR (áudio 6402 do Cassiano: "se clicar pra voltar, volta nessa página,
+     nesse lugar"). Ao tocar na miniatura ou no texto da caixinha, a personalização inteira (nome, tamanho, cores, cor do
+     nome, caixinha marcada ou não, miniaturas) e a altura da tela vão pro sessionStorage. Voltando (botão voltar do
+     navegador ou do iPhone): se o navegador devolveu a página congelada (bfcache), já está tudo no lugar e só se apaga o
+     guardado; se recarregou, o guardado repreenche pelos MESMOS campos do "editar" (preencherComItem) e a tela desce até
+     onde estava. A DECLARAÇÃO não volta marcada (mesma regra do "editar": o aceite é marcado de novo, conscientemente).
+     Vale ~2 h; outra página de produto não lê (a chave leva o slug). */
+  function chaveVolta() { return 'alea_volta_' + (botaoComprar ? botaoComprar.getAttribute('data-slug') : ''); }
+  function guardarParaVoltar() {
+    try {
+      var it = montarItem();
+      var caixaAgora = caixaPoopBag && !caixaPoopBag.hidden ? {
+        marcada: caixaPoopBag.querySelector('[data-extra-caixa]').checked,
+        miniatura: (caixaPoopBag.querySelector('img[data-mini]') || {}).getAttribute ? caixaPoopBag.querySelector('img[data-mini]').getAttribute('src') : null
+      } : null;
+      sessionStorage.setItem(chaveVolta(), JSON.stringify({ item: it, y: window.scrollY, caixa: caixaAgora, quando: Date.now() }));
+    } catch (e) { /* aba anônima sem armazenamento: o voltar fica com o que o navegador guardar */ }
+  }
+  window.aleaGuardarParaVoltar = guardarParaVoltar;
+  (function voltarDoPoopBag() {
+    if (editando || !botaoComprar) return;
+    var st = null;
+    try { st = JSON.parse(sessionStorage.getItem(chaveVolta()) || 'null'); } catch (e) { st = null; }
+    window.addEventListener('pageshow', function (ev) {
+      if (ev.persisted) { try { sessionStorage.removeItem(chaveVolta()); } catch (e) {} }   // bfcache: a página voltou intacta
+    });
+    if (!st || !st.item || Date.now() - (st.quando || 0) > 2 * 3600 * 1000) return;
+    var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+    if (nav.type !== 'back_forward') return;
+    try { sessionStorage.removeItem(chaveVolta()); } catch (e) {}
+    preencherComItem(st.item);
+    if (st.caixa) {
+      if (st.caixa.miniatura) window.aleaMiniaturaPoopBag = st.caixa.miniatura;
+      var cx = mostrarCaixaPoopBag(st.caixa.miniatura);
+      var cxx = cx && cx.querySelector('[data-extra-caixa]');
+      if (cxx && cxx.checked !== !!st.caixa.marcada) { cxx.checked = !!st.caixa.marcada; cxx.dispatchEvent(new Event('change', { bubbles: true })); }
+    }
+    repintarPreco();
+    window.aleaVoltouDoPoopBag = true;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    function descer() { window.scrollTo(0, st.y || 0); }
+    descer();
+    if (document.readyState === 'complete') setTimeout(descer, 60);
+    else window.addEventListener('load', function () { descer(); setTimeout(descer, 120); }, { once: true });
   })();
 
   /* v31 — CORES DA PEÇA COMEÇAM VAZIAS A CADA ABERTURA (áudio 2263 do Cassiano, 27/09/2026 — substitui o "form já

@@ -2612,3 +2612,16 @@ body.nome-dourado {
   .extra-poopbag .titulo-extra { font-size: 14px; }
 }
 .extra.extra-poopbag[hidden] { display: none; }   /* v49: o display:flex do .extra venceria o [hidden] */
+
+/* ---- v50 (04/10/2026, print 6401 + áudio 6402 do Cassiano): a caixinha do Poop Bag NÃO é branca — "o nosso fundo é bege" —
+   e ganha a BORDA na cor do botão "Personalize agora" (terracota) pra chamar atenção, marcada ou não. Só o quadradinho marca;
+   miniatura e texto são link pra página do Poop Bag (produto.js v48). */
+.extra.extra-poopbag, .extra.extra-poopbag.marcado, .extra.extra-poopbag:hover {
+  background: #EAE4DB; border: 2px solid var(--terracota); cursor: default;
+}
+.extra-poopbag .marca-poopbag { display: flex; align-items: center; justify-content: center; margin: -8px; padding: 8px; cursor: pointer; }
+.extra-poopbag .marca-poopbag input { width: 22px; height: 22px; }
+.extra-poopbag a.mini-poopbag { text-decoration: none; }
+.extra-poopbag a.titulo-extra { text-decoration: none; cursor: pointer; }
+.extra-poopbag a.titulo-extra:hover, .extra-poopbag a.titulo-extra:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.recado-limite-nome { margin: 6px 0 0; }
