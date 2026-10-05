@@ -92,6 +92,12 @@
        MESMA descrição da sacola e o MESMO envio pelo WhatsApp, agora com dados, entrega e pagamento. */
     descrever: function (i) { return descreverItem(i); },
     abrirWhatsApp: function (extras) { return abrirWhatsApp(extras); },
+    /* 05/10/2026 (pagamento pela InfinitePay): o MESMO texto do pedido, só o link, sem abrir — a página guarda antes
+       de ir pagar e mostra o botão na volta, já com a sacola limpa. */
+    linkWhatsApp: function (extras) {
+      if (!itens.length || !window.aleaTemZap) return null;
+      return 'https://wa.me/' + (window.ALEA || {}).whatsapp + '?text=' + encodeURIComponent(textoDoPedido(extras));
+    },
     itens: function () { return itens.slice(); },
     quantos: function () { return pecas(); },
     total: total,

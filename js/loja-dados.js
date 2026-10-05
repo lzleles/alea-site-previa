@@ -277,6 +277,15 @@
     tirarEndereco: function (id) { return api('POST', '/api/eu/endereco/' + encodeURIComponent(id) + '/remover').then(daFicha); },
     principalEndereco: function (id) { return api('POST', '/api/eu/endereco/' + encodeURIComponent(id) + '/principal').then(daFicha); },
     registrarPedido: function (p) { return api('POST', '/api/pedido', p); },
+    /* PAGAMENTO PELA INFINITEPAY (05/10/2026): o servidor cobra pela tabela e devolve o link; o cliente paga lá e volta.
+       statusLink confere na volta (o servidor pergunta à InfinitePay; o navegador nunca aprova sozinho). */
+    pagarLink: function (p) { return api('POST', '/api/pagamento/link', p); },
+    statusLink: function (numero, q) {
+      var s = Object.keys(q).filter(function (k) { return q[k]; }).map(function (k) {
+        return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]);
+      }).join('&');
+      return api('GET', '/api/pagamento/link/' + encodeURIComponent(numero) + '?' + s);
+    },
     sair: function () { return api('POST', '/api/sair').then(function () { return { logado: false }; }); },
     exportar: function () { return api('GET', '/api/eu/exportar'); },
     excluir: function () { return api('POST', '/api/eu/excluir'); },
@@ -332,6 +341,7 @@
     entrarGoogle: motor.entrarGoogle, salvarFicha: motor.salvarFicha, definirSenha: motor.definirSenha,
     guardarEndereco: motor.guardarEndereco, tirarEndereco: motor.tirarEndereco, principalEndereco: motor.principalEndereco,
     registrarPedido: motor.registrarPedido, sair: motor.sair, exportar: motor.exportar, excluir: motor.excluir,
+    pagarLink: PREVIA ? null : servidor.pagarLink, statusLink: PREVIA ? null : servidor.statusLink,   // 05/10/2026
     config: PREVIA ? function () { return Promise.resolve({ metodos: ['google', 'codigo', 'senha'] }); } : servidor.config,
     /* ETAPA 69 (condição da casa, 23/09/2026): quais jeitos de entrar o servidor JÁ faz. Sem "metodos" no /api/config
        = só Google. Código e senha aparecem sozinhos quando a casa ligar ("metodos": ["google","codigo","senha"]). */

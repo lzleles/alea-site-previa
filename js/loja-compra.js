@@ -77,6 +77,18 @@
   var erro = '';
   var concluido = null;
 
+  /* PAGAMENTO PELA INFINITEPAY (05/10/2026 — o Cassiano trocou o Mercado Pago pela InfinitePay; ordem do Lázaro
+     "coloque no ar o qto antes"). Liga SOZINHO quando o /api/config do servidor diz {"provedor":"infinitepay"}.
+     O cliente paga na página segura da InfinitePay (Pix ou cartão até 10x sem juros) e volta pra esta página com
+     ?pedido=AL-0001&transaction_nsu=…&slug=…; quem diz "pago" é o servidor, conferindo na InfinitePay.
+     Peça sem preço (sob consulta) continua indo pelo WhatsApp, como antes. */
+  var PAG = null;                              // {provedor, parcelas_max} quando o pagamento pelo site está ligado
+  var K_PAG = 'alea_pagamento_link_v1';        // {numero, chave, nome, linhas} — sobrevive à ida e volta
+  var retorno = null;                          // a tela da volta: {estado, numero, nome, tentativas, link}
+  function usaLink() { return !!(PAG && L.pagarLink && !L.previa && !sobConsulta() && subtotal() > 0); }
+  function lerPag() { try { return JSON.parse(localStorage.getItem(K_PAG) || 'null'); } catch (e) { return null; } }
+  function gravarPag(o) { try { if (o) localStorage.setItem(K_PAG, JSON.stringify(o)); else localStorage.removeItem(K_PAG); } catch (e) { /* aba anônima */ } }
+
   function guardar() { L.compra.gravar(st); }
   function tela() { return (location.hash || '').indexOf('compra') >= 0 ? 'compra' : 'sacola'; }
 
@@ -218,7 +230,14 @@
     }
     var p = st.pagamento;
     var caixa = '';
-    if (p === 'pix') {
+    if (usaLink() && p === 'pix') {
+      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div><p>Ao finalizar, você vai para a página segura ' +
+        'de pagamento, paga o Pix e volta para cá. A aprovação é na hora.</p></div>';
+    } else if (usaLink() && p === 'cartao') {
+      caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
+        '<p>Em até ' + (PAG.parcelas_max || 10) + 'x sem juros. Ao finalizar, você digita o cartão na página segura de pagamento ' +
+        'e volta para cá. A ālea & Co. não recebe nem guarda o número do seu cartão.</p></div>';
+    } else if (p === 'pix') {
       caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div><p>Para pagar, finalize sua compra abaixo.</p></div>';
     } else if (p === 'cartao') {
       caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
@@ -247,7 +266,61 @@
     return '<h1 class="loja-titulo grande">Finalizar Compra</h1>' + etapaDados() + etapaEntrega() + etapaPagamento() +
       htmlResumo() +
       (st.etapa === 'pagamento' ? '<button type="button" class="loja-bt largo" data-concluir' + (st.pagamento ? '' : ' disabled') + '>Finalizar Compra</button>' +
-        '<p class="loja-miudo" style="text-align:center;margin-top:10px">Enquanto o pagamento pelo site não liga, o pedido completo segue pelo WhatsApp da ālea & Co.</p>' : '');
+        '<p class="loja-miudo" style="text-align:center;margin-top:10px">' + (usaLink()
+          ? 'O valor pago agora é o das peças. O frete é combinado com a ālea & Co. pelo WhatsApp, depois do pagamento.'
+          : 'Enquanto o pagamento pelo site não liga, o pedido completo segue pelo WhatsApp da ālea & Co.') + '</p>' : '');
+  }
+
+  /* a tela da VOLTA da InfinitePay */
+  function htmlRetorno() {
+    var r = retorno;
+    if (r.estado === 'aprovado') {
+      return '<div class="loja-concluido"><h1>Pagamento aprovado</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Obrigado' + (r.nome ? ', ' + esc(r.nome) : '') + '! Seu pagamento foi confirmado e a confirmação chega no seu e-mail. ' +
+        'Agora é só combinar o frete com a ālea & Co. pelo WhatsApp.</p>' +
+        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">Combinar o frete no WhatsApp</a></p>' : '') +
+        '<p><a class="loja-mais-produtos" href="index.html">Continuar comprando</a></p></div>';
+    }
+    if (r.estado === 'conferindo') {
+      return '<div class="loja-concluido"><h1>Confirmando o pagamento…</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Estamos conferindo com o banco. Não feche esta página.</p></div>';
+    }
+    if (r.estado === 'sem_chave') {
+      return '<div class="loja-concluido"><h1>Recebemos o seu retorno</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Assim que o pagamento for confirmado, você recebe a confirmação no seu e-mail.</p>' +
+        '<p><a class="loja-bt" href="index.html">Voltar para a loja</a></p></div>';
+    }
+    return '<div class="loja-concluido"><h1>Pagamento ainda não confirmado</h1><p class="numero">' + esc(r.numero) + '</p>' +
+      '<p>Se você já pagou, a confirmação chega no seu e-mail em alguns minutos. Se não terminou, pode voltar e pagar.</p>' +
+      (r.link ? '<p><a class="loja-bt" href="' + esc(r.link) + '">Voltar para o pagamento</a></p>' : '') +
+      '<p><a class="loja-mais-produtos" href="finalizar-compra.html#/compra">Rever a compra</a></p></div>';
+  }
+
+  function conferirRetorno(q) {
+    var guardado = lerPag();
+    var numero = q.get('pedido') || q.get('order_nsu') || '';
+    if (!guardado || guardado.numero !== numero || !L.statusLink) {
+      retorno = { estado: 'sem_chave', numero: numero }; pintar(); return;
+    }
+    retorno = { estado: 'conferindo', numero: numero, nome: guardado.nome, zap: guardado.zap, tentativas: 0 };
+    pintar();
+    (function perguntar() {
+      L.statusLink(numero, { chave: guardado.chave, transaction_nsu: q.get('transaction_nsu') || '', slug: q.get('slug') || '',
+                             receipt_url: q.get('receipt_url') || '' }).then(function (s) {
+        retorno.link = s.link;
+        if (s.estado === 'aprovado') {
+          retorno.estado = 'aprovado';
+          gravarPag(null); L.compra.limpar(); if (CAR()) CAR().limpar();
+          st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
+          pintar(); return;
+        }
+        if (++retorno.tentativas < 15) { setTimeout(perguntar, 4000); return; }   // ~1 min: o Pix às vezes demora
+        retorno.estado = 'pendente'; pintar();
+      }).catch(function () {
+        if (++retorno.tentativas < 15) { setTimeout(perguntar, 4000); return; }
+        retorno.estado = 'pendente'; pintar();
+      });
+    })();
   }
 
   function htmlConcluido() {
@@ -261,7 +334,7 @@
 
   /* ================================================================ desenhar */
   function pintar() {
-    raiz.innerHTML = FAIXA + (concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
+    raiz.innerHTML = FAIXA + (retorno ? htmlRetorno() : concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
     ligar();
     erro = '';
   }
@@ -396,6 +469,7 @@
                    entrega: e, pagamento: st.pagamento, presente: st.presente ? (st.presente_texto || '') : null,
                    consent_marketing: !!d.consent_marketing, visitante: window.aleaRastro ? window.aleaRastro.visitante() : null };
     var botao = raiz.querySelector('[data-concluir]'); if (botao) botao.disabled = true;
+    if (usaLink()) { pagarNaInfinitePay(pedido, linhas, botao); return; }
     var zap = null;
     /* 21:46: "deixa [o WhatsApp] até você confirmar com ele" — vale na prévia também */
     zap = car.abrirWhatsApp(linhas);                         // abre JÁ, no mesmo toque (senão o navegador bloqueia)
@@ -404,6 +478,34 @@
       car.limpar(); L.compra.limpar();
       st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
       pintar(); window.scrollTo(0, 0);
+    });
+  }
+
+  /* o servidor cobra pela tabela e devolve o link; guardamos número + chave (pra conferir na volta) e o texto do
+     WhatsApp (pra combinar o frete depois de pago) e saímos pra página segura da InfinitePay */
+  function pagarNaInfinitePay(pedido, linhas, botao) {
+    var car = CAR(), d = st.dados, e = st.entrega;
+    var corpo = {
+      forma: st.pagamento === 'pix' ? 'pix' : 'cartao',
+      itens: car.itens().map(function (i) {        // as miniaturas (imagem) ficam no aparelho: o servidor só precisa da escolha
+        var c = JSON.parse(JSON.stringify(i)); delete c.miniatura;
+        (c.extras || []).forEach(function (x) { if (x) delete x.miniatura; });
+        return c;
+      }),
+      total: car.total(),
+      comprador: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, cpf: d.cpf, telefone: d.telefone },
+      entrega: { cep: e.cep, logradouro: e.logradouro, numero: e.numero, complemento: e.complemento || '',
+                 bairro: e.bairro || '', cidade: e.cidade, uf: e.uf, destinatario: e.destinatario },
+      presente: pedido.presente, visitante: pedido.visitante, consent_marketing: !!d.consent_marketing
+    };
+    if (botao) botao.textContent = 'Indo para o pagamento…';
+    L.pagarLink(corpo).then(function (r) {
+      var extras = linhas.concat(['', 'PAGO pelo site: pedido ' + r.numero + ' (' + dinheiro(r.total) + '). Falta combinar o frete.']);
+      gravarPag({ numero: r.numero, chave: r.chave, nome: d.nome, zap: car.linkWhatsApp ? car.linkWhatsApp(extras) : null });
+      location.href = r.url;
+    }).catch(function (x) {
+      erro = (x && x.message) || 'O pagamento não respondeu agora. Nada foi cobrado. Tente de novo em instantes.';
+      pintar(); rolarPara('.loja-etapa:nth-of-type(3)');
     });
   }
 
@@ -449,6 +551,14 @@
   window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
 
   function comecar() {
+    var q = new URLSearchParams(location.search);
+    var cfg = (L.previa || !L.config) ? Promise.resolve(null) : L.config().catch(function () { return null; });
+    cfg.then(function (c) {
+      var pg = c && c.pagamento;
+      PAG = (pg && pg.provedor === 'infinitepay') ? pg : null;
+      if (PAG && (q.get('pedido') || q.get('order_nsu'))) conferirRetorno(q);   // a volta da InfinitePay
+      else if (PAG) pintar();
+    });
     L.eu().then(function (j) {
       eu = j || { logado: false };
       if (eu.logado) {
