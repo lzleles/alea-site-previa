@@ -645,7 +645,7 @@ window.ALEA.modelos3d['stria-planter'] = {
    ACESSÓRIOS (msg 6367 "B" sobre o áudio 6365 + msg 6369, 04/10/2026): a ARGOLA do arquivo dele (schluesselring v9, obj 35,
    30 × 30 × 3,16 mm) SEMPRE TRANSPARENTE e uma CORDINHA BEGE passando pelos 2 furinhos do topo da tampa — nenhum dos dois muda
    com as cores do formulário (personalizar3d.js v14). Malhas em modelos/poopbag_acessorios.glb, geradas por
-   33_produtos_novos_2026-10-04/poop_bag_extra/glb/gerar_acessorios_poopbag_v1.py. TROCAR A COR DA CORDINHA = a linha `cordinha`. */
+   33_produtos_novos_2026-10-04/poop_bag_extra/glb/gerar_acessorios_poopbag_v2_alca_pendurada.py (a alça sobe ~7 mm, cai\n   pelo lado e a argola fica PENDURADA, em pé; a v1, alça reta pra cima, foi recusada na conferência dos prints). TROCAR A COR DA CORDINHA = a linha `cordinha`. */
 window.ALEA.modelos3d['poop-bag-holder'] = {
   glb: 'modelos/poopbag.glb?v=2026-10-04',
   acessorios: {
