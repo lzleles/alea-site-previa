@@ -147,6 +147,15 @@ window.VITRINE = [
   { produto: 'ālea Makeup Layer Organizer',               nome: 'Makeup Layer Organizer', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: [] },
   { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] }
 ];
+/* 06/10/2026 (áudios 6772/6773 do Cassiano): "os itens do home, você pode colocar tudo em ordem alfabética (...) os
+   comedouros não, a parte do pet pode deixar do jeito que está". Só os itens HOME trocam de lugar entre si (pelo nome do
+   produto); o resto da VITRINE fica onde está. Produto novo da Home entra em qualquer lugar acima: a ordem sai daqui. */
+(function homeEmOrdemAlfabetica() {
+  var lugares = [], itens = [];
+  window.VITRINE.forEach(function (v, i) { if (v.categoria === 'home') { lugares.push(i); itens.push(v); } });
+  itens.sort(function (a, b) { return a.produto.localeCompare(b.produto, 'pt', { sensitivity: 'base' }); });
+  lugares.forEach(function (i, k) { window.VITRINE[i] = itens[k]; });
+})();
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
   { produto: 'ālea Bowl Wave', nome: 'Luke',       categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['pro_luke_1q','luke_1','luke_2','luke_3','luke_4'] },

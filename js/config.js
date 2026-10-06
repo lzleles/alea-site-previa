@@ -669,16 +669,21 @@ window.ALEA.modelos3d['stria-planter'] = {
     for (var k in (extra || {})) c[k] = extra[k];
     return c;
   }
-  var V = '?v=2026-10-05';
-  window.ALEA.modelos3d['laptop-stand'] = cfg('modelos/laptopstand.glb' + V);   // os 2 holders, 40 mm entre eles (provisório)
+  /* v53 (06/10/2026): os .glb saem do montar_lote_home_v2_logo_inteira_e_pecas_separadas.py (gravação da logo em malha
+     própria, Nodus Opção 1 em escadinha, Make com a tampa assentada e a gaveta 25 mm pra fora) e o Make, o Makeup e o
+     Nodus ganham `pecas: true` = TOQUE NA PEÇA com tutorial (personalizar3d.js v15; áudios 6744/6750/6757/6763/6768).
+     `soUmModo`: some a linha "Monocromático" — a janela de cor pinta a peça tocada. Tudo abre branco (6759). */
+  var V = '?v=2026-10-06';
+  var P = { pecas: true, soUmModo: true };
+  window.ALEA.modelos3d['laptop-stand'] = cfg('modelos/laptopstand.glb' + V);   // os 2 holders, 40 mm entre eles (provisório); 1 cor (6770)
   window.ALEA.modelos3d['pen-holder'] = cfg('modelos/penholder.glb' + V);
-  window.ALEA.modelos3d['make'] = cfg('modelos/make.glb' + V);                   // fundo + gaveta + tampa
-  window.ALEA.modelos3d['makeup-layer-organizer'] = cfg('modelos/makeup.glb' + V);   // 3 camadas + insert
+  window.ALEA.modelos3d['make'] = cfg('modelos/make.glb' + V, P);                // peca_0 fundo, peca_1 gaveta, peca_2 tampa
+  window.ALEA.modelos3d['makeup-layer-organizer'] = cfg('modelos/makeup.glb' + V, P);   // peca_0..2 camadas de baixo pra cima, peca_3 copinho
   window.ALEA.modelos3d['lamel'] = cfg('modelos/lamel_vase.glb' + V, { glbPorEscolha: {
     'Vase': 'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase)
     'Wavy': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy)
   } });
-  window.ALEA.modelos3d['nodus-organizer'] = cfg('modelos/nodus_opcao1.glb' + V, { glbPorEscolha: {
+  window.ALEA.modelos3d['nodus-organizer'] = cfg('modelos/nodus_opcao1.glb' + V, { pecas: true, soUmModo: true, glbPorEscolha: {
     'Opção 1': 'modelos/nodus_opcao1.glb' + V,   // 5 peças: bandeja grande (placa 1) + placa 9, encaixadas
     'Opção 2': 'modelos/nodus_opcao2.glb' + V,   // 3 peças: bandeja 4 gomos (placa 2) + placa 8
     'Opção 3': 'modelos/nodus_opcao3.glb' + V    // Centrum: part A + part B no centro

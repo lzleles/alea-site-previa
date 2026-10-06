@@ -2642,3 +2642,29 @@ body.nome-dourado {
 .produto-topo .sem-foto-pagina { position: relative; width: 100%; aspect-ratio: 1 / 1; }
 .botao[data-em-breve], .botao[data-em-breve]:hover { opacity: .55; cursor: not-allowed; }
 .valor .em-breve { font-size: .8em; }
+
+/* ---- v52 (06/10/2026, áudios 6744/6750/6757/6763/6768 do Cassiano): TOQUE NA PEÇA + TUTORIAL (personalizar3d.js v15).
+   O dedo anda sobre as peças no 3D e "toca" (anel que abre); a cor fica travada até o 1º toque de verdade; depois,
+   "Agora escolha a cor". Antes: 03_site/_versoes_anteriores/toque_na_peca_antes_2026-10-06/css/. */
+.tutorial-toque { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.tutorial-texto {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); margin: 0; padding: 7px 14px;
+  background: rgba(255, 255, 255, .88); border-radius: 999px; font-size: 13px; color: #3B302A; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(40, 32, 24, .12);
+}
+.tutorial-dedo {
+  position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+  background: rgba(255, 255, 255, .92); border: 2px solid var(--terracota); box-shadow: 0 2px 8px rgba(40, 32, 24, .25);
+  transition: left .35s ease, top .35s ease;
+}
+.tutorial-dedo::after {
+  content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--terracota); opacity: 0;
+}
+.tutorial-dedo.toca { animation: dedo-aperta .5s ease-out 1; }
+.tutorial-dedo.toca::after { animation: dedo-anel .8s ease-out 1; }
+@keyframes dedo-aperta { 0% { transform: scale(1); } 35% { transform: scale(.78); } 100% { transform: scale(1); } }
+@keyframes dedo-anel { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tutorial-dedo, .tutorial-dedo.toca, .tutorial-dedo.toca::after { animation: none; transition: none; } }
+.janela3d-guia { margin: 2px 0 8px; font-size: 13.5px; font-weight: 600; color: var(--terracota); }
+[data-cores-peca] .trava-pecas { position: absolute; inset: 0; z-index: 3; background: transparent; cursor: not-allowed; }
+[data-cores-peca]:has(.trava-pecas) .cores-campos { opacity: .45; }

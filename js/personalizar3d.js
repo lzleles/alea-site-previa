@@ -105,6 +105,17 @@
       2. fotoDoPoopBag(cfg, est), exportada: o porta-saquinho montado FORA da tela, nas cores e com o nome do comedouro, pra
          miniatura da caixinha "Adicionar Poop Bag Holder + R$ 49,00" (produto.js v46). Quem pede: o fechar() da janela,
          só nos slugs de ALEA.extraPoopBag (pedirMiniaturaPoopBag). Comedouro sem isso = nada muda.
+   v15 (06/10/2026, os produtos HOME do lote msg6689 — áudios 6739/6744/6750/6757/6763/6768 do Cassiano; a v14 está em
+      03_site/_versoes_anteriores/toque_na_peca_antes_2026-10-06/js/):
+      1. A GRAVAÇÃO DA LOGO À VISTA (6739: "a meia capivara embaixo não aparece inteira"): o .glb traz a gravação numa malha
+         própria (material '<zona ou peca_N>_logo', montar_lote_home_v2) e ela ganha a SOMBRA DE DENTRO — o mesmo tom da
+         peça, um pouco mais escuro (o mesmo cálculo da letra do nome, item 6 da v5). Sem isso o fundo da gravação saía no
+         mesmo tom do fundo da peça e a logo sumia. E a sombra do chão some quando a câmera olha a peça por baixo.
+      2. TOQUE NA PEÇA (`cfg.pecas`, 6744/6750: "6 janelas de cores... não queria cor 1, objeto 1"): a peça de várias
+         partes (material 'peca_N' no .glb; N=0 é a base) se pinta tocando nela. Ao abrir, um TUTORIAL mostra o dedo
+         tocando nas peças e a cor fica travada; no 1º toque a peça acende e aparece "Agora escolha a cor"; daí em
+         diante cada toque escolhe a peça e a janela de cor de sempre pinta só ela. As cores vão no campo escondido
+         `cores_por_peca` (JSON) — o texto do PEDIDO por peça é TBD (os produtos estão "Em breve", compra desligada).
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -470,6 +481,9 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   controles.autoRotate = !/debug3d/.test(location.search); controles.autoRotateSpeed = 1.2;
   controles.minDistance = 0.25; controles.maxDistance = 1.2;
   controles.maxPolarAngle = Math.PI * 0.62;
+  /* v15 (1): peça sem nome (Home) gira até ver o FUNDO de frente — a logo gravada embaixo inteira (6739); os comedouros
+     seguem com o limite de sempre */
+  if (cfg.semNome) controles.maxPolarAngle = Math.PI * 0.97;
   controles.addEventListener('start', function () { controles.autoRotate = false; });
   function redimensionar() {
     var w = palco.clientWidth, h = palco.clientHeight;
@@ -483,7 +497,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   window.addEventListener('resize', redimensionar);
   if (window.ResizeObserver) new ResizeObserver(redimensionar).observe(palco);
   redimensionar();
-  (function laco() { if (!vivo) return; controles.update(); renderer.render(cena, camera); requestAnimationFrame(laco); })();
+  var sombraChao = null, aCadaQuadro = null;                         // v15: a sombra some vista por baixo; o tutorial anda
+  (function laco() {
+    if (!vivo) return;
+    controles.update();
+    if (sombraChao) sombraChao.visible = camera.position.y > sombraChao.position.y;
+    if (aCadaQuadro) aCadaQuadro();
+    renderer.render(cena, camera); requestAnimationFrame(laco);
+  })();
 
   /* ---------------- materiais */
   /* v8: a PELE FELPUDA (1) e a TEXTURA DA COR (2) entram no sombreador de cada material. Tudo é medido em mm no
@@ -639,7 +660,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   if (!vivo) return;
   var fonte = semNome ? null : new Font(fonteBin);
   function zonaDoMaterial(nome) { return nome.indexOf('topo') >= 0 ? 'topo' : nome.indexOf('base') >= 0 ? 'base' : 'principal'; }
+  /* v15: a chave de cada malha do .glb — 'topo'|'principal'|'base' (como sempre), 'peca_N' (toque na peça) e, com o
+     sufixo '_logo', a gravação da logo daquela zona/peça (pintada com a sombra de dentro) */
+  function chaveDoMaterial(nome) {
+    var logo = /_logo$/.test(nome), n = nome.replace(/_logo$/, ''), mp = /^peca_(\d+)/.exec(n);
+    return (mp ? 'peca_' + mp[1] : zonaDoMaterial(n)) + (logo ? '_logo' : '');
+  }
   var partes = [], zonaPorGrupo = [];
+  var caixaDaPeca = {};                                               // v15: 'peca_N' -> Box3 (o dedo do tutorial)
   gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse(function (o) {
     if (!o.isMesh) return;
@@ -648,11 +676,29 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     if (!g.attributes.normal) g.computeVertexNormals();
     g.clearGroups();
     partes.push(g);
-    zonaPorGrupo.push(zonaDoMaterial((o.material && o.material.name) || ''));
+    var ch = chaveDoMaterial((o.material && o.material.name) || '');
+    zonaPorGrupo.push(ch);
+    if (/^peca_\d+$/.test(ch)) {
+      var bx = new THREE.Box3().setFromBufferAttribute(g.attributes.position);
+      caixaDaPeca[ch] = caixaDaPeca[ch] ? caixaDaPeca[ch].union(bx) : bx;
+    }
   });
   var geo = mergeGeometries(partes, true);
   var matsArray = ordemZonas.map(function (z) { return mats[z]; });
-  geo.groups.forEach(function (g, i) { g.materialIndex = ordemZonas.indexOf(zonaPorGrupo[i]); });
+  var chaveDoIndice = ordemZonas.slice();                             // v15: índice do material -> chave
+  var matsExtra = {};                                                 // v15: 'peca_N', '<chave>_logo' -> material
+  function indiceDaChave(ch) {
+    var i = chaveDoIndice.indexOf(ch);
+    if (i >= 0) return i;
+    var o = cfg.original.principal;                                   // peça nova abre na cor original (Branco fosco)
+    matsExtra[ch] = material(o.hex, o.acabamento, filamento(o.acabamento, o.site));
+    matsArray.push(matsExtra[ch]); chaveDoIndice.push(ch);
+    return matsArray.length - 1;
+  }
+  geo.groups.forEach(function (g, i) { g.materialIndex = indiceDaChave(zonaPorGrupo[i]); });
+  var pecasDaPeca = Object.keys(caixaDaPeca).sort(function (a, b) { return parseInt(a.slice(5), 10) - parseInt(b.slice(5), 10); });
+  var modoPecas = !!cfg.pecas && pecasDaPeca.length > 1;              // v15 (2)
+  function matDaChave(ch) { return mats[ch] || matsExtra[ch]; }
   var corpoBrush = new CSG.Brush(geo, matsArray);
   corpoBrush.updateMatrixWorld();
 
@@ -758,6 +804,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
     s.rotation.x = -Math.PI / 2; s.position.set(centro.x, caixa.min.y - 0.0005, centro.z);
     cena.add(s);
+    sombraChao = s;
   })();
   controles.target.copy(centro);
   /* enquadrar pela esfera da peça e pelo MENOR dos dois ângulos de visão: no celular o palco é alto e estreito,
@@ -828,7 +875,135 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mz._alea[k].value; });
       matLetra._alea.uMapaMm.value.copy(mz._alea.uMapaMm.value);
     }
-    ajustarFundo(ordemZonas.map(function (z) { return '#' + mats[z].color.getHexString(); }));
+    /* v15 (2): toque na peça — a janela de cor pinta SÓ a peça escolhida; as outras ficam como estavam */
+    if (modoPecas) {
+      var escP = escolhaDoCampo(campos[0]);
+      if (pecaEscolhida && escP && !sincronizando) corDaPeca[pecaEscolhida] = escP;
+      var oP = cfg.original.principal;
+      pecasDaPeca.forEach(function (ch) {
+        var x = corDaPeca[ch] || { hex: oP.hex, acab: oP.acabamento, fil: filamento(oP.acabamento, oP.site) };
+        pintar(matsExtra[ch], x.hex, x.acab, x.fil);
+      });
+      gravarCoresPorPeca();
+    }
+    /* v15 (1): a gravação da logo = a cor da sua zona/peça com a sombra de dentro */
+    chaveDoIndice.forEach(function (ch) {
+      if (/_logo$/.test(ch)) sombraDe(matDaChave(ch), matDaChave(ch.replace(/_logo$/, '')));
+    });
+    ajustarFundo(modoPecas ? pecasDaPeca.map(function (ch) { return '#' + matsExtra[ch].color.getHexString(); })
+                           : ordemZonas.map(function (z) { return '#' + mats[z].color.getHexString(); }));
+  }
+  /* v15: o mesmo cálculo da letra sem cor (item 6): peça escura -> um pouco mais clara; clara -> um pouco mais escura */
+  function sombraDe(dst, src) {
+    if (!dst || !src) return;
+    var L = luminancia('#' + src.color.getHexString());
+    if (L < 0.18) dst.color.copy(src.color).lerp(new THREE.Color(0xffffff), 0.12);
+    else dst.color.copy(src.color).multiplyScalar(0.72);
+    dst.roughness = src.roughness; dst.metalness = src.metalness;
+    ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { dst._alea[k].value = src._alea[k].value; });
+    dst._alea.uMapaMm.value.copy(src._alea.uMapaMm.value);
+  }
+  /* ---------------- v15 (2): TOQUE NA PEÇA + TUTORIAL */
+  var pecaEscolhida = null, corDaPeca = {}, sincronizando = false, tutorial = null, raioPecas = null;
+  var ACAB_DO_SITE = { fosco: 1, basico: 1, perolizado: 1 };
+  function campoDeCor() { return form && form.querySelector('.cores-campos .campo-cor'); }
+  function gravarCoresPorPeca() {
+    if (!form) return;
+    var h = form.querySelector('input[name="cores_por_peca"]');
+    if (!h) { h = document.createElement('input'); h.type = 'hidden'; h.name = 'cores_por_peca'; form.appendChild(h); }
+    var oP = cfg.original.principal;
+    h.value = JSON.stringify({ glb: cfg.glb, pecas: pecasDaPeca.map(function (ch) {   // o glb: trocou a Opção, não herda
+      var x = corDaPeca[ch];
+      return { peca: parseInt(ch.slice(5), 10), acabamento: x ? x.acab : oP.acabamento, cor: x ? x.fil.site : oP.site };
+    }) });
+  }
+  /* a janela de cor mostra a cor da peça escolhida (o mesmo caminho do aleaAssumirCorDaCapa: bolinha -> lista -> cor) */
+  function mostrarCorDaPeca(ch) {
+    var modo = form && form.querySelector('input[name="cores_peca"][value="monocromatico"]');
+    if (modo && !modo.checked) { modo.checked = true; modo.dispatchEvent(new Event('change', { bubbles: true })); }
+    var c = campoDeCor(); if (!c) return;
+    var oP = cfg.original.principal, x = corDaPeca[ch];
+    var acab = x ? x.acab : oP.acabamento, cor = x ? x.fil.site : oP.site;
+    if (!ACAB_DO_SITE[acab]) return;
+    sincronizando = true;
+    var rad = c.querySelector('.acabamento input[value="' + acab + '"]');
+    if (rad && !rad.checked) { rad.checked = true; rad.dispatchEvent(new Event('change', { bubbles: true })); }
+    var sel = c.querySelector('select');
+    if (sel) { sel.value = cor; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    setTimeout(function () { sincronizando = false; }, 0);
+  }
+  /* a peça ACENDE: um brilho quente que apaga em 0,8 s (só o destaque do toque — a cor da peça não muda) */
+  function acender(ch) {
+    var ms = [matsExtra[ch], matsExtra[ch + '_logo']].filter(Boolean), t0 = performance.now();
+    (function passo() {
+      var u = Math.min(1, (performance.now() - t0) / 800), k = Math.sin(Math.PI * u) * 0.55;
+      ms.forEach(function (m) { m.emissive.setRGB(k, k * 0.82, k * 0.55); });
+      if (u < 1 && vivo) requestAnimationFrame(passo);
+    })();
+  }
+  function pecaNoPonto(ev) {
+    var r = canvas.getBoundingClientRect();
+    var p = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    var rc = new THREE.Raycaster(); rc.setFromCamera(p, camera); rc.firstHitOnly = true;
+    /* o raio precisa do material em LISTA pra devolver o grupo (a peça) do triângulo tocado */
+    if (!raioPecas) { raioPecas = new THREE.Mesh(geo.clone(), matsArray); raioPecas.geometry.computeBoundsTree(); }
+    var hit = rc.intersectObject(raioPecas, false)[0];
+    if (!hit || !hit.face) return null;
+    var ch = (chaveDoIndice[hit.face.materialIndex] || '').replace(/_logo$/, '');
+    return /^peca_\d+$/.test(ch) ? ch : null;
+  }
+  function escolherPeca(ch) {
+    pecaEscolhida = ch;
+    acender(ch);
+    mostrarCorDaPeca(ch);
+    if (tutorial) tutorial.acabar();
+    var guia = fundo.querySelector('.janela3d-guia');
+    if (guia) { guia.textContent = 'Agora escolha a cor.'; guia.classList.remove('treme-falta'); void guia.offsetWidth; guia.classList.add('treme-falta'); }
+  }
+  function montarTutorial() {
+    var cx = form && form.querySelector('[data-cores-peca]');
+    /* a janela de cor já aparece (travada) — o produto tem um modo só, o Monocromático, escondido (soUmModo) */
+    var modo = form && form.querySelector('input[name="cores_peca"][value="monocromatico"]');
+    if (modo && !modo.checked) { modo.checked = true; modo.dispatchEvent(new Event('change', { bubbles: true })); }
+    var guia = document.createElement('p');
+    guia.className = 'janela3d-guia';
+    guia.textContent = 'Toque na peça que você quer pintar.';
+    if (cx) cx.insertBefore(guia, cx.querySelector('[data-cores-campos]') || null);
+    var trava = document.createElement('div');                       // a cor fica travada até o 1º toque
+    trava.className = 'trava-toque trava-pecas';
+    trava.setAttribute('aria-hidden', 'true');
+    if (cx) { cx.style.position = 'relative'; cx.appendChild(trava); }
+    trava.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      [guia, aviso].forEach(function (el) { el.classList.remove('treme-falta'); void el.offsetWidth; el.classList.add('treme-falta'); });
+    });
+    var aviso = document.createElement('div');
+    aviso.className = 'tutorial-toque';
+    aviso.innerHTML = '<span class="tutorial-dedo" aria-hidden="true"></span><p class="tutorial-texto">Toque na peça para escolher a cor</p>';
+    palco.appendChild(aviso);
+    var dedo = aviso.querySelector('.tutorial-dedo');
+    var k = 0, t0 = performance.now(), v = new THREE.Vector3();
+    var ordem = pecasDaPeca.slice(1).concat(pecasDaPeca.slice(0, 1));   // mostra as peças e por último a base
+    aCadaQuadro = function () {
+      var ch = ordem[k % ordem.length], b = caixaDaPeca[ch];
+      b.getCenter(v); v.y = b.min.y + (b.max.y - b.min.y) * 0.75;
+      v.project(camera);
+      dedo.style.left = ((v.x + 1) / 2 * palco.clientWidth) + 'px';
+      dedo.style.top = ((1 - v.y) / 2 * palco.clientHeight) + 'px';
+      var dt = performance.now() - t0;
+      if (dt > 1700) { t0 = performance.now(); k++; dedo.classList.remove('toca'); void dedo.offsetWidth; dedo.classList.add('toca'); acender(ordem[k % ordem.length]); }
+    };
+    dedo.classList.add('toca'); acender(ordem[0]);
+    return {
+      acabar: function () {
+        aCadaQuadro = null;
+        if (aviso.parentNode) aviso.parentNode.removeChild(aviso);
+        if (trava.parentNode) trava.parentNode.removeChild(trava);
+        tutorial = null;
+      },
+      limpar: function () { this.acabar(); if (guia.parentNode) guia.parentNode.removeChild(guia); if (cx) cx.style.position = ''; }
+    };
   }
   var campoNome = form && form.querySelector('[name="nome_pet"]');
   /* (7) o NOME na peça: abre com o original da foto; digitou, muda; apagou no passo 1, volta o original; saiu do
@@ -859,11 +1034,29 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     if (!toque) return;
     var mexeu = Math.hypot(e.clientX - toque.x, e.clientY - toque.y), tempo = performance.now() - toque.t;
     toque = null;
-    if (mexeu < 8 && tempo < 350) virarPraFrente();
+    if (mexeu < 8 && tempo < 350) {
+      if (modoPecas) { var ch = pecaNoPonto(e); if (ch) { controles.autoRotate = false; escolherPeca(ch); } return; }   // v15 (2)
+      virarPraFrente();
+    }
   });
   if (opcoes.parado) { controles.autoRotate = false; camera.position.copy(frente); controles.update(); }
   gravar(nomeParaMostrar());
+  if (modoPecas) {                                                     // v15 (2)
+    /* reabriu a janela: as cores que ela já escolheu voltam (campo escondido) */
+    var salvas = [];
+    try {
+      var sv = JSON.parse(((form && form.querySelector('input[name="cores_por_peca"]')) || {}).value || '{}');
+      if (sv.glb === cfg.glb) salvas = sv.pecas || [];
+    } catch (e) { salvas = []; }
+    salvas.forEach(function (s) {
+      var f = filamento(s.acabamento, s.cor);
+      if (!f || !f.hex) return;
+      corDaPeca['peca_' + s.peca] = { hex: f.hex, acab: s.acabamento, fil: f };
+    });
+  }
   aplicarForm();
+  /* o tutorial abre sempre (a cor só pinta a peça tocada: sem toque, a janela de cor não teria dono) */
+  if (modoPecas) tutorial = montarTutorial();
   fundo.querySelector('.janela3d-carregando').hidden = true;
   var espera = null;
   function aoMexer(ev) {
@@ -884,6 +1077,9 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   if (form) { form.addEventListener('input', aoMexer); form.addEventListener('change', aoMexer); }
 
   limpar = function () {
+    if (tutorial) tutorial.limpar();
+    var guiaV = form && form.querySelector('.janela3d-guia'); if (guiaV) guiaV.remove();
+    var travaV = form && form.querySelector('.trava-pecas'); if (travaV) travaV.remove();
     if (form) { form.removeEventListener('input', aoMexer); form.removeEventListener('change', aoMexer); }
     if (campoNome) campoNome.removeEventListener('focus', virarPraFrente);
     window.removeEventListener('resize', redimensionar);
