@@ -20,6 +20,10 @@
       celular, lupa "Buscar" no computador). Bloco de 4 linhas no fim do arquivo; toda página com site.js ganha a busca.
    03/10/2026 (fotos 5612/5613 + áudios 5615/5616): o Linktree das redes vira a PÍLULA "✱ | Linktree" (montarRedes);
       a cor de cada lugar mora no estilo.css. Antes: 03_site/_versoes_anteriores/linktree_botao_antes_2026-10-03/
+   06/10/2026 (print 6916 + áudio 6917): ligarCategoriaDoProduto() — a categoria em cima do nome da peça vira link pra lista.
+      Antes: 03_site/_versoes_anteriores/categoria_link_antes_2026-10-06/
+   06/10/2026 (áudios 6928/6930/6932/6935 + print 6934): carrega o js/idioma.js (O SITE EM INGLÊS: bandeiras PT/EN no topo,
+      dicionário js/idioma-en.js). Bloco no fim do arquivo. Antes: 03_site/_versoes_anteriores/site_ingles_antes_2026-10-06/
 */
 /* =============================================================================
    site.js — o que vale em TODA página (abertura, feed, produto, textos)
@@ -562,6 +566,17 @@ window.aleaCorDoTopo = (function () {
 (function () {
   var eu = document.currentScript, s = document.createElement('script');
   s.src = (eu && eu.src ? eu.src.replace(/site\.js(\?.*)?$/, '') : 'js/') + 'busca.js'; s.defer = true; document.head.appendChild(s);
+})();
+
+/* 06/10/2026 — O SITE EM INGLÊS (js/idioma.js; áudios 6928/6930/6932/6935 + print 6934 do Cassiano): as bandeiras PT/EN no topo e a
+   tradução. Carregado daqui pelo mesmo motivo da busca. Em inglês, a página fica escondida até o dicionário chegar (no máximo
+   2,5 s), pra não piscar português. */
+(function () {
+  var eu = document.currentScript, s = document.createElement('script');
+  try {
+    if (localStorage.getItem('alea_idioma') === 'en' || /[?&]lang=en\b/.test(location.search)) document.documentElement.classList.add('idioma-carregando');
+  } catch (e) { /* aba anônima */ }
+  s.src = (eu && eu.src ? eu.src.replace(/site\.js(\?.*)?$/, '') : 'js/') + 'idioma.js'; s.async = false; document.head.appendChild(s);
 })();
 
 /* 03/10/2026 — O RODAPÉ COMO FECHO (fotos 5826/5828/5829 + áudios 5827/5830/5831 do Cassiano):

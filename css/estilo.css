@@ -2671,3 +2671,21 @@ body.nome-dourado {
 .janela3d-guia { margin: 2px 0 8px; font-size: 13.5px; font-weight: 600; color: var(--terracota); }
 [data-cores-peca] .trava-pecas { position: absolute; inset: 0; z-index: 3; background: transparent; cursor: not-allowed; }
 [data-cores-peca]:has(.trava-pecas) .cores-campos { opacity: .45; }
+
+/* 06/10/2026 — O SITE EM INGLÊS (js/idioma.js; áudios 6928/6930/6935 + print 6934 do Cassiano): as duas bandeiras pequenas,
+   Brasil "PT" e EUA "EN", CENTRALIZADAS no espaço entre o logo 3D e os botões da direita (as duas margens automáticas, a
+   daqui e a do nav, dividem o espaço ao meio). Bandeira e sigla são um botão só: clicar em qualquer um troca o idioma. */
+.topo .idiomas { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.topo .idioma { background: transparent; border: 0; padding: 2px; cursor: pointer; display: grid; justify-items: center; gap: 3px;
+  color: inherit; opacity: .5; transition: opacity .2s ease; -webkit-tap-highlight-color: transparent; }
+.topo .idioma.ativo { opacity: 1; }
+.topo .idioma:hover, .topo .idioma:focus-visible { opacity: 1; }
+.topo .idioma .bandeira { display: block; line-height: 0; }
+.topo .idioma .bandeira svg { width: 22px; height: auto; display: block; border-radius: 2.5px; box-shadow: 0 0 0 .5px rgba(0,0,0,.18); }
+.topo .idioma .sigla { font-size: 9.5px; letter-spacing: .08em; font-weight: 700; line-height: 1; }
+body.home:not(.marca-medida) .topo .idiomas { visibility: hidden; }
+/* na abertura da home o logo 3D cresce por cima do topo (estado estampa-espera): as bandeiras esperam ele voltar ao tamanho
+   normal e entram com um fade, pra nao ficar uma por cima da outra (medido no teste: no celular encostavam no 3D) */
+.topo .idiomas { transition: opacity .45s ease; }
+body.home.estampa-espera .topo .idiomas { opacity: 0; visibility: hidden; transition: none; }
+html.idioma-carregando body { opacity: 0; }
