@@ -425,6 +425,28 @@ window.aleaCorDoTopo = (function () {
     });
   }
 
+  /* ---------------------------------- a categoria em cima do nome é link (06/10/2026)
+     Print 6916 + áudio 6917 do Cassiano: "qualquer categoria que tiver em cima do nome, seja home, seja fan, seja
+     pet, vai direto para a categoria, tanto para o celular quanto para o computador". O rótulo <span class="linha">
+     da página de peça ganha um <a> em volta pra `index.html#<categoria>` (o mesmo endereço do menu). Feito aqui, e
+     não no gerador, pelo mesmo motivo da conta logo abaixo: as páginas são GERADAS. Categoria sem peça na vitrine
+     fica sem link (o index.html#<id> dela não abriria nada). */
+  function ligarCategoriaDoProduto() {
+    var cats = window.CATEGORIAS || [], vit = window.VITRINE || [];
+    Array.prototype.forEach.call(document.querySelectorAll('.produto-topo span.linha:not([data-album-nome])'), function (el) {
+      if (el.closest('a')) return;
+      var txt = (el.textContent || '').trim().toLowerCase();
+      var cat = cats.filter(function (c) { return c.id === txt || (c.nome || '').toLowerCase() === txt; })[0];
+      if (!cat || !vit.some(function (i) { return i.categoria === cat.id; })) return;
+      var a = document.createElement('a');
+      a.className = 'linha-link';
+      a.href = 'index.html#' + cat.id;
+      a.setAttribute('aria-label', 'Ver todas as peças de ' + (cat.nome || cat.id));
+      el.parentNode.insertBefore(a, el);
+      a.appendChild(el);
+    });
+  }
+
   /* --------------------------------------------------- a conta no servidor (22/09/2026)
      Os arquivos da conta e da memória da visita só carregam quando `api_conta` está
      preenchido no config.js. Carregar DAQUI, e não com <script> em cada página, é de
@@ -485,6 +507,7 @@ window.aleaCorDoTopo = (function () {
     esconderFaltas();
     embrulharNomeCollab();
     ligarVoltarProFeed();
+    ligarCategoriaDoProduto();
     preencherContato();
     montarMenuCategorias();
     montarRedes();
