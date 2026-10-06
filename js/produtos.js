@@ -6,6 +6,9 @@
    saida: Objetos globais de categorias, vitrine e produtos, além de alertas no console
    status: ativo (cabecalho proposto pelo Codex em 2026-09-20, confianca ALTA; conferir na proxima vez que o script rodar)
    validado_em: TBD
+   06/10/2026 (ālea Urubu Mascote Flamengo, cadastro campo por campo msgs 6884-6926 do Cassiano): 1º produto da categoria
+     FAN — VITRINE (sem foto: "foto em breve") e PRODUTOS (texto DELE fechado em 6918-6922, preço sob consulta). A versão
+     anterior está em 03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
    05/10/2026 (lote msg6689, áudios 6726/6728/6729/6731): +6 produtos HOME "Em breve" na VITRINE (sem foto) e em PRODUTOS
      (sem texto). A versão anterior está em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
    04/10/2026 (Poop Bag, msgs 6315-6363): o Poop Bag volta à VITRINE depois da Cláudia (R$ 79, poopbag_capaq) e o bloco
@@ -145,7 +148,10 @@ window.VITRINE = [
   { produto: 'ālea Nodus Organizer',                      nome: 'Nodus Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'nodus-organizer', recorte: false, fotos: [] },
   { produto: 'ālea Make',                                 nome: 'Make', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
   { produto: 'ālea Makeup Layer Organizer',               nome: 'Makeup Layer Organizer', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: [] },
-  { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] }
+  { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] },
+  /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
+     consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
+  { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: [] }
 ];
 /* 06/10/2026 (áudios 6772/6773 do Cassiano): "os itens do home, você pode colocar tudo em ordem alfabética (...) os
    comedouros não, a parte do pet pode deixar do jeito que está". Só os itens HOME trocam de lugar entre si (pelo nome do
@@ -446,6 +452,25 @@ window.PRODUTOS = [
       'Seu desenho equilibra precisão e leveza: uma estrutura marcada por ritmo e continuidade, onde luz e sombra passam a fazer parte da própria forma.',
       'Nas versões Ovatum e Longum, a mesma linguagem ganha proporções distintas, permitindo composições individuais ou em conjunto sem perder sua identidade.',
       'Um objeto de presença sutil, pensado para integrar o ambiente sem apenas ocupá-lo.'
+    ], galeria: [] },
+
+  /* ===================================================================================================
+     ālea Urubu Mascote Flamengo — 1º produto da FAN (06/10/2026, cadastro campo por campo, msgs 6884-6926 do Cassiano).
+     Página: 03_site/01_gerar_paginas_v36_urubu_mascote_2026-10-06.py (clone do Lamel, com o campo do nome).
+     3D: modelos/urubu.glb (as partes VERMELHAS) + urubu_fixas.glb (o resto, nas cores do arquivo) + urubu_nome.json (a barrinha
+     das costas), pelo 38_urubu_mascote_2026-10-06/site_3d/ferramentas/montar_urubu_glb_v1.py, do 3MF DELE (msg 6884).
+     - nome 6887 · categoria FAN 6890 · sem linha 6892/6894 · preço sob consulta 6894 · 3 tamanhos 6895 (P 100%, M 180%, G 230%:
+       6902/6910) · PLA nos 3 (6912) · Filamento Clássico/Perolizado, só o vermelho muda (6897-6904, 6912/6913) · texto DELE
+       6918-6922 · fotos depois (6924) · nome GRÁTIS nas costas, acima do número (6887/6926).
+     - medidas do ARQUIVO, montado (placa 1, 100%): 25,8 cm de altura × 21,2 de largura (asas) × 7,8 de profundidade.
+     =================================================================================================== */
+  { slug: 'urubu-mascote-flamengo', nome: 'ālea Urubu Mascote Flamengo', linha: 'Fan', categoria: 'fan', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], resumo: '',
+    paragrafos: [   // msgs 6918-6922, texto fechado com ELE
+      'O ālea Urubu Mascote Flamengo nasce para quem carrega o time no peito e quer ter essa paixão à vista, na estante, na mesa de trabalho ou no cantinho da coleção.',
+      'Cheio de detalhes, das cores da camisa à postura de quem entra em campo, ele é produzido peça por peça em PLA, com acabamento Clássico ou Perolizado no vermelho, que ganha brilho e profundidade com a luz.',
+      'Disponível em três tamanhos: Pequeno, Médio e Gigante. E com um toque só seu: o nome que você escolher vai nas costas, acima do número da camisa.',
+      'Mais do que um boneco, é a torcida em forma de peça.'
     ], galeria: [] },
 
   /* ===================================================================================================

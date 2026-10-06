@@ -2689,3 +2689,7 @@ body.home:not(.marca-medida) .topo .idiomas { visibility: hidden; }
 .topo .idiomas { transition: opacity .45s ease; }
 body.home.estampa-espera .topo .idiomas { opacity: 0; visibility: hidden; transition: none; }
 html.idioma-carregando body { opacity: 0; }
+
+/* v56 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6897-6904 do Cassiano): "Filamento" Clássico/Perolizado SEM escolher cor —
+   a caixa de cor de filamento fixo (produto.js v51) mostra só as bolinhas; a lista de cores existe (o pedido lê dela), escondida. */
+.campo-cor.filamento-fixo select { display: none; }

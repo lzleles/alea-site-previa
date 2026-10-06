@@ -4,7 +4,14 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v50 (06/10/2026, marcar o acabamento não abre mais a lista de cores sozinha)
+   status: ativo — v51 (06/10/2026, ālea Urubu Mascote Flamengo: caixa "Filamento" de cor fixa e frase de falta do nome por produto)
+   v51 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6897-6904 do Cassiano: "abaixo de pequeno, médio e gigante, só duas opções de
+     filamento (...) clássico e perolizado, sem escolher cor"; só o vermelho muda): produto com `ALEA.modelos3d[slug].filamentoFixo`
+     ({ titulo, cor, acabamentos }, config.js v56) — a caixa de cor mostra SÓ as bolinhas daqueles acabamentos (Clássico/Perolizado)
+     e a cor fica fixa (a lista some, já escolhida). Na sacola e no pedido sai "Filamento: Perolizado" (+ o filamento exato pro
+     Cassiano); o modo continua o Monocromático (o "editar" da sacola remonta igual). E `textoFaltaNome` troca a frase de falta
+     do nome ("Por favor, digite o nome do pet." não serve pra um boneco). A v50 está em
+     03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
    v50 (06/10/2026, vídeo 6790 + áudio 6791 do Cassiano: "tô clicando só no clássico, no fosco, no perolizado, ele já tá abrindo
      as cores automático (...) eu quero que clica e eu mesmo clico em escolher a cor"): os 2 sel.focus() depois de marcar o
      acabamento (cores da peça e cor do nome) saíram — no iPhone o foco num <select> abre a lista. A v49 está em
@@ -213,6 +220,12 @@
      MARCAR guarda o que estava digitado, esvazia e trava o campo; DESMARCAR devolve o texto e reabre o campo — nada
      do que o cliente digitou se perde. A v33 está em 03_site/_versoes_anteriores/sem_nome_quadradinho_antes_2026-09-27/. */
   var semNomeCaixa = null;
+  /* v51: a frase de falta do nome — por produto (config.js modelos3d[slug].textoFaltaNome); sem ela, a de sempre */
+  function textoFaltaNome() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).textoFaltaNome || 'Por favor, digite o nome do pet.';
+  }
+  window.aleaTextoFaltaNome = textoFaltaNome;
   (function quadradinhoSemNome() {
     var form = document.querySelector('[data-personalizar]');
     var campoN = form && form.querySelector('[name="nome_pet"]');
@@ -257,7 +270,7 @@
         form.setAttribute('data-sem-nome', '');
         rot.classList.remove('faltou');
         var rec = document.querySelector('[data-recado-aceite]');
-        if (rec && rec.textContent === 'Por favor, digite o nome do pet.') rec.hidden = true;
+        if (rec && rec.textContent === textoFaltaNome()) rec.hidden = true;   // v51
       } else {
         campoN.disabled = false;
         if (!campoN.value && guardado) campoN.value = guardado;
@@ -1500,6 +1513,11 @@
      filamento sazonal não se promete antes de existir. */
   var caixaCores = document.querySelector('[data-cores-peca]');
   var camposCores = document.querySelector('[data-cores-campos]');
+  /* v51: o filamento de cor FIXA do produto (Urubu: Clássico/Perolizado, sempre Vermelho), ou null */
+  function filamentoFixoDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).filamentoFixo || null;
+  }
   /* v42 (áudio 6138: "sempre que ele abrir já vai ter só essas duas palavras, exterior e interior"): produto com
      `soUmModo` esconde a linha Tricolor/Bicolor/Monocromático — o único modo da página é marcado pela capa ao abrir */
   (function () {
@@ -1510,6 +1528,7 @@
      no config.js (`ALEA.fraseCoresDaPeca`); sem ele, nada entra. */
   (function fraseDasCores() {
     var txt = (window.ALEA || {}).fraseCoresDaPeca;
+    if (filamentoFixoDoProduto()) return;   // v51: sem escolha de cor, a frase das cores não cabe
     var tit = caixaCores && caixaCores.querySelector('.rotulo-grupo');
     if (!txt || !tit || caixaCores.querySelector('.dica-cores')) return;
     var p = document.createElement('p');
@@ -1577,6 +1596,8 @@
     /* v42 (áudio 6138, Stria): "exterior e interior, não vai colocar cor exterior e cor interior" — o produto pode dar o
        nome das caixas (modelos3d[slug].partesCor[quantos]); sem isso, Topo/Principal/Base como sempre */
     var nomesDoProduto = (partesCorDoProduto() || {})[quantos];
+    var FF = quantos === 1 ? filamentoFixoDoProduto() : null;   // v51
+    if (FF) ACAB = ACAB.filter(function (ac) { return FF.acabamentos.indexOf(ac.id) >= 0; });
     for (var k = 1; k <= quantos; k++) {
       var parte = partes[k - 1] || ('Cor ' + k);
       var titulo = (nomesDoProduto && nomesDoProduto[k - 1]) || NOME_DA_PARTE[parte] || parte;
@@ -1592,6 +1613,7 @@
         '<select name="cor_' + k + '" data-parte="' + parte.toLowerCase() + '" disabled ' +
         'aria-label="' + titulo + '"><option value="">' + (quantos > 1 ? titulo :
         'Escolha o acabamento acima') + '</option></select>';
+      if (FF) { linha.classList.add('filamento-fixo'); linha.setAttribute('data-titulo', FF.titulo); }
       camposCores.appendChild(linha);
     }
     camposCores.onchange = function (ev) {
@@ -1599,6 +1621,13 @@
       if (!rad) return;
       var dono = rad.closest('.campo-cor');
       var sel = dono.querySelector('select');
+      if (FF) {   // v51: a cor é FIXA — a lista nasce já escolhida (escondida pelo CSS) e só o acabamento muda
+        sel.innerHTML = '<option value="' + FF.cor + '">' + FF.cor + '</option>';
+        sel.value = FF.cor;
+        sel.disabled = false;
+        dono.classList.remove('faltou');
+        return;
+      }
       var tit = dono.getAttribute('data-titulo') || 'Cor';
       var lista = FIL[rad.value] || [];
       sel.innerHTML = '<option value="">' + (quantos > 1 ? tit + ': escolha a cor' : 'Escolha a cor') + '</option>' +
@@ -1636,6 +1665,7 @@
     var FIL = (window.ALEA || {}).filamentos || {};
     var ACAB = (window.ALEA || {}).acabamentos || [];
     var escolhas = [], lista = [], originais = [], partesNomes = [];
+    var FFc = filamentoFixoDoProduto();
     Array.prototype.forEach.call(camposCores.querySelectorAll('.campo-cor'), function (c) {
       var ac = c.querySelector('.acabamento input:checked');
       var sel = c.querySelector('select');
@@ -1644,7 +1674,8 @@
       var def = ACAB.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
       var fil = (FIL[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
       escolhas.push({ acabamento: ac.value, cor: sel.value });
-      lista.push(sel.value + def.sufixo);
+      if (FFc) { partesNomes[partesNomes.length - 1] = FFc.titulo; lista.push(def.rotulo); }   // v51: "Filamento: Perolizado"
+      else lista.push(sel.value + def.sufixo);
       originais.push(fil ? fil.original : sel.value + def.sufixo);
     });
     return {
@@ -1653,7 +1684,7 @@
       originais: originais,
       escolhas: escolhas,
       /* v42: só no produto com partesCor (Stria): o nome de cada caixa, na ordem das cores ("Exterior", "Interior") */
-      partes: partesCorDoProduto() ? partesNomes : undefined,
+      partes: (partesCorDoProduto() || FFc) ? partesNomes : undefined,
       a_combinar: !!r.getAttribute('data-aviso'),
       /* v37: true = o cliente apertou "Pronto" sem escolher e as cores são as da FOTO DE CAPA (aleaAssumirCorDaCapa).
          Na sacola e no pedido sai IGUAL à escolha à mão; o campo é só pra quem lê o pedido no servidor (e-mail v3). */
@@ -1731,7 +1762,7 @@
        (a pergunta "Deseja mesmo não adicionar nome?" saiu). Desmarcado e vazio: a trava de sempre, frase de sempre. */
     var formSN = document.querySelector('[data-personalizar]');
     var semNome = formSN && formSN.hasAttribute('data-sem-nome');
-    if (nome && !nome.value.trim() && !semNome) faltas.push({ el: nome.closest('label') || nome, texto: 'Por favor, digite o nome do pet.' });
+    if (nome && !nome.value.trim() && !semNome) faltas.push({ el: nome.closest('label') || nome, texto: textoFaltaNome() });   // v51
     /* ETAPA 52: com o detalhe marcado, cobra o acabamento e depois a cor do nome */
     if (corNomeBox && !corNomeBox.querySelector('.acabamento input').disabled) {
       var rotNome = corNomeBox.closest('label') || corNomeBox;
@@ -1760,7 +1791,9 @@
             var tt = c.getAttribute('data-titulo') || '';
             qual = 'da cor do ' + tt; qual2 = 'a cor do ' + tt;
           }
-          if (!c.querySelector('.acabamento input:checked')) {
+          if (!c.querySelector('.acabamento input:checked') && filamentoFixoDoProduto()) {
+            faltas.push({ el: c, texto: 'Por favor, escolha o ' + filamentoFixoDoProduto().titulo.toLowerCase() + '.' });   // v51
+          } else if (!c.querySelector('.acabamento input:checked')) {
             faltas.push({ el: c, texto: 'Por favor, escolha o acabamento ' + qual + '.' });
           } else if (!c.querySelector('select').value) {
             faltas.push({ el: c, texto: 'Por favor, escolha ' + qual2 + '.' });

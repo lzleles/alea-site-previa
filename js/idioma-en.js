@@ -523,7 +523,23 @@ window.ALEA_EN = {
 "Pix": "Pix",
 "Boleto": "Bank slip (boleto)",
 "Resumo do pedido": "Order summary",
-"Mensagem para presente": "Gift message"
+"Mensagem para presente": "Gift message",
+"O ālea Urubu Mascote Flamengo nasce para quem carrega o time no peito e quer ter essa paixão à vista, na estante, na mesa de trabalho ou no cantinho da coleção.": "The ālea Urubu Mascote Flamengo is made for anyone who wears the club on their chest and wants that passion on display — on the shelf, on the desk or in their collection corner.",
+"Cheio de detalhes, das cores da camisa à postura de quem entra em campo, ele é produzido peça por peça em PLA, com acabamento Clássico ou Perolizado no vermelho, que ganha brilho e profundidade com a luz.": "Packed with detail, from the jersey colors to the stance of a player walking onto the pitch, it’s made piece by piece in PLA, with a Classic or Pearl finish on the red that picks up shine and depth in the light.",
+"Disponível em três tamanhos: Pequeno, Médio e Gigante. E com um toque só seu: o nome que você escolher vai nas costas, acima do número da camisa.": "Available in three sizes: Small, Medium and Giant. And with a touch that’s all yours: the name you pick goes on the back, above the shirt number.",
+"Mais do que um boneco, é a torcida em forma de peça.": "More than a figure, it’s the whole crowd in one piece.",
+"O nome que você escolher, nas costas, acima do número da camisa, sem custo.": "The name you pick, on the back, above the shirt number, at no extra cost.",
+"Pequeno 25,8 × 21,2 × 7,8 cm · Médio 46,5 × 38,1 × 13,9 cm · Gigante 59,4 × 48,7 × 17,8 cm (altura × largura × profundidade)": "Small 25.8 × 21.2 × 7.8 cm · Medium 46.5 × 38.1 × 13.9 cm · Giant 59.4 × 48.7 × 17.8 cm (height × width × depth)",
+"Nome nas costas": "Name on the back",
+"Filamento": "Filament",
+"Filamento: Clássico": "Filament: Classic",
+"Filamento: Perolizado": "Filament: Pearl",
+"Por favor, digite o nome.": "Please type the name.",
+"Por favor, escolha o filamento.": "Please choose the filament.",
+"Pequeno": "Small",
+"Médio": "Medium",
+"Gigante": "Giant",
+"Grande": "Large"
 };
 
 window.ALEA_EN_RE = [

@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v16 (06/10/2026, cores iniciais por peça no Nodus)
+   status: v17 (06/10/2026, ālea Urubu Mascote Flamengo: nome nas costas)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -119,6 +119,11 @@
          tocando nas peças e a cor fica travada; no 1º toque a peça acende e aparece "Agora escolha a cor"; daí em
          diante cada toque escolhe a peça e a janela de cor de sempre pinta só ela. As cores vão no campo escondido
          `cores_por_peca` (JSON) — o texto do PEDIDO por peça é TBD (os produtos estão "Em breve", compra desligada).
+   v17 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6887/6926 do Cassiano: o nome vai NAS COSTAS, na barrinha acima do número;
+      a v16 está em 03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/): com `cfg.nomeAtras` (config.js v56), tocar no campo
+      do nome gira a peça pra TRÁS (o mesmo giro de 0,6 s do "de frente", em volta do centro) — sem isso o cliente digitaria
+      vendo a barriga do boneco. Tocar na peça continua virando de frente. E a frase de falta do nome vem de
+      `cfg.textoFaltaNome` (o boneco não tem "pet"); sem ela, a de sempre.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -307,7 +312,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   function faltaONome(cn) {
     var rotN = cn.closest('label') || cn;
     rotN.classList.add('faltou');
-    avisarNoPasso('Por favor, digite o nome do pet.', [rotN]);
+    avisarNoPasso(cfg.textoFaltaNome || 'Por favor, digite o nome do pet.', [rotN]);   // v17
     try { cn.focus({ preventScroll: true }); } catch (e) { cn.focus(); }
   }
   /* (8) "Deseja mesmo não adicionar nome?" — SAIU na v11 (áudios 2319-2322: "vamos tirar aquela mensagem"). Fica guardado
@@ -1020,16 +1025,28 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   }
   window.aleaGravarNome = function () { gravar(nomeParaMostrar()); };
   frente = camera.position.clone();
-  function virarPraFrente() {
+  /* v17: o lado do NOME — nas costas (Urubu) = a frente girada meia volta em torno do centro da peça */
+  var ladoDoNome = cfg.nomeAtras ? frente.clone().sub(centro).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI).add(centro) : frente;
+  /* o giro anda EM VOLTA do centro (ângulo, altura e distância), não em linha reta: de frente pra costas, a reta passaria
+     por dentro da peça */
+  function virarPara(alvo) {
     controles.autoRotate = false;
-    var de = camera.position.clone(), t0 = performance.now();
+    var de = camera.position.clone().sub(centro), pra = alvo.clone().sub(centro), t0 = performance.now();
+    var a0 = Math.atan2(de.x, de.z), a1 = Math.atan2(pra.x, pra.z), da = a1 - a0;
+    while (da > Math.PI) da -= 2 * Math.PI;
+    while (da < -Math.PI) da += 2 * Math.PI;
+    var r0 = Math.hypot(de.x, de.z), r1 = Math.hypot(pra.x, pra.z);
     (function passo() {
       var u = Math.min(1, (performance.now() - t0) / 600), e = 1 - Math.pow(1 - u, 3);
-      camera.position.lerpVectors(de, frente, e);
+      var a = a0 + da * e, r = r0 + (r1 - r0) * e;
+      camera.position.set(centro.x + r * Math.sin(a), centro.y + de.y + (pra.y - de.y) * e, centro.z + r * Math.cos(a));
       if (u < 1 && vivo) requestAnimationFrame(passo);
     })();
   }
-  if (campoNome) campoNome.addEventListener('focus', virarPraFrente);
+  function virarPraFrente() { virarPara(frente); }
+  function virarProNome() { virarPara(ladoDoNome); }
+  window.aleaVirarProNome = virarProNome;   // v17: o teste confere a barrinha de costas
+  if (campoNome) campoNome.addEventListener('focus', virarProNome);
   /* (10) TOQUE (sem arrastar) na peça: vira de frente e para; só volta a mexer se arrastar */
   var toque = null;
   canvas.addEventListener('pointerdown', function (e) { toque = { x: e.clientX, y: e.clientY, t: performance.now() }; });

@@ -66,6 +66,11 @@
       lamel_vase) e Longum (o alto, lamel_wavy) — em `formatos` e no `glbPorEscolha`, e entra `iconeFormato['lamel']`
       (miniatura depois do nome, como o Stria). A versão anterior está em
       03_site/_versoes_anteriores/lamel_ovatum_longum_antes_2026-10-06/js/.
+   v56-produto (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6884-6926 do Cassiano): `tamanhos` Pequeno/Médio/Gigante e
+      `modelos3d['urubu-mascote-flamengo']` com 3 campos NOVOS: `filamentoFixo` (produto.js v51: a caixa de cor vira
+      "Filamento" Clássico/Perolizado, cor fixa Vermelho), `nomeAtras` (personalizar3d.js v17: o nome fica nas COSTAS — o
+      campo do nome gira a peça pra trás) e `textoFaltaNome`. A versão anterior está em
+      03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -577,7 +582,9 @@ window.ALEA.tamanhos = {
   'claudia-wave':      ['M', 'G'],   // era ['P','G'] até o áudio 3033
   /* POR FORMATO (04/10/2026, áudio 6228: "o Orbis vai ser mini e pequeno e o Quadrum vai ser pequeno e grande"; 6229: o
      Tamanho só aparece depois do Formato). Lista simples = vale pra qualquer formato; objeto = a lista de cada formato. */
-  'stria-planter':     { Orbis: ['Mini', 'Pequeno'], Quadrum: ['Pequeno', 'Grande'] }
+  'stria-planter':     { Orbis: ['Mini', 'Pequeno'], Quadrum: ['Pequeno', 'Grande'] },
+  /* v56 (06/10/2026, áudio 6895: "pequeno, médio e gigante"; escalas 6902/6910: P 100%, M 180%, G 230% do arquivo dele) */
+  'urubu-mascote-flamengo': ['Pequeno', 'Médio', 'Gigante']
 };
 /* PREÇO POR ESCOLHA (04/10/2026, áudio 6234 do Cassiano): produto com variantes de preço diferente. A chave é
    'Formato|Tamanho' (a mesma do glbPorEscolha). Antes da escolha, a página e o feed mostram "a partir de" + o MENOR preço
@@ -896,3 +903,49 @@ window.ALEA.filamentosPorFoto = {
   "img/produtos/striaplanter_4.jpg": ["Bambu Lab · PLA · Matte · Desert Tan (11401)", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble"],
   "img/produtos/vaseprismatic_capaq.jpg": ["Bambu Lab · PLA · Sparkle · Classic Gold Sparkle", "Elegoo · PETG · PETG · Transparente", "SUNLU · PLA · High Speed Marble · Chestnut Brown Marble", "eSUN · PLA · PLA-Basic · Black"]
 };
+
+/* v56 — 06/10/2026, ālea Urubu Mascote Flamengo (cadastro campo por campo, msgs 6884-6926 do Cassiano). O 3D sai do 3MF DELE
+   ("Urubu Flamengo - A1.3mf", msg 6884), placa 1 = o boneco MONTADO (objeto 161, 44 partes), pelo
+   38_urubu_mascote_2026-10-06/site_3d/ferramentas/montar_urubu_glb_v1.py, com a COR DE FORA de cada triângulo lida da pintura
+   do arquivo (as chuteiras são pintadas: dourado silk + branco silk):
+     urubu.glb ........ SÓ as partes VERMELHAS (filamento 4 do arquivo = Bambu Lab PLA Lite Red) = a zona 'principal', a que o
+                        campo "Filamento" pinta e onde o nome é gravado
+     urubu_fixas.glb .. o resto, FIXO nas cores do arquivo (acessórios do personalizar3d v14), uma malha por filamento
+     urubu_nome.json .. o text_shape "Cacá" (Defante 11) da placa 13 — a BARRINHA das costas, acima do número — levado pra
+                        barrinha igual do boneco montado (casada por forma: distância média 0,78 mm)
+   FILAMENTO (6897-6904, 6912/6913): só o vermelho muda — Clássico = Vermelho Clássico (Bambu Lab PLA Lite Red, o do arquivo);
+   Perolizado = Vermelho Perolizado da lista dele (Multfila Silk Vermelho Metalizado). Branco, preto, amarelo e o resto ficam.
+   NOME GRÁTIS (6926), sem cor (6887): gravado na barrinha, na cor dela — no ARQUIVO o nome é um modificador na extrusora 1
+   (branco); a regra do site (3.1.3) é nunca pintar o nome no 3D. Abre com o nome do arquivo, "Cacá" (como os outros).
+   O limite de letras é a barrinha útil na altura das letras (65,7 mm) menos 2 mm de cada lado: medir_limite_nome_urubu_v1.py.
+   A janela 3D não troca de tamanho (como os comedouros, áudio 3019): o tamanho vai no pedido. */
+window.ALEA.modelos3d['urubu-mascote-flamengo'] = {
+  glb: 'modelos/urubu.glb?v=2026-10-06',
+  acessorios: {
+    glb: 'modelos/urubu_fixas.glb?v=2026-10-06',
+    materiais: {   // a cor do ARQUIVO dele (Metadata/project_settings.config, filament_colour) — nada inventado
+      branco:      { cor: '#F6F6F6', rugosidade: 0.95 },   // f1 ELEGOO PLA Matte White (o hex do site pra ela)
+      preto:       { cor: '#272729', rugosidade: 0.75 },   // f2 eSUN PLA+ preto (#161616 no arquivo; o tom do Preto do site)
+      amarelo:     { cor: '#FEC600', rugosidade: 0.7 },    // f3 Bambu PLA Basic (o bico)
+      laranja:     { cor: '#FF671F', rugosidade: 0.7 },    // f5 Bambu PLA Lite Orange (as pupilas)
+      dourado:     { cor: '#FFC107', rugosidade: 0.35 },   // f6 Multfila PLA Silk (as chuteiras)
+      branco_silk: { cor: '#FFFFFF', rugosidade: 0.35 }    // f7 ELEGOO PLA Silk branco (cadarço, sola, detalhe da chuteira)
+    }
+  },
+  nome: 'modelos/urubu_nome.json?v=2026-10-06',
+  fonte: 'fonts/defante.otf',
+  zonaNome: 'principal',
+  nomeAtras: true,
+  textoFaltaNome: 'Por favor, digite o nome.',
+  soUmModo: true,
+  filamentoFixo: { titulo: 'Filamento', cor: 'Vermelho', acabamentos: ['basico', 'perolizado'] },
+  folgaEnquadrar: 0.9,
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Vermelho' }] },
+  original: {
+    topo:      { site: 'Vermelho', hex: '#C6001A', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Lite · Red (16200)' },
+    principal: { site: 'Vermelho', hex: '#C6001A', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Lite · Red (16200)' },
+    base:      { site: 'Vermelho', hex: '#C6001A', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Lite · Red (16200)' }
+  }
+};
+/* LIMITE-NOME-URUBU (gerado por medir_limite_nome_urubu_v1.py — não editar à mão) */
+window.ALEA.modelos3d['urubu-mascote-flamengo'].limiteNome = {"mm":61.7,"folgaMm":2.0,"larguras":{" ":[2.53,0,0],"!":[2.75,1.03,2.21],"\"":[3.24,0.35,2.88],"#":[7.79,0.36,7.41],"$":[6.54,0.47,6.06],"%":[8.09,0.43,7.66],"&":[7.63,0.47,7.08],"'":[1.9,0.35,1.54],"(":[3.06,0.49,2.78],")":[3.06,0.27,2.56],"*":[3.84,0.38,3.45],"+":[3.75,0.37,3.38],",":[1.85,0.33,1.52],"-":[3.65,0.32,3.32],".":[1.85,0.33,1.51],"/":[3.56,0.29,3.27],"0":[6.05,0.51,5.53],"1":[3.27,0.35,2.71],"2":[5.98,0.47,5.5],"3":[5.98,0.45,5.48],"4":[6.4,0.34,5.96],"5":[5.95,0.48,5.49],"6":[6.13,0.46,5.63],"7":[5.18,0.55,4.79],"8":[6.03,0.49,5.52],"9":[6.13,0.48,5.66],":":[1.98,0.4,1.58],";":[1.98,0.4,1.58],"<":[3.45,0.37,3.01],"=":[3.77,0.38,3.39],">":[3.45,0.44,3.07],"?":[5.72,0.29,5.31],"@":[9.32,0.43,8.85],"A":[6.11,0.05,6.05],"B":[6.48,0.55,6.14],"C":[6.55,0.26,6.33],"D":[6.4,0.55,6.13],"E":[5.78,0.55,5.58],"F":[5.75,0.55,5.58],"G":[6.64,0.26,6.36],"H":[6.68,0.55,6.13],"I":[2.28,0.55,1.73],"J":[6.19,0.16,5.74],"K":[6.3,0.55,6.13],"L":[5.75,0.55,5.58],"M":[7.94,0.55,7.39],"N":[6.69,0.55,6.13],"O":[6.69,0.26,6.42],"P":[6.26,0.55,6.14],"Q":[6.69,0.26,6.42],"R":[6.37,0.55,6.13],"S":[6.27,0.34,5.93],"T":[5.37,0.16,5.19],"U":[6.98,0.41,6.57],"V":[6.11,0.05,6.05],"W":[10.87,0.05,10.8],"X":[6.27,0.05,6.21],"Y":[6.27,0.05,6.21],"Z":[5.43,0.2,5.23],"[":[2.6,0.55,2.31],"\\":[3.56,0.29,3.27],"]":[2.6,0.27,2.04],"^":[3.7,0.31,3.38],"_":[4.72,0.32,4.4],"`":[2.09,0.29,1.74],"a":[5.36,0.23,4.95],"b":[5.62,0.51,5.32],"c":[5.16,0.27,4.96],"d":[5.62,0.3,5.11],"e":[5.34,0.27,5.04],"f":[3.57,0.51,3.71],"g":[5.59,0.29,5.32],"h":[5.73,0.51,5.32],"i":[2.2,0.51,1.69],"j":[2.21,-0.66,1.7],"k":[5.37,0.51,5.32],"l":[2.2,0.51,1.69],"m":[8.48,0.51,8.06],"n":[5.72,0.51,5.32],"o":[5.36,0.27,5.08],"p":[5.62,0.51,5.32],"q":[5.62,0.3,5.11],"r":[4.18,0.51,4.01],"s":[4.85,0.32,4.53],"t":[3.44,0.41,3.19],"u":[5.71,0.4,5.21],"v":[4.93,0.05,4.87],"w":[8.51,0.05,8.45],"x":[4.97,0.08,4.89],"y":[4.93,0.05,4.87],"z":[5.34,0.26,5.08],"{":[3.19,0.4,2.91],"|":[2.02,0.55,1.47],"}":[3.19,0.27,2.79],"~":[5.27,0.34,4.92]," ":[3.42,0,0],"¡":[2.22,0.52,1.7],"¢":[5.51,0.43,5.11],"£":[6.86,0.43,6.41],"¤":[5.08,0.42,4.66],"¥":[7.26,0.55,6.71],"¦":[1.99,0.53,1.45],"§":[6.6,0.51,6.09],"¨":[3.62,0.33,3.28],"©":[8.58,0.44,8.14],"ª":[4.45,0.42,3.99],"«":[6.28,0.31,5.95],"­":[0.0,0,0],"®":[8.59,0.44,8.14],"¯":[3.65,0.32,3.32],"°":[3.86,0.4,3.46],"±":[3.85,0.42,3.42],"²":[3.75,0.44,3.3],"³":[3.74,0.42,3.28],"´":[2.09,0.34,1.8],"¶":[8.3,0.35,7.92],"·":[1.85,0.33,1.51],"¸":[0.74,-0.11,0.91],"¹":[2.21,0.38,1.73],"»":[6.28,0.32,5.96],"¼":[7.94,0.37,7.52],"½":[7.89,0.37,7.46],"¾":[8.69,0.4,8.28],"¿":[5.7,0.38,5.41],"À":[6.11,0.05,6.05],"Á":[6.11,0.05,6.06],"Â":[6.66,0.6,6.6],"Ã":[6.11,0.05,6.05],"Ä":[6.11,0.05,6.05],"Å":[6.11,0.05,6.05],"Æ":[8.29,0.05,8.08],"Ç":[6.55,0.26,6.32],"È":[5.78,0.55,5.58],"É":[5.78,0.55,5.58],"Ê":[5.78,0.55,5.58],"Ë":[5.78,0.55,5.58],"Ì":[2.29,0.41,1.86],"Í":[2.29,0.42,1.87],"Î":[2.28,-0.24,2.52],"Ï":[2.3,-0.33,2.62],"Ñ":[6.69,0.55,6.13],"Ò":[6.69,0.26,6.42],"Ó":[6.69,0.26,6.42],"Ô":[6.69,0.26,6.42],"Õ":[6.69,0.26,6.42],"Ö":[6.69,0.26,6.42],"×":[3.53,0.37,3.15],"Ø":[6.79,0.31,6.47],"Ù":[6.98,0.41,6.57],"Ú":[6.98,0.41,6.57],"Û":[6.98,0.41,6.57],"Ü":[6.98,0.41,6.57],"Ý":[5.94,-0.11,6.05],"ß":[6.41,0.51,6.09],"à":[5.36,0.23,4.95],"á":[5.36,0.23,4.95],"â":[5.36,0.23,4.95],"ã":[5.36,0.23,4.95],"ä":[5.36,0.23,4.95],"å":[5.36,0.23,4.95],"æ":[8.84,0.23,8.53],"ç":[5.16,0.27,4.95],"è":[5.34,0.27,5.04],"é":[5.34,0.27,5.04],"ê":[5.34,0.27,5.04],"ë":[5.34,0.27,5.04],"ì":[2.19,0.36,1.82],"í":[2.19,0.36,1.82],"î":[2.19,-0.29,2.47],"ï":[2.18,-0.38,2.56],"ñ":[5.72,0.51,5.32],"ò":[5.36,0.27,5.08],"ó":[5.36,0.27,5.08],"ô":[5.36,0.27,5.08],"õ":[5.36,0.27,5.08],"ö":[5.36,0.27,5.08],"÷":[3.67,0.33,3.33],"ø":[5.42,0.31,5.11],"ù":[5.72,0.4,5.21],"ú":[5.72,0.4,5.21],"û":[5.72,0.4,5.21],"ü":[5.72,0.4,5.21],"ý":[4.93,0.05,4.87],"ÿ":[4.93,0.05,4.87],"Ā":[6.11,0.05,6.06],"ā":[5.36,0.23,4.95],"Ă":[6.11,0.05,6.05],"ă":[5.36,0.23,4.95],"Ą":[6.11,0.05,6.06],"ą":[5.37,0.23,4.95],"Ć":[6.55,0.26,6.33],"ć":[5.16,0.27,4.96],"Ĉ":[6.55,0.26,6.33],"ĉ":[5.16,0.27,4.96],"Ċ":[6.55,0.26,6.33],"ċ":[5.16,0.27,4.96],"Č":[6.55,0.26,6.33],"č":[5.16,0.27,4.96],"Ď":[6.4,0.55,6.13],"ď":[5.62,0.3,6.73],"Đ":[6.74,0.19,6.47],"đ":[5.62,0.3,5.81],"Ē":[5.78,0.55,5.58],"ē":[5.34,0.27,5.04],"Ĕ":[5.78,0.55,5.58],"ĕ":[5.34,0.27,5.04],"Ė":[5.78,0.55,5.58],"ė":[5.34,0.27,5.04],"Ę":[5.78,0.55,5.58],"ę":[5.34,0.27,5.03],"Ě":[5.78,0.55,5.58],"ě":[5.34,0.27,5.04],"Ĝ":[6.64,0.26,6.36],"ĝ":[5.6,0.29,5.32],"Ğ":[6.64,0.26,6.36],"ğ":[5.6,0.29,5.32],"Ġ":[6.64,0.26,6.36],"ġ":[5.6,0.29,5.32],"Ģ":[6.64,0.26,6.36],"ģ":[5.6,0.29,5.32],"Ĥ":[6.68,0.55,6.13],"ĥ":[5.72,0.51,5.32],"Ħ":[7.23,0.21,7.01],"ħ":[5.72,-0.2,5.31],"Ĩ":[2.28,-0.58,2.86],"ĩ":[2.19,-0.63,2.81],"Ī":[2.29,-0.36,2.64],"ī":[2.2,-0.41,2.6],"Ĭ":[2.28,-0.4,2.67],"ĭ":[2.19,-0.44,2.62],"Į":[2.28,0.55,1.73],"į":[2.2,0.51,1.69],"Ĵ":[6.11,0.09,6.45],"ĵ":[2.21,-0.66,2.49],"Ķ":[6.3,0.55,6.13],"ķ":[5.37,0.51,5.32],"Ĺ":[5.74,0.41,5.57],"ĺ":[2.19,0.36,1.82],"Ļ":[5.75,0.55,5.58],"ļ":[2.18,0.49,1.68],"Ľ":[5.75,0.55,5.58],"ľ":[2.19,0.51,3.31],"Ŀ":[5.75,0.55,5.58],"ŀ":[3.7,0.51,3.61],"Ł":[6.08,0.19,5.91],"ł":[3.3,0.14,3.15],"Ń":[6.69,0.55,6.13],"ń":[5.72,0.51,5.32],"Ņ":[6.69,0.55,6.13],"ņ":[5.71,0.49,5.31],"Ň":[6.69,0.55,6.14],"ň":[5.72,0.51,5.32],"Ō":[6.7,0.26,6.42],"ō":[5.36,0.27,5.08],"Ŏ":[6.69,0.26,6.42],"ŏ":[5.36,0.27,5.08],"Ő":[6.69,0.26,6.42],"ő":[5.36,0.27,5.08],"Œ":[10.48,0.26,10.28],"œ":[8.97,0.27,8.66],"Ŕ":[6.37,0.55,6.14],"ŕ":[4.18,0.51,4.01],"Ŗ":[6.37,0.55,6.14],"ŗ":[4.17,0.49,3.99],"Ř":[6.37,0.55,6.14],"ř":[4.18,0.51,4.01],"Ś":[6.27,0.34,5.93],"Ŝ":[6.28,0.34,5.93],"Ş":[6.27,0.34,5.93],"Š":[6.27,0.34,5.93],"Ţ":[5.37,0.16,5.19],"ţ":[3.43,0.41,3.19],"Ť":[5.37,0.16,5.19],"ť":[3.43,0.41,3.19],"Ŧ":[5.37,0.16,5.19],"ŧ":[3.89,0.15,3.57],"Ũ":[6.97,0.41,6.57],"ũ":[5.72,0.4,5.21],"Ū":[6.98,0.41,6.57],"ū":[5.72,0.4,5.21],"Ŭ":[6.98,0.41,6.57],"ŭ":[5.72,0.4,5.21],"Ů":[6.97,0.41,6.57],"ů":[5.72,0.4,5.21],"Ű":[6.98,0.41,6.57],"ű":[5.72,0.4,5.21],"Ų":[6.98,0.41,6.57],"ų":[5.73,0.4,5.21],"Ŵ":[10.73,-0.01,10.74],"ŵ":[8.51,0.05,8.45],"Ŷ":[5.94,-0.11,6.05],"ŷ":[4.93,0.05,4.87],"Ÿ":[5.94,-0.11,6.05],"Ź":[5.43,0.2,5.23],"ź":[5.34,0.26,5.08],"Ż":[5.43,0.2,5.23],"ż":[5.34,0.26,5.08],"Ž":[5.43,0.2,5.23],"ž":[5.34,0.26,5.08]}};
