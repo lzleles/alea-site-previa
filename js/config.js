@@ -58,6 +58,10 @@
       nome"): o 3D do Poop Bag sai do 3MF NOVO dele (a v3 aprovada no áudio 6594, faixa do nome cortada rente igual o Petra),
       placa 6 "Negative Name" (corpo obj 24 + tampa obj 19), mesmo exportador; `limiteNome` passa a ser a FAIXA RETA
       (medir_limite_nome_poopbag_v3_faixa_reta.py). Os anteriores estão em 03_site/_versoes_anteriores/poop_bag_nome_rente_antes_2026-10-05/.
+   v52-produto (05/10/2026, áudios 6726/6728/6729/6731 do Cassiano): os 6 produtos HOME do lote msg6689 — `ALEA.emBreve` (campo
+      NOVO: "Em breve" no lugar do preço, sem compra; produto.js v49 / feed.js v41 / carrinho.js), `formatos` do Lamel (Vase/Wavy)
+      e do Nodus Organizer (Opção 1/2/3) e os 6 `modelos3d` (glbPorEscolha no Lamel e no Nodus). A versão anterior está em
+      03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -593,8 +597,19 @@ window.ALEA.parcelamento = null;
 /* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
 window.ALEA.formatos = {
-  'stria-planter': ['Orbis', 'Quadrum']
+  'stria-planter': ['Orbis', 'Quadrum'],
+  /* v52 (05/10/2026): ālea Lamel — "a família vai ser só ālea Lamel e lá dentro a opção de escolher qual dos dois vasos" (áudio
+     6728). Nomes PROVISÓRIOS (o nome de cada objeto no arquivo dele: lamel_vase e lamel_wavy) — ele dá os nomes depois. */
+  'lamel': ['Vase', 'Wavy'],
+  /* v52: ālea Nodus Organizer — áudios 6729/6731: Opção 1 = 5 peças (placa 1 + placa 9), Opção 2 = 3 peças (placa 2 + placa 8),
+     Opção 3 = o Centrum (part A + part B). "Opção 1/2/3" são PROVISÓRIOS, ele escolhe os nomes depois. */
+  'nodus-organizer': ['Opção 1', 'Opção 2', 'Opção 3']
 };
+/* v52 — EM BREVE (05/10/2026, áudio 6726 do Cassiano: "você deixa na frente escrito em breve, no lugar do valor (...) amanhã eu vou
+   organizar questão de foto, imprimir"). Produto listado aqui: card e página dizem "Em breve" no lugar do preço, o botão de compra
+   fica desligado e a sacola não aceita (produto.js v49, feed.js v41, carrinho.js); o "Personalize agora" com o 3D funciona.
+   Pra pôr à venda: tirar o slug daqui e dar o preço (VITRINE/PRODUTOS em produtos.js ou precoPorEscolha). */
+window.ALEA.emBreve = ['laptop-stand', 'pen-holder', 'nodus-organizer', 'make', 'makeup-layer-organizer', 'lamel'];
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,
@@ -639,6 +654,36 @@ window.ALEA.modelos3d['stria-planter'] = {
     base:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' }
   }
 };
+/* v52 — 05/10/2026, OS PRODUTOS HOME DO LOTE msg6689 (áudios 6726/6728/6729/6731 do Cassiano), todos "Em breve" (ALEA.emBreve).
+   Os .glb saem dos 3MF OFICIAIS dele (05_bambu/lote_produtos_msg6689_2026-10-05/oficial_msg6720/_OFICIAIS.md) pelo
+   37_produtos_home_lote_2026-10-05/montar_lote_home_v1_encaixe_por_colisao.py: cada peça MONTADA como o cliente recebe (o encaixe
+   medido por colisão, nada chutado — medidas em 37_.../glb/_montagem.json), a logo NEGATIVA de cada arquivo recortada, uma cor só
+   (zona principal). Nenhum é modo vaso (spiral_mode 0 nos 7). Abre em Branco fosco (PROVISÓRIO: sem foto ainda, não há "cor da
+   capa" dele) — trocar `capa`/`original` quando ele mandar as fotos e os filamentos. Sem nome gravado. */
+(function () {
+  var branco = { site: 'Branco', hex: '#F6F6F6', acabamento: 'fosco', oficial: 'Elegoo · PLA · Matte · Matte White' };
+  function cfg(glb, extra) {
+    var c = { glb: glb, semNome: true, rotuloBotao: 'Personalize agora',
+              capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'fosco', cor: 'Branco' }] },
+              original: { topo: branco, principal: branco, base: branco } };
+    for (var k in (extra || {})) c[k] = extra[k];
+    return c;
+  }
+  var V = '?v=2026-10-05';
+  window.ALEA.modelos3d['laptop-stand'] = cfg('modelos/laptopstand.glb' + V);   // os 2 holders, 40 mm entre eles (provisório)
+  window.ALEA.modelos3d['pen-holder'] = cfg('modelos/penholder.glb' + V);
+  window.ALEA.modelos3d['make'] = cfg('modelos/make.glb' + V);                   // fundo + gaveta + tampa
+  window.ALEA.modelos3d['makeup-layer-organizer'] = cfg('modelos/makeup.glb' + V);   // 3 camadas + insert
+  window.ALEA.modelos3d['lamel'] = cfg('modelos/lamel_vase.glb' + V, { glbPorEscolha: {
+    'Vase': 'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase)
+    'Wavy': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy)
+  } });
+  window.ALEA.modelos3d['nodus-organizer'] = cfg('modelos/nodus_opcao1.glb' + V, { glbPorEscolha: {
+    'Opção 1': 'modelos/nodus_opcao1.glb' + V,   // 5 peças: bandeja grande (placa 1) + placa 9, encaixadas
+    'Opção 2': 'modelos/nodus_opcao2.glb' + V,   // 3 peças: bandeja 4 gomos (placa 2) + placa 8
+    'Opção 3': 'modelos/nodus_opcao3.glb' + V    // Centrum: part A + part B no centro
+  } });
+})();
 /* v49 — 04/10/2026, ālea Poop Bag Holder (msg 6285 do Cassiano: "ALEA Poop Bag Holder.3mf"; cadastro 6315-6363). O .glb
    sai da placa 6 "Negative Name" do 3MF dele (corpo obj 22 + tampa obj 17), pelo
    33_produtos_novos_2026-10-04/poop_bag_extra/glb/exportar_glb_configurador_v6_poopbag_v1.py ("1=principal,2=base,3=topo",

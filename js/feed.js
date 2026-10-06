@@ -8,6 +8,9 @@
    validado_em: TBD
    v34 (27/09/2026, áudio 2308): no card, o nome do "× Nome" vai num <span class="nome"> (o degradê mede o nome, e o
       × fica azul sólido). Antes: 03_site/_versoes_anteriores/x_azul_nome_proporcional_antes_2026-09-27/js/feed.js
+   v41 (05/10/2026, áudio 6726 do Cassiano, os produtos HOME do lote msg6689): peça em `ALEA.emBreve` (config.js v52) mostra
+      "Em breve" no lugar do preço do card; peça sem foto mostra a marca num bloco bege com "foto em breve" (CSS v51).
+      Antes: 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/feed.js
    v40 (04/10/2026, msgs 6339/6343/6345 + áudio 6340 do Cassiano): SUBCATEGORIAS. A categoria com `subcategorias`
       (hoje só o HOME: DESK · DECOR · DAILY · MEET · AURA) mostra a fileira delas EMBAIXO DO TÍTULO, no formato do menu.
       Tocou em HOME = aparece TUDO; só filtra se a pessoa tocar numa subcategoria (tocar de novo na mesma solta o filtro).
@@ -114,6 +117,7 @@
   }
   /* v39 (áudio 6234): o preço do card. Com preço por variante, "a partir de" + o menor preço preenchido. */
   function valorDoCard(c) {
+    if ((((window.ALEA || {}).emBreve) || []).indexOf(c.pagina) >= 0) return '<small class="em-breve">Em breve</small>';   // v41
     if (c.preco !== null && c.preco !== undefined) return moeda(c.preco);
     var tab = ((window.ALEA || {}).precoPorEscolha || {})[c.pagina];
     var vs = tab ? Object.keys(tab).map(function (k) { return tab[k]; }).filter(function (v) { return typeof v === 'number'; }) : [];
@@ -244,6 +248,12 @@
           'alt="' + c.produto + ' de ' + c.nome + ' — foto ' + (k + 1) + '">';
       });
 
+      /* v41 (05/10/2026, áudio 6726: "por enquanto eles vão ficar sem foto"): sem foto, o quadrado mostra a marca em
+         bloco bege com "foto em breve" — nunca o quadrado vazio. Chegou a foto dele, entra em `fotos` e isto some. */
+      if (!fotos.length && !c.recorte) {
+        imgs = '<div class="sem-foto" role="img" aria-label="' + c.produto + ' — foto em breve">' +
+          '<span class="sem-foto-marca" aria-hidden="true"></span><span class="sem-foto-texto">foto em breve</span></div>';
+      }
       var quantas = fotos.length + (c.recorte ? 1 : 0);
 
       /* as bolinhas ficam DENTRO do quadrado da foto, no pé dele (2ª rodada de

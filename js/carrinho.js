@@ -4,7 +4,7 @@
    objetivo: Mantém carrinho, dados locais e histórico de pedidos e prepara o fechamento da compra pelo WhatsApp.
    entrada: DOM, configuração global e dados do localStorage
    saida: Gavetas, contador, histórico local e mensagem de pedido no WhatsApp
-   status: ativo (04/10/2026 tarde: "Formato: X" e as cores por parte "Exterior: …, Interior: …" do Stria Planter, produto.js v42; 04/10/2026: sai a frase "Cliente ciente da variação de cor da tela" da descrição do item; 28/09/2026: a descrição do item abre com "Tamanho: X" quando o produto tem tamanho — produto.js v36)
+   status: ativo (05/10/2026: `adicionar` recusa peça "Em breve" — ALEA.emBreve, áudio 6726; antes em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/; 04/10/2026 tarde: "Formato: X" e as cores por parte "Exterior: …, Interior: …" do Stria Planter, produto.js v42; 04/10/2026: sai a frase "Cliente ciente da variação de cor da tela" da descrição do item; 28/09/2026: a descrição do item abre com "Tamanho: X" quando o produto tem tamanho — produto.js v36)
    validado_em: 28/09/2026 (Playwright, 03_site/_testar_tamanhos_v3_2026-09-28.py: sacola e texto do pedido com o tamanho)
 */
 /* =============================================================================
@@ -103,6 +103,9 @@
     total: total,
     textoTotal: textoTotal,     // 25/09/2026: o mesmo texto do total, pra quem precisar (o loja-compra.js tem a regra igual)
     adicionar: function (item) {
+      /* 05/10/2026 (áudio 6726 do Cassiano): peça "Em breve" (ALEA.emBreve, config.js) não entra na sacola — trava aqui
+         também, além do botão desligado no produto.js v49, pra nenhum outro caminho (busca, desejos) furar. */
+      if (item && (((window.ALEA || {}).emBreve) || []).indexOf(item.slug) >= 0) return;
       item.quando = new Date().toISOString();
       itens.push(item);
       salvar();

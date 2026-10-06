@@ -4,7 +4,12 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v48 (04/10/2026, caixinha do Poop Bag: só o quadradinho marca, link pro Poop Bag e voltar no mesmo lugar)
+   status: ativo — v49 (05/10/2026, peça "Em breve": preço vira "Em breve" e não compra; o 3D continua)
+   v49 (05/10/2026, áudio 6726 do Cassiano: "no lugar do valor, em breve (...) só pra me enviar a prévia (...) quero que você já
+     deixe o modelo pronto, pra eu ver se na hora lá do 3D eu personalize"): produto listado em `ALEA.emBreve` (config.js v52)
+     mostra "Em breve" no preço (topo e acima dos botões, sem parcela), o botão de compra fica DESLIGADO dizendo "Em breve",
+     a sacola e a declaração somem e nada vai pro carrinho (carrinho.js também trava). O "Personalize agora" com o 3D
+     funciona igual. A v48 está em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
    v48 (04/10/2026, print 6401 + áudio 6402 do Cassiano): a caixinha do Poop Bag vira <div> (só o quadradinho marca); a
      miniatura e o texto levam à página do Poop Bag (mesma aba); ao sair por eles a personalização e a altura da tela vão pro
      sessionStorage e voltam no "voltar" do navegador se ele recarregar a página (bfcache = já volta intacta). Fundo bege e
@@ -189,6 +194,8 @@
   var telacheia = document.querySelector('[data-telacheia]');
   var caixaAceite = document.querySelector('[data-aceite-caixa]');
   var botaoComprar = document.querySelector('[data-comprar-agora]');
+  /* v49 (áudio 6726): peça "Em breve" — ver o cabeçalho */
+  var emBreve = !!(botaoComprar && (((window.ALEA || {}).emBreve) || []).indexOf(botaoComprar.getAttribute('data-slug')) >= 0);
 
   /* ⚠️ v34 (27/09/2026, áudios 2319-2322 do Cassiano, print 2321 = o quadradinho do aviso de cor como MODELO): "na
      frente do nome, vamos colocar a mensagem 'Sem nome' e o quadradinho (...) se o cliente passar sem marcar essa
@@ -1194,9 +1201,10 @@
 
   function repintarPreco() {
     if (!alvoValor) return;
-    var t = precoTotal();
+    var t = emBreve ? null : precoTotal();
     var html, valorParcela = t;
-    if (t !== null) html = window.aleaDinheiro(t);
+    if (emBreve) html = '<small>Em breve</small>';   // v49
+    else if (t !== null) html = window.aleaDinheiro(t);
     else if (precosEscolha && !escolhaCompleta() && menorPrecoDaEscolha() !== null) {
       valorParcela = menorPrecoDaEscolha();
       html = '<small class="a-partir">a partir de</small> ' + window.aleaDinheiro(valorParcela);
@@ -2155,8 +2163,15 @@
   /* "Comprar agora" põe no carrinho e já leva ao fechamento do pedido. Sem WhatsApp
      configurado, o fechamento não acontece e a gaveta abre com o aviso — em vez de um
      botão que parece funcionar e não vai a lugar nenhum. */
-  if (botaoComprar) botaoComprar.addEventListener('click', function () { porNoCarrinho(true); });
-  if (botaoSacola) botaoSacola.addEventListener('click', function () { porNoCarrinho(false); });
+  if (botaoComprar) botaoComprar.addEventListener('click', function () { if (!emBreve) porNoCarrinho(true); });
+  if (botaoSacola) botaoSacola.addEventListener('click', function () { if (!emBreve) porNoCarrinho(false); });
+  /* v49: "Em breve" — sacola e declaração saem; o botão fica desligado (nomearBotaoPeloEstoque escreve "Em breve") */
+  if (emBreve) {
+    if (botaoSacola) botaoSacola.hidden = true;
+    var aceiteEB = document.querySelector('[data-aceite]');
+    if (aceiteEB) aceiteEB.hidden = true;
+    if (botaoComprar) { botaoComprar.disabled = true; botaoComprar.setAttribute('data-em-breve', ''); }
+  }
 
   /* ==================================================== v39 — o ESTOQUE decide o nome do botão
      ALEA.estoque[slug] = [{ modo: 'monocromatico', escolhas: [{ acabamento, cor }], qtd }]. Sem lista = encomenda. */
@@ -2185,6 +2200,7 @@
   }
   function nomearBotaoPeloEstoque() {
     if (!botaoComprar) return;
+    if (emBreve) { if (botaoComprar.textContent.trim() !== 'Em breve') botaoComprar.textContent = 'Em breve'; return; }   // v49
     var txt = estaEmEstoque() ? 'Comprar agora' : 'Encomendar agora';
     if (botaoComprar.textContent.trim() !== txt) botaoComprar.textContent = txt;
     botaoComprar.setAttribute('data-estoque', txt === 'Comprar agora' ? 'sim' : 'nao');

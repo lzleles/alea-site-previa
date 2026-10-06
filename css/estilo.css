@@ -2625,3 +2625,20 @@ body.nome-dourado {
 .extra-poopbag a.titulo-extra { text-decoration: none; cursor: pointer; }
 .extra-poopbag a.titulo-extra:hover, .extra-poopbag a.titulo-extra:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 .recado-limite-nome { margin: 6px 0 0; }
+
+/* ---- v51 (05/10/2026, áudio 6726 do Cassiano: os produtos HOME do lote msg6689 "por enquanto vão ficar sem foto", "no
+   lugar do valor, em breve"). (1) card SEM FOTO no feed (feed.js v41): bloco bege do tamanho da foto com a marca e
+   "foto em breve" — nunca o quadrado vazio; (2) a página sem foto (gerador v35) usa o mesmo bloco no lugar da colmeia;
+   (3) o botão "Em breve" desligado (produto.js v49). Antes: 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/css/. */
+.sem-foto {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; background: #EAE4DB; border-radius: var(--raio);
+}
+.sem-foto-marca {
+  width: 46%; aspect-ratio: 3 / 1; background: url("../img/marca/e_co/logo_horizontal_oficial.svg") center / contain no-repeat;
+  opacity: .55;
+}
+.sem-foto-texto { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #6B5F57; }
+.produto-topo .sem-foto-pagina { position: relative; width: 100%; aspect-ratio: 1 / 1; }
+.botao[data-em-breve], .botao[data-em-breve]:hover { opacity: .55; cursor: not-allowed; }
+.valor .em-breve { font-size: .8em; }

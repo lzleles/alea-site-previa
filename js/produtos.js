@@ -6,6 +6,8 @@
    saida: Objetos globais de categorias, vitrine e produtos, além de alertas no console
    status: ativo (cabecalho proposto pelo Codex em 2026-09-20, confianca ALTA; conferir na proxima vez que o script rodar)
    validado_em: TBD
+   05/10/2026 (lote msg6689, áudios 6726/6728/6729/6731): +6 produtos HOME "Em breve" na VITRINE (sem foto) e em PRODUTOS
+     (sem texto). A versão anterior está em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
    04/10/2026 (Poop Bag, msgs 6315-6363): o Poop Bag volta à VITRINE depois da Cláudia (R$ 79, poopbag_capaq) e o bloco
      dele em PRODUTOS ganha o cadastro novo (o de 24/09 fica comentado logo abaixo dele). A versão anterior está em
      03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/.
@@ -134,7 +136,16 @@ window.VITRINE = [
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
   { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', sub: 'decor', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
   /* 04/10/2026: 4º produto da HOME (Cassiano, msgs 6122-6153). Capa = IMG_2690 (6146). SEM preço até ele fatiar (6092). */
-  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] }
+  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] },
+  /* 05/10/2026: os 6 do LOTE msg6689 (áudios 6726/6728/6729/6731 do Cassiano), todos "Em breve" (config.js ALEA.emBreve):
+     SEM FOTO por enquanto (fotos: [] -> feed.js v41 mostra o bloco "foto em breve") e sem preço. Subcategorias confirmadas
+     por ele (6731): Desk = Laptop Stand, Pen Holder, Nodus Organizer; Aura = Make, Makeup Layer Organizer; Decor = Lamel. */
+  { produto: 'ālea Laptop Stand',                         nome: 'Laptop Stand', categoria: 'home', sub: 'desk',  preco: null, pagina: 'laptop-stand', recorte: false, fotos: [] },
+  { produto: 'ālea Pen Holder',                           nome: 'Pen Holder', categoria: 'home', sub: 'desk',    preco: null, pagina: 'pen-holder', recorte: false, fotos: [] },
+  { produto: 'ālea Nodus Organizer',                      nome: 'Nodus Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'nodus-organizer', recorte: false, fotos: [] },
+  { produto: 'ālea Make',                                 nome: 'Make', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
+  { produto: 'ālea Makeup Layer Organizer',               nome: 'Makeup Layer Organizer', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: [] },
+  { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] }
 ];
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
@@ -397,6 +408,29 @@ window.PRODUTOS = [
     ],
     galeria: ['striaplanter_1', 'striaplanter_2', 'striaplanter_3', 'striaplanter_4']
   },
+
+  /* ===================================================================================================
+     OS 6 DO LOTE msg6689 (05/10/2026, áudios 6726/6728/6729/6731 do Cassiano) — "Em breve" (config.js ALEA.emBreve).
+     Página: 03_site/01_gerar_paginas_v35_lote_home_em_breve_2026-10-05.py (clone do Vase Prismatic, sem foto, sem texto).
+     3D: modelos/*.glb do 37_produtos_home_lote_2026-10-05/montar_lote_home_v1_encaixe_por_colisao.py (montados, logo recortada).
+     - SEM TEXTO (paragrafos vazios): "amanhã eu vou organizando um por um, falando de descrição e tudo" (6726) — nunca inventar.
+     - capa 'em_breve' = a capa PROVISÓRIA bege "foto em breve" (03_site/_gerar_capa_em_breve_v1_2026-10-05.py), só pra busca
+       e lista de desejos não quebrarem; sai quando chegar a foto dele.
+     - Lamel: formatos Vase/Wavy (nomes provisórios, 6728). Nodus Organizer: Opção 1/2/3 (provisórios, 6729/6731; a Opção 3 é o
+       Centrum, que NÃO é produto separado — 6731).
+     =================================================================================================== */
+  { slug: 'laptop-stand', nome: 'ālea Laptop Stand', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'pen-holder', nome: 'ālea Pen Holder', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'make', nome: 'ālea Make', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'makeup-layer-organizer', nome: 'ālea Makeup Layer Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'lamel', nome: 'ālea Lamel', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
 
   /* ===================================================================================================
      OS PRODUTOS ANTIGOS — fora da vitrine desde 25/09/2026 (msg 1884). As páginas continuam no disco e
