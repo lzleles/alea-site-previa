@@ -539,7 +539,16 @@ window.ALEA_EN = {
 "Pequeno": "Small",
 "Médio": "Medium",
 "Gigante": "Giant",
-"Grande": "Large"
+"Grande": "Large",
+"Pequeno porte": "Small breeds",
+"Médio e grande porte": "Medium & large breeds",
+"Tamanho: Pequeno porte": "Size: Small breeds",
+"Tamanho: Médio e grande porte": "Size: Medium & large breeds",
+"Pequeno porte 15,7 × 15,9 × 15,9 cm · Médio e grande porte 18,0 × 18,2 × 18,2 cm (altura × largura × comprimento)": "Small breeds 15.7 × 15.9 × 15.9 cm · Medium & large breeds 18.0 × 18.2 × 18.2 cm (height × width × length)",
+"Pequeno porte 13,3 × 16,6 × 16,2 cm · Médio e grande porte 15,0 × 18,8 × 18,4 cm (altura × largura × comprimento)": "Small breeds 13.3 × 16.6 × 16.2 cm · Medium & large breeds 15.0 × 18.8 × 18.4 cm (height × width × length)",
+"ālea Pet Bowl Caesar": "ālea Pet Bowl Caesar",
+"ālea Pet Bowl Prisma": "ālea Pet Bowl Prisma",
+"ālea Pet Petra": "ālea Pet Petra"
 };
 
 window.ALEA_EN_RE = [

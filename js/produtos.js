@@ -6,6 +6,8 @@
    saida: Objetos globais de categorias, vitrine e produtos, além de alertas no console
    status: ativo (cabecalho proposto pelo Codex em 2026-09-20, confianca ALTA; conferir na proxima vez que o script rodar)
    validado_em: TBD
+   06/10/2026 (Caesar, Prisma e Petra, msg 7047 do Cassiano): VITRINE logo depois da Cláudia (sem foto) e PRODUTOS (sem texto,
+     descrição depois). A versão anterior está em 03_site/_versoes_anteriores/caesar_prisma_petra_antes_2026-10-06/js/.
    06/10/2026 (ālea Urubu Mascote Flamengo, cadastro campo por campo msgs 6884-6926 do Cassiano): 1º produto da categoria
      FAN — VITRINE (sem foto: "foto em breve") e PRODUTOS (texto DELE fechado em 6918-6922, preço sob consulta). A versão
      anterior está em 03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
@@ -129,6 +131,12 @@ window.VITRINE = [
      config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
   { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
+  /* 06/10/2026 (msg 7047 do Cassiano: "pode adicionar os três (...) pode fazer o campo deles lá"): Caesar, Prisma e Petra,
+     logo depois da Cláudia, SEM FOTO por enquanto ("foto em breve") e sem texto. Caesar com preço por tamanho (config.js
+     precoPorEscolha, o feed mostra "a partir de"); Prisma e Petra Sob consulta. Título = nome do arquivo dele (ALEA -> ālea). */
+  { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: false, fotos: [] },
+  { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: false, fotos: [] },
+  { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: null, pagina: 'pet-petra',         recorte: false, fotos: [] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
   { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 79, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag_capaq'] },
@@ -472,6 +480,20 @@ window.PRODUTOS = [
       'Disponível em três tamanhos: Pequeno, Médio e Gigante. E com um toque só seu: o nome que você escolher vai nas costas, acima do número da camisa.',
       'Mais do que um boneco, é a torcida em forma de peça.'
     ], galeria: [] },
+
+  /* ===================================================================================================
+     CAESAR, PRISMA e PETRA (06/10/2026, msg 7047 do Cassiano: "pode adicionar os três, depois a gente faz a descrição").
+     Página: 03_site/01_gerar_paginas_v37_caesar_prisma_petra_2026-10-06.py (clone do Luke, sem foto, sem texto).
+     3D: modelos/caesar|prisma|petra.glb + _nome.json, dos 3MF DELE (msgs 7044-7046), placa 1 de cada (o tamanho menor).
+     Material PLA: lido do project_settings dos 3 (filament_type PLA). Cores da peça: só Monocromático (uma cor por peça
+     no arquivo). Texto e fotos: ELE manda depois (paragrafos e galeria vazios, de propósito).
+     =================================================================================================== */
+  { slug: 'pet-bowl-caesar', nome: 'ālea Pet Bowl Caesar', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'pet-bowl-prisma', nome: 'ālea Pet Bowl Prisma', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'pet-petra', nome: 'ālea Pet Petra', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: [] },
 
   /* ===================================================================================================
      OS PRODUTOS ANTIGOS — fora da vitrine desde 25/09/2026 (msg 1884). As páginas continuam no disco e

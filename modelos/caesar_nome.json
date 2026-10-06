@@ -1,0 +1,62 @@
+{
+ "matriz_mundo_zup": [
+  [
+   0.0008734179427847266,
+   0.0,
+   0.0,
+   -0.0011092424392700195
+  ],
+  [
+   0.0,
+   0.0,
+   -0.0008734179427847266,
+   -0.05882471054792404
+  ],
+  [
+   0.0,
+   0.0008734179427847266,
+   0.0,
+   0.011492027901113033
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "bbox_local_texto": [
+  [
+   -34.47999954223633,
+   -6.0,
+   -1.9850000143051147
+  ],
+  [
+   37.02000045776367,
+   8.0,
+   0.014999985694885254
+  ]
+ ],
+ "text_info": {
+  "text": "K L A U S",
+  "font_name": "Defante",
+  "font_version": "2.5",
+  "style_name": "Recomendado",
+  "boldness": "0",
+  "skew": "0",
+  "font_index": "-1",
+  "font_size": "20",
+  "thickness": "2",
+  "embeded_depth": "0",
+  "rotate_angle": "0",
+  "text_gap": "0",
+  "bold": "0",
+  "italic": "0",
+  "surface_type": "0",
+  "hit_mesh": "0",
+  "hit_position": "0 0 0",
+  "hit_normal": "0 0 0"
+ },
+ "altura_peca_m": 0.15721523761749268,
+ "origem": "trabalho/caesar objeto 4 (exportar_glb_configurador_v3)"
+}

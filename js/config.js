@@ -71,6 +71,11 @@
       "Filamento" Clássico/Perolizado, cor fixa Vermelho), `nomeAtras` (personalizar3d.js v17: o nome fica nas COSTAS — o
       campo do nome gira a peça pra trás) e `textoFaltaNome`. A versão anterior está em
       03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
+   v57-produto (06/10/2026, msg 7047 do Cassiano: Caesar, Prisma e Petra "o campo deles lá", descrição depois):
+      `modelos3d` 'pet-bowl-caesar' / 'pet-bowl-prisma' / 'pet-petra' com o campo NOVO `nomeRelevo` (personalizar3d.js v18),
+      `tamanhos` do Caesar e do Prisma (Petra tem um tamanho só no arquivo) e o preço do Caesar (149/179) em
+      `precoPorEscolha`. E os rótulos dos 2 tamanhos de TODOS os comedouros viram 'Pequeno porte' / 'Médio e grande porte'
+      (áudio 7054; eram 'M'/'G'), nas listas e nas chaves de `precoPorEscolha`. A versão anterior está em 03_site/_versoes_anteriores/caesar_prisma_petra_antes_2026-10-06/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -563,6 +568,56 @@ window.ALEA.modelos3d['vase-prismatic'] = {
   }
 };
 
+/* 06/10/2026 — CAESAR, PRISMA e PETRA (msg 7047 do Cassiano: "pode adicionar os três, depois a gente faz a descrição, pode
+   fazer o campo deles lá"; os 3MF dele, msgs 7044-7046, em 42_comedouros_site_caesar_prisma_petra_2026-10-06/_original/).
+   Os .glb saem do 07_render_capa/exportar_glb_configurador_v6_peca_sem_nome_deitada.py (80000 faces, EM PÉ), depois do
+   42_.../ferramentas/preparar_3mf_para_glb_v1.py, que só troca na CÓPIA o subtipo do nome e da logo de MODIFICADOR pra
+   negativo (o exportador só lê o quadro do nome a partir do negativo; logo de comedouro é sempre recorte, ofício 3.1.4).
+   A janela mostra o tamanho MENOR do arquivo (áudio 3019), placa 1 dos três (objeto 4). Uma zona só (o arquivo é de uma
+   cor por peça) -> só Monocromático. `nomeRelevo` (personalizar3d.js v18): o nome é MODIFICADOR no arquivo -> pra FORA,
+   em relevo, na cor do objeto (ofício 3.1.3, áudios 5306/5310). As cores `original` são as do project_settings do 3MF.
+   Caesar: corpo SUNLU PLA Marble (= Mármore); o nome do arquivo é dourado (Bambu PLA Silk+ #F4A925, que NÃO está na
+     lista do site) -> sem `capa.nome` até ele dizer a cor (nunca por palpite).
+   Prisma: corpo Bambu PLA Sparkle #2D2B28 (NÃO está na lista do site; a mais perto é o Preto) -> abre na cor do arquivo,
+     SEM `capa` (o formulário não pré-marca uma cor que o site não vende) até ele dizer.
+   Petra: corpo Bambu PLA Sparkle Classic Gold = "Dourado com Glitter" (Clássico); nome branco no arquivo (Bambu PLA Basic
+     White, fora da lista) -> sem `capa.nome`. */
+window.ALEA.modelos3d['pet-bowl-caesar'] = {
+  glb: 'modelos/caesar.glb?v=2026-10-06',
+  nome: 'modelos/caesar_nome.json?v=2026-10-06',
+  fonte: 'fonts/defante.otf',
+  nomeRelevo: true,
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Mármore' }] },
+  original: {
+    topo:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    principal: { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
+    base:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' }
+  }
+};
+window.ALEA.modelos3d['pet-bowl-prisma'] = {
+  glb: 'modelos/prisma.glb?v=2026-10-06',
+  nome: 'modelos/prisma_nome.json?v=2026-10-06',
+  fonte: 'fonts/defante.otf',
+  nomeRelevo: true,
+  original: {
+    topo:      { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
+    principal: { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
+    base:      { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' }
+  }
+};
+window.ALEA.modelos3d['pet-petra'] = {
+  glb: 'modelos/petra.glb?v=2026-10-06',
+  nome: 'modelos/petra_nome.json?v=2026-10-06',
+  fonte: 'fonts/defante.otf',
+  nomeRelevo: true,
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Dourado com Glitter' }] },
+  original: {
+    topo:      { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
+    principal: { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
+    base:      { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
+  }
+};
+
 /* TAMANHOS À VENDA (28/09/2026, áudios do Cassiano ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho (...)
    arrumar uma opção lá no site"). A página ganha o grupo "Tamanho" (produto.js v36) logo acima do "Personalize aqui";
    escolher é OBRIGATÓRIO e o tamanho vai no item da sacola, no Resumo do Pedido e na mensagem do pedido ("Tamanho: M").
@@ -577,14 +632,22 @@ window.ALEA.modelos3d['vase-prismatic'] = {
    estão "Sob consulta"); se um dia o G custar mais, é decisão do Cassiano/Lázaro e entra como campo novo, não aqui.
    Produto fora desta lista = sem o grupo Tamanho (nada muda na página). */
 window.ALEA.tamanhos = {
-  'luke-bowl':         ['M', 'G'],
-  'matteo-texturized': ['M', 'G'],   // era ['P','G'] até o áudio 3033
-  'claudia-wave':      ['M', 'G'],   // era ['P','G'] até o áudio 3033
+  /* v57 (06/10/2026, áudio 7054 do Cassiano: "ao invés de P, M, G (...) vai ser pequeno porte, uma opção. A segunda opção vai ser
+     médio e grande porte"): os 2 tamanhos de TODO comedouro passam a ser 'Pequeno porte' (era o M = 1º valor) e 'Médio e
+     grande porte' (era o G = 2º valor). O rótulo vai no pedido ("Tamanho: Pequeno porte"). Antes: ['M', 'G']. */
+  'luke-bowl':         ['Pequeno porte', 'Médio e grande porte'],
+  'matteo-texturized': ['Pequeno porte', 'Médio e grande porte'],   // era ['P','G'] até o áudio 3033, ['M','G'] até o 7054
+  'claudia-wave':      ['Pequeno porte', 'Médio e grande porte'],   // idem
   /* POR FORMATO (04/10/2026, áudio 6228: "o Orbis vai ser mini e pequeno e o Quadrum vai ser pequeno e grande"; 6229: o
      Tamanho só aparece depois do Formato). Lista simples = vale pra qualquer formato; objeto = a lista de cada formato. */
   'stria-planter':     { Orbis: ['Mini', 'Pequeno'], Quadrum: ['Pequeno', 'Grande'] },
   /* v56 (06/10/2026, áudio 6895: "pequeno, médio e gigante"; escalas 6902/6910: P 100%, M 180%, G 230% do arquivo dele) */
-  'urubu-mascote-flamengo': ['Pequeno', 'Médio', 'Gigante']
+  'urubu-mascote-flamengo': ['Pequeno', 'Médio', 'Gigante'],
+  /* v57 (06/10/2026, msg 7047): os 2 tamanhos com os rótulos do áudio 7054 (acima). Medido nos
+     3MF dele: Caesar Pequeno porte = placas 1/2 (15,9 cm), Médio e grande porte = placas 4/5 (18,2 cm); Prisma Pequeno porte = placa 1, Médio e grande = placa 2 "Ampulheta".
+     Petra: o arquivo tem UM tamanho só (20,0 × 6,8 cm, boca do M) -> sem o grupo Tamanho até ele dizer. */
+  'pet-bowl-caesar':   ['Pequeno porte', 'Médio e grande porte'],
+  'pet-bowl-prisma':   ['Pequeno porte', 'Médio e grande porte']
 };
 /* PREÇO POR ESCOLHA (04/10/2026, áudio 6234 do Cassiano): produto com variantes de preço diferente. A chave é
    'Formato|Tamanho' (a mesma do glbPorEscolha). Antes da escolha, a página e o feed mostram "a partir de" + o MENOR preço
@@ -596,9 +659,12 @@ window.ALEA.precoPorEscolha = {
   /* v45 — msg 6255 do Cassiano (04/10/2026 18:08): "Pet Bowl Matteo 149,00 179,00 / Ayla 299,00 / Luke 149,00 189,00 /
      Claudia 169,00 219,00" (+ Caesar 149/179 e Poop Bag 79, que NÃO entram: Caesar ainda não tem página, 6256; Poop Bag
      fica fora, 6258). 1º valor = M, 2º = G. Sem Formato, a chave é só o tamanho; sem tamanho (Ayla), a chave é ''. */
-  'luke-bowl':         { 'M': 149, 'G': 189 },
-  'matteo-texturized': { 'M': 149, 'G': 179 },
-  'claudia-wave':      { 'M': 169, 'G': 219 },
+  /* v57 (áudio 7054): a chave é o rótulo novo do tamanho (era 'M'/'G'); os valores não mudaram */
+  'luke-bowl':         { 'Pequeno porte': 149, 'Médio e grande porte': 189 },
+  'matteo-texturized': { 'Pequeno porte': 149, 'Médio e grande porte': 179 },
+  'claudia-wave':      { 'Pequeno porte': 169, 'Médio e grande porte': 219 },
+  /* v57 (06/10/2026): o Caesar anotado em 04/10 18:08 (msg 6255: 149/179; 1º = Pequeno porte, 2º = Médio e grande porte). Prisma e Petra sem preço = Sob consulta. */
+  'pet-bowl-caesar':   { 'Pequeno porte': 149, 'Médio e grande porte': 179 },
   'ayla-pompom':       { '': 299 }
 };
 /* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada

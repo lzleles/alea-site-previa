@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v17 (06/10/2026, ālea Urubu Mascote Flamengo: nome nas costas)
+   status: v18 (06/10/2026, Caesar/Prisma/Petra: nome em relevo, `cfg.nomeRelevo`)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -124,6 +124,12 @@
       do nome gira a peça pra TRÁS (o mesmo giro de 0,6 s do "de frente", em volta do centro) — sem isso o cliente digitaria
       vendo a barriga do boneco. Tocar na peça continua virando de frente. E a frase de falta do nome vem de
       `cfg.textoFaltaNome` (o boneco não tem "pet"); sem ela, a de sempre.
+   v18 (06/10/2026, msg 7047 do Cassiano: Caesar, Prisma e Petra no site; a v17 está em
+      03_site/_versoes_anteriores/caesar_prisma_petra_antes_2026-10-06/js/): nos 3 o nome do arquivo é MODIFICADOR, e a regra dele
+      (áudios 5306/5310, 02/10/2026, ofício 3.1.3) é: modificador = nome pra FORA, em relevo, na cor do objeto. Com `cfg.nomeRelevo`
+      a letra sai a espessura do arquivo (thickness) pra fora da parede e se SOMA à peça (CSG ADDITION, em vez da SUBTRACTION da
+      gravação); sem cor ela é o mesmo filamento da peça, sem a sombra de gravação; com "Um detalhe que transforma" a própria letra
+      leva a cor (a letra preenchida por dentro não aparece). Peça sem `nomeRelevo` = exatamente como na v17.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -741,6 +747,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   avaliador.useGroups = true;
   avaliador.attributes = ['position', 'normal'];
   var resultado = null, preenchida = null, nomeColorido = false, frente = null;
+  var relevo = !semNome && !!cfg.nomeRelevo;    // v18
 
   function gravar(nome) {
     nome = (nome || '').trim();
@@ -767,7 +774,9 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
         var S = hit ? hit.point : plano;
         var pi = S.clone().addScaledVector(fora, frente ? -0.00015 : -PROF);   // letra preenchida: rente, por dentro
         posPreenchida.push(pi.x, pi.y, pi.z);
-        v.copy(S).addScaledVector(fora, frente ? 0.0015 : -PROF);
+        /* v18: nome em RELEVO (cfg.nomeRelevo) — a frente da letra sai PROF pra fora da parede e o pé entra 0,3 mm nela */
+        if (relevo) v.copy(S).addScaledVector(fora, frente ? PROF : -0.0003);
+        else v.copy(S).addScaledVector(fora, frente ? 0.0015 : -PROF);
         pos.setXYZ(i, v.x, v.y, v.z);
       }
       pos.needsUpdate = true;
@@ -781,11 +790,11 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       if (preenchida) { cena.remove(preenchida); preenchida.geometry.dispose(); }
       var gp = t.clone(); gp.setAttribute('position', new THREE.Float32BufferAttribute(posPreenchida, 3)); gp.computeVertexNormals();
       preenchida = new THREE.Mesh(gp, matLetra);
-      preenchida.visible = nomeColorido;
+      preenchida.visible = nomeColorido && !relevo;     // v18: no relevo a própria letra leva a cor
       cena.add(preenchida);
       var textoBrush = new CSG.Brush(t, matLetra);
       textoBrush.updateMatrixWorld();
-      try { alvo = avaliador.evaluate(corpoBrush, textoBrush, CSG.SUBTRACTION); }
+      try { alvo = avaliador.evaluate(corpoBrush, textoBrush, relevo ? CSG.ADDITION : CSG.SUBTRACTION); }
       catch (e) { console.warn('gravação do nome falhou', e); alvo = corpoBrush; }
     }
     if (!nome && preenchida) { cena.remove(preenchida); preenchida.geometry.dispose(); preenchida = null; }
@@ -869,9 +878,15 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     var extra = form.querySelector('[data-extra-caixa]');
     var corNome = extra && extra.checked ? escolhaDoCampo(form.querySelector('.campo-cor-nome')) : null;
     nomeColorido = !!corNome;
-    if (preenchida) preenchida.visible = nomeColorido;
+    if (preenchida) preenchida.visible = nomeColorido && !relevo;
     if (corNome) pintar(matLetra, corNome.hex, corNome.acab, corNome.fil);
-    else {
+    else if (relevo) {
+      /* v18: letra em relevo SEM cor = o mesmo filamento da peça, sem a sombra de gravação (o relevo aparece na luz) */
+      var mzR = mats[zonaNome];
+      matLetra.color.copy(mzR.color); matLetra.roughness = mzR.roughness; matLetra.metalness = mzR.metalness;
+      ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mzR._alea[k].value; });
+      matLetra._alea.uMapaMm.value.copy(mzR._alea.uMapaMm.value);
+    } else {
       /* (6) a letra é a MESMA cor da peça; só a sombra de dentro muda de tom pra ler: peça escura -> um pouco mais
          clara; peça clara -> um pouco mais escura. Sem contorno, sem brilho (o cliente não pode achar que vem assim) */
       var mz = mats[zonaNome];
