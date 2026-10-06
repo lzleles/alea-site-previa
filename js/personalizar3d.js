@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v14 (04/10/2026, Poop Bag: acessórios fixos + miniatura do Poop Bag pra caixinha dos comedouros)
+   status: v16 (06/10/2026, cores iniciais por peça no Nodus)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -105,6 +105,9 @@
       2. fotoDoPoopBag(cfg, est), exportada: o porta-saquinho montado FORA da tela, nas cores e com o nome do comedouro, pra
          miniatura da caixinha "Adicionar Poop Bag Holder + R$ 49,00" (produto.js v46). Quem pede: o fechar() da janela,
          só nos slugs de ALEA.extraPoopBag (pedirMiniaturaPoopBag). Comedouro sem isso = nada muda.
+   v16 (06/10/2026, foto 6799 + áudio 6800 e foto 6802 + msg 6803 do Cassiano: "quero que deixe essas cores aí selecionadas
+      (...) vai ficar chamativo e bonito pro cliente ver"; a v15 está em 03_site/_versoes_anteriores/lista_nao_abre_sozinha_antes_2026-10-06/js/):
+      peça de TOQUE NA PEÇA abre nas cores de `cfg.coresIniciais` (por .glb) quando o cliente ainda não escolheu nada.
    v15 (06/10/2026, os produtos HOME do lote msg6689 — áudios 6739/6744/6750/6757/6763/6768 do Cassiano; a v14 está em
       03_site/_versoes_anteriores/toque_na_peca_antes_2026-10-06/js/):
       1. A GRAVAÇÃO DA LOGO À VISTA (6739: "a meia capivara embaixo não aparece inteira"): o .glb traz a gravação numa malha
@@ -1048,6 +1051,11 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       var sv = JSON.parse(((form && form.querySelector('input[name="cores_por_peca"]')) || {}).value || '{}');
       if (sv.glb === cfg.glb) salvas = sv.pecas || [];
     } catch (e) { salvas = []; }
+    /* v16 (foto 6799 + áudio 6800, foto 6802 + msg 6803): sem escolha salva, a peça abre nas cores que ELE deixou
+       (cfg.coresIniciais[<pedaço do nome do .glb>] = [{ peca, acabamento, cor }], config.js v54) */
+    if (!salvas.length && cfg.coresIniciais) {
+      Object.keys(cfg.coresIniciais).forEach(function (k) { if (!salvas.length && cfg.glb.indexOf(k) >= 0) salvas = cfg.coresIniciais[k]; });
+    }
     salvas.forEach(function (s) {
       var f = filamento(s.acabamento, s.cor);
       if (!f || !f.hex) return;

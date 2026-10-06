@@ -62,6 +62,10 @@
       NOVO: "Em breve" no lugar do preço, sem compra; produto.js v49 / feed.js v41 / carrinho.js), `formatos` do Lamel (Vase/Wavy)
       e do Nodus Organizer (Opção 1/2/3) e os 6 `modelos3d` (glbPorEscolha no Lamel e no Nodus). A versão anterior está em
       03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
+   v55-produto (06/10/2026, fotos 6809/6810 do Cassiano): os formatos do Lamel ganham os nomes DELE — Ovatum (o oval,
+      lamel_vase) e Longum (o alto, lamel_wavy) — em `formatos` e no `glbPorEscolha`, e entra `iconeFormato['lamel']`
+      (miniatura depois do nome, como o Stria). A versão anterior está em
+      03_site/_versoes_anteriores/lamel_ovatum_longum_antes_2026-10-06/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -600,7 +604,8 @@ window.ALEA.formatos = {
   'stria-planter': ['Orbis', 'Quadrum'],
   /* v52 (05/10/2026): ālea Lamel — "a família vai ser só ālea Lamel e lá dentro a opção de escolher qual dos dois vasos" (áudio
      6728). Nomes PROVISÓRIOS (o nome de cada objeto no arquivo dele: lamel_vase e lamel_wavy) — ele dá os nomes depois. */
-  'lamel': ['Vase', 'Wavy'],
+  /* v55 (06/10/2026, fotos 6809/6810 do Cassiano): os nomes DELE — Vase (o oval) vira Ovatum, Wavy (o alto) vira Longum. */
+  'lamel': ['Ovatum', 'Longum'],
   /* v52: ālea Nodus Organizer — áudios 6729/6731: Opção 1 = 5 peças (placa 1 + placa 9), Opção 2 = 3 peças (placa 2 + placa 8),
      Opção 3 = o Centrum (part A + part B). "Opção 1/2/3" são PROVISÓRIOS, ele escolhe os nomes depois. */
   'nodus-organizer': ['Opção 1', 'Opção 2', 'Opção 3']
@@ -621,6 +626,13 @@ window.ALEA.iconeFormato = {
     lado: 'depois',      // v48: "na frente da palavra" (6269/6271/6275) lido como DEPOIS do nome; 'antes' se ele disser o contrário
     miniatura: { Orbis: 'img/stria_formato_orbis.png?v=marmore', Quadrum: 'img/stria_formato_quadrum.png?v=marmore' },   // v48: ?v= pra o celular não mostrar a cinza do cache
     simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
+  },
+  /* v55 (06/10/2026, foto 6810: "com a miniatura depois da palavra", igual ao Stria): render do .glb do site em Branco (a cor
+     em que o Lamel abre) pelo 37_produtos_home_lote_2026-10-05/miniatura_formato_lamel_v1_branco.py. */
+  'lamel': {
+    modo: 'miniatura',
+    lado: 'depois',
+    miniatura: { Ovatum: 'img/lamel_formato_ovatum.png?v=2026-10-06', Longum: 'img/lamel_formato_longum.png?v=2026-10-06' }
   }
 };
 
@@ -673,20 +685,45 @@ window.ALEA.modelos3d['stria-planter'] = {
      própria, Nodus Opção 1 em escadinha, Make com a tampa assentada e a gaveta 25 mm pra fora) e o Make, o Makeup e o
      Nodus ganham `pecas: true` = TOQUE NA PEÇA com tutorial (personalizar3d.js v15; áudios 6744/6750/6757/6763/6768).
      `soUmModo`: some a linha "Monocromático" — a janela de cor pinta a peça tocada. Tudo abre branco (6759). */
-  var V = '?v=2026-10-06';
+  /* v54 (06/10/2026): os .glb saem do montar_lote_home_v3_logo_rompe_o_fundo.py (a gravação da logo estava TAPADA por uma
+     película do fundo no Make, Makeup, Nodus, Lamel e parte do Pen Holder — áudios 6796/6798/6807); ?v sobe pra 2026-10-06b. */
+  var V = '?v=2026-10-06b';
   var P = { pecas: true, soUmModo: true };
   window.ALEA.modelos3d['laptop-stand'] = cfg('modelos/laptopstand.glb' + V);   // os 2 holders, 40 mm entre eles (provisório); 1 cor (6770)
   window.ALEA.modelos3d['pen-holder'] = cfg('modelos/penholder.glb' + V);
   window.ALEA.modelos3d['make'] = cfg('modelos/make.glb' + V, P);                // peca_0 fundo, peca_1 gaveta, peca_2 tampa
   window.ALEA.modelos3d['makeup-layer-organizer'] = cfg('modelos/makeup.glb' + V, P);   // peca_0..2 camadas de baixo pra cima, peca_3 copinho
   window.ALEA.modelos3d['lamel'] = cfg('modelos/lamel_vase.glb' + V, { glbPorEscolha: {
-    'Vase': 'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase)
-    'Wavy': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy)
+    'Ovatum': 'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase) — v55: era 'Vase'
+    'Longum': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy) — v55: era 'Wavy'
   } });
   window.ALEA.modelos3d['nodus-organizer'] = cfg('modelos/nodus_opcao1.glb' + V, { pecas: true, soUmModo: true, glbPorEscolha: {
     'Opção 1': 'modelos/nodus_opcao1.glb' + V,   // 5 peças: bandeja grande (placa 1) + placa 9, encaixadas
     'Opção 2': 'modelos/nodus_opcao2.glb' + V,   // 3 peças: bandeja 4 gomos (placa 2) + placa 8
     'Opção 3': 'modelos/nodus_opcao3.glb' + V    // Centrum: part A + part B no centro
+  },
+  /* v54 (06/10/2026, foto 6799 + áudio 6800 e foto 6802 + msg 6803 do Cassiano): abre nas cores que ELE deixou na prévia.
+     Nome de cada cor = o tom medido nas fotos dele contra a lista Fosco (o dropdown mostrava Caramelo na 6799 e Areia na
+     6802); peça = altura medida no .glb (peca_0 = base). */
+  coresIniciais: {
+    'nodus_opcao1': [
+      { peca: 0, acabamento: 'fosco', cor: 'Branco' },        // base
+      { peca: 4, acabamento: 'fosco', cor: 'Cáqui' },         // 31 mm
+      { peca: 2, acabamento: 'fosco', cor: 'Caramelo' },      // 51 mm
+      { peca: 1, acabamento: 'fosco', cor: 'Azul Bebê' },     // 71 mm
+      { peca: 3, acabamento: 'fosco', cor: 'Verde Menta' },   // 91 mm
+      { peca: 5, acabamento: 'fosco', cor: 'Amarelo' }        // 111 mm
+    ],
+    'nodus_opcao2': [
+      { peca: 0, acabamento: 'fosco', cor: 'Branco' },        // base
+      { peca: 1, acabamento: 'fosco', cor: 'Terracota' },     // 51 mm (a dupla)
+      { peca: 2, acabamento: 'fosco', cor: 'Caramelo' },      // 31 mm
+      { peca: 3, acabamento: 'fosco', cor: 'Areia' }          // 111 mm
+    ],
+    'nodus_opcao3': [                                         // foto 6804 + msg 6805 ("e esse assim")
+      { peca: 0, acabamento: 'fosco', cor: 'Verde Menta' },   // a flor de fora (part A)
+      { peca: 1, acabamento: 'fosco', cor: 'Amarelo' }        // o tubo do centro (part B)
+    ]
   } });
 })();
 /* v49 — 04/10/2026, ālea Poop Bag Holder (msg 6285 do Cassiano: "ALEA Poop Bag Holder.3mf"; cadastro 6315-6363). O .glb

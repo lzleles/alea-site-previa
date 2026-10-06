@@ -438,8 +438,15 @@ window.PRODUTOS = [
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
   { slug: 'makeup-layer-organizer', nome: 'ālea Makeup Layer Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  /* 06/10/2026: formatos viram Ovatum (o oval, lamel_vase) e Longum (o alto, lamel_wavy) — fotos 6809/6810 do Cassiano. */
   { slug: 'lamel', nome: 'ālea Lamel', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 6812, texto DELE
+      'A família Lamel nasce da sobreposição visual de lâminas verticais que percorrem toda a peça, criando profundidade, movimento e diferentes percepções conforme o ângulo de observação.',
+      'Seu desenho equilibra precisão e leveza: uma estrutura marcada por ritmo e continuidade, onde luz e sombra passam a fazer parte da própria forma.',
+      'Nas versões Ovatum e Longum, a mesma linguagem ganha proporções distintas, permitindo composições individuais ou em conjunto sem perder sua identidade.',
+      'Um objeto de presença sutil, pensado para integrar o ambiente sem apenas ocupá-lo.'
+    ], galeria: [] },
 
   /* ===================================================================================================
      OS PRODUTOS ANTIGOS — fora da vitrine desde 25/09/2026 (msg 1884). As páginas continuam no disco e

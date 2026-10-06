@@ -4,7 +4,11 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v49 (05/10/2026, peça "Em breve": preço vira "Em breve" e não compra; o 3D continua)
+   status: ativo — v50 (06/10/2026, marcar o acabamento não abre mais a lista de cores sozinha)
+   v50 (06/10/2026, vídeo 6790 + áudio 6791 do Cassiano: "tô clicando só no clássico, no fosco, no perolizado, ele já tá abrindo
+     as cores automático (...) eu quero que clica e eu mesmo clico em escolher a cor"): os 2 sel.focus() depois de marcar o
+     acabamento (cores da peça e cor do nome) saíram — no iPhone o foco num <select> abre a lista. A v49 está em
+     03_site/_versoes_anteriores/lista_nao_abre_sozinha_antes_2026-10-06/js/.
    v49 (05/10/2026, áudio 6726 do Cassiano: "no lugar do valor, em breve (...) só pra me enviar a prévia (...) quero que você já
      deixe o modelo pronto, pra eu ver se na hora lá do 3D eu personalize"): produto listado em `ALEA.emBreve` (config.js v52)
      mostra "Em breve" no preço (topo e acima dos botões, sem parcela), o botão de compra fica DESLIGADO dizendo "Em breve",
@@ -1246,7 +1250,7 @@
         return '<option value="' + f.site + '">' + f.site + '</option>'; }).join('');
       sel.disabled = false;
       var rot = caixa.closest('label'); if (rot) rot.classList.remove('faltou');
-      try { sel.focus({ preventScroll: true }); } catch (e) { sel.focus(); }
+      /* v50 (vídeo 6790 + áudio 6791): NÃO focar o select — no iPhone o foco ABRE a lista sozinha; ele toca quando quiser */
     });
   })();
 
@@ -1606,7 +1610,7 @@
         }).join('');
       sel.disabled = false;
       dono.classList.remove('faltou');
-      try { sel.focus({ preventScroll: true }); } catch (e) { sel.focus(); }
+      /* v50 (vídeo 6790 + áudio 6791): NÃO focar o select — no iPhone o foco ABRE a lista sozinha; ele toca quando quiser */
     };
     return;
     var primeiro = camposCores.querySelector('input');
