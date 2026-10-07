@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v18 (06/10/2026, Caesar/Prisma/Petra: nome em relevo, `cfg.nomeRelevo`)
+   status: v19 (06/10/2026, Urubu: nome rente na cor fixa do modificador do arquivo, `cfg.nomeRente` + `cfg.corNomeFixa`)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -130,6 +130,13 @@
       a letra sai a espessura do arquivo (thickness) pra fora da parede e se SOMA à peça (CSG ADDITION, em vez da SUBTRACTION da
       gravação); sem cor ela é o mesmo filamento da peça, sem a sombra de gravação; com "Um detalhe que transforma" a própria letra
       leva a cor (a letra preenchida por dentro não aparece). Peça sem `nomeRelevo` = exatamente como na v17.
+   v19 (06/10/2026, áudio 7201 do Cassiano, Urubu: "esse nome não é negativo, é modificador, e tem que ser branco,
+      obrigatoriamente branco"; a v18 está em 03_site/_versoes_anteriores/urubu_nome_branco_antes_2026-10-06/js/): com
+      `cfg.corNomeFixa` = { hex, rugosidade, acabamento } a letra sai na cor do FILAMENTO DO MODIFICADOR no arquivo (medido no 3MF),
+      fixa: não segue o Filamento escolhido nem a cor da peça. Com `cfg.nomeRente` o nome não corta nem soma na peça: é a letra
+      deitada na parede (0,05 mm por fora), como o modificador imprime (no Urubu, 92% da letra fica dentro da barrinha, medido).
+      Peça sem as duas = exatamente como na v18. No mesmo dia (áudios 7203/7205, ofício 3.1.13) Caesar/Prisma/Petra perderam o
+      `nomeRelevo` no config.js: comedouro é sempre gravado pra dentro.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -748,6 +755,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   avaliador.attributes = ['position', 'normal'];
   var resultado = null, preenchida = null, nomeColorido = false, frente = null;
   var relevo = !semNome && !!cfg.nomeRelevo;    // v18
+  var rente = !semNome && !!cfg.nomeRente;      // v19: modificador = só troca o filamento -> letra RENTE à parede, sem corte nem soma
 
   function gravar(nome) {
     nome = (nome || '').trim();
@@ -772,7 +780,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
         raio.set(origem, menos.copy(fora).negate());
         var hit = raio.intersectObject(corpoRaio, false)[0];
         var S = hit ? hit.point : plano;
-        var pi = S.clone().addScaledVector(fora, frente ? -0.00015 : -PROF);   // letra preenchida: rente, por dentro
+        var pi = S.clone().addScaledVector(fora, frente ? (rente ? 0.00005 : -0.00015) : -PROF);   // letra preenchida: rente, por dentro (v19 rente: 0,05 mm por fora, só pra não brigar com a parede na tela)
         posPreenchida.push(pi.x, pi.y, pi.z);
         /* v18: nome em RELEVO (cfg.nomeRelevo) — a frente da letra sai PROF pra fora da parede e o pé entra 0,3 mm nela */
         if (relevo) v.copy(S).addScaledVector(fora, frente ? PROF : -0.0003);
@@ -790,12 +798,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       if (preenchida) { cena.remove(preenchida); preenchida.geometry.dispose(); }
       var gp = t.clone(); gp.setAttribute('position', new THREE.Float32BufferAttribute(posPreenchida, 3)); gp.computeVertexNormals();
       preenchida = new THREE.Mesh(gp, matLetra);
-      preenchida.visible = nomeColorido && !relevo;     // v18: no relevo a própria letra leva a cor
+      preenchida.visible = rente || (nomeColorido && !relevo);     // v18: no relevo a própria letra leva a cor; v19: rente = só ela
       cena.add(preenchida);
-      var textoBrush = new CSG.Brush(t, matLetra);
-      textoBrush.updateMatrixWorld();
-      try { alvo = avaliador.evaluate(corpoBrush, textoBrush, relevo ? CSG.ADDITION : CSG.SUBTRACTION); }
-      catch (e) { console.warn('gravação do nome falhou', e); alvo = corpoBrush; }
+      if (!rente) {
+        var textoBrush = new CSG.Brush(t, matLetra);
+        textoBrush.updateMatrixWorld();
+        try { alvo = avaliador.evaluate(corpoBrush, textoBrush, relevo ? CSG.ADDITION : CSG.SUBTRACTION); }
+        catch (e) { console.warn('gravação do nome falhou', e); alvo = corpoBrush; }
+      }
     }
     if (!nome && preenchida) { cena.remove(preenchida); preenchida.geometry.dispose(); preenchida = null; }
     if (resultado) { cena.remove(resultado); if (resultado.geometry !== geo) resultado.geometry.dispose(); }
@@ -878,8 +888,13 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     var extra = form.querySelector('[data-extra-caixa]');
     var corNome = extra && extra.checked ? escolhaDoCampo(form.querySelector('.campo-cor-nome')) : null;
     nomeColorido = !!corNome;
-    if (preenchida) preenchida.visible = nomeColorido && !relevo;
+    if (preenchida) preenchida.visible = rente || (nomeColorido && !relevo);
     if (corNome) pintar(matLetra, corNome.hex, corNome.acab, corNome.fil);
+    else if (cfg.corNomeFixa) {
+      /* v19: o nome na cor FIXA do arquivo (o filamento do modificador), não a da peça — não muda com o Filamento escolhido */
+      var cf = cfg.corNomeFixa;
+      pintar(matLetra, cf.hex, cf.acabamento || 'fosco', { rugosidade: cf.rugosidade, metal: cf.metal });
+    }
     else if (relevo) {
       /* v18: letra em relevo SEM cor = o mesmo filamento da peça, sem a sombra de gravação (o relevo aparece na luz) */
       var mzR = mats[zonaNome];
@@ -898,6 +913,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mz._alea[k].value; });
       matLetra._alea.uMapaMm.value.copy(mz._alea.uMapaMm.value);
     }
+    window.aleaCorNome = '#' + matLetra.color.getHexString();           // v19: o teste confere a cor da letra
     /* v15 (2): toque na peça — a janela de cor pinta SÓ a peça escolhida; as outras ficam como estavam */
     if (modoPecas) {
       var escP = escolhaDoCampo(campos[0]);

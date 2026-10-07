@@ -76,6 +76,10 @@
       `tamanhos` do Caesar e do Prisma (Petra tem um tamanho só no arquivo) e o preço do Caesar (149/179) em
       `precoPorEscolha`. E os rótulos dos 2 tamanhos de TODOS os comedouros viram 'Pequeno porte' / 'Médio e grande porte'
       (áudio 7054; eram 'M'/'G'), nas listas e nas chaves de `precoPorEscolha`. A versão anterior está em 03_site/_versoes_anteriores/caesar_prisma_petra_antes_2026-10-06/js/.
+   v58-produto (06/10/2026, áudios 7201/7203/7205 do Cassiano, ofício 3.1.13): Caesar/Prisma/Petra PERDEM o `nomeRelevo`
+      (comedouro = nome gravado pra dentro; com cor escolhida a letra sai na cor) e o Urubu ganha `nomeRente` + `corNomeFixa`
+      (personalizar3d.js v19: nome rente, BRANCO fixo = o filamento do modificador no arquivo). Nenhum campo novo de formulário.
+      A versão anterior está em 03_site/_versoes_anteriores/urubu_nome_branco_antes_2026-10-06/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -574,8 +578,12 @@ window.ALEA.modelos3d['vase-prismatic'] = {
    42_.../ferramentas/preparar_3mf_para_glb_v1.py, que só troca na CÓPIA o subtipo do nome e da logo de MODIFICADOR pra
    negativo (o exportador só lê o quadro do nome a partir do negativo; logo de comedouro é sempre recorte, ofício 3.1.4).
    A janela mostra o tamanho MENOR do arquivo (áudio 3019), placa 1 dos três (objeto 4). Uma zona só (o arquivo é de uma
-   cor por peça) -> só Monocromático. `nomeRelevo` (personalizar3d.js v18): o nome é MODIFICADOR no arquivo -> pra FORA,
-   em relevo, na cor do objeto (ofício 3.1.3, áudios 5306/5310). As cores `original` são as do project_settings do 3MF.
+   cor por peça) -> só Monocromático. As cores `original` são as do project_settings do 3MF.
+   NOME (06/10/2026, áudios 7203/7205 do Cassiano, ofício 3.1.13): "comedouro é SEMPRE em baixo relevo; só vira modificador
+   se o cliente escolher a cor do nome". Até aqui os 3 saíam com `nomeRelevo` (pra fora, na cor da peça); agora SEM a flag:
+   gravados pra DENTRO com a profundidade do arquivo (thickness: Caesar 2 mm, Prisma 2 mm, Petra 1 mm), como Luke/Matteo/
+   Cláudia; com "Um detalhe que transforma" + cor, a letra aparece na cor escolhida. A versão anterior está em
+   03_site/_versoes_anteriores/urubu_nome_branco_antes_2026-10-06/js/.
    Caesar: corpo SUNLU PLA Marble (= Mármore); o nome do arquivo é dourado (Bambu PLA Silk+ #F4A925, que NÃO está na
      lista do site) -> sem `capa.nome` até ele dizer a cor (nunca por palpite).
    Prisma: corpo Bambu PLA Sparkle #2D2B28 (NÃO está na lista do site; a mais perto é o Preto) -> abre na cor do arquivo,
@@ -586,7 +594,6 @@ window.ALEA.modelos3d['pet-bowl-caesar'] = {
   glb: 'modelos/caesar.glb?v=2026-10-06',
   nome: 'modelos/caesar_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
-  nomeRelevo: true,
   capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Mármore' }] },
   original: {
     topo:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
@@ -598,7 +605,6 @@ window.ALEA.modelos3d['pet-bowl-prisma'] = {
   glb: 'modelos/prisma.glb?v=2026-10-06',
   nome: 'modelos/prisma_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
-  nomeRelevo: true,
   original: {
     topo:      { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
     principal: { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
@@ -609,7 +615,6 @@ window.ALEA.modelos3d['pet-petra'] = {
   glb: 'modelos/petra.glb?v=2026-10-06',
   nome: 'modelos/petra_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
-  nomeRelevo: true,
   capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Dourado com Glitter' }] },
   original: {
     topo:      { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
@@ -982,7 +987,9 @@ window.ALEA.filamentosPorFoto = {
    FILAMENTO (6897-6904, 6912/6913): só o vermelho muda — Clássico = Vermelho Clássico (Bambu Lab PLA Lite Red, o do arquivo);
    Perolizado = Vermelho Perolizado da lista dele (Multfila Silk Vermelho Metalizado). Branco, preto, amarelo e o resto ficam.
    NOME GRÁTIS (6926), sem cor (6887): gravado na barrinha, na cor dela — no ARQUIVO o nome é um modificador na extrusora 1
-   (branco); a regra do site (3.1.3) é nunca pintar o nome no 3D. Abre com o nome do arquivo, "Cacá" (como os outros).
+   (branco). ATÉ a v57 o site gravava o nome pra dentro na cor da barrinha; DESDE a v58 (áudio 7201 do Cassiano, 06/10/2026:
+   "esse nome não é negativo, é modificador, e tem que ser branco, obrigatoriamente branco") ele sai RENTE e BRANCO,
+   a cor do modificador no arquivo. Abre com o nome do arquivo, "Cacá" (como os outros).
    O limite de letras é a barrinha útil na altura das letras (65,7 mm) menos 2 mm de cada lado: medir_limite_nome_urubu_v1.py.
    A janela 3D não troca de tamanho (como os comedouros, áudio 3019): o tamanho vai no pedido. */
 window.ALEA.modelos3d['urubu-mascote-flamengo'] = {
@@ -1001,6 +1008,13 @@ window.ALEA.modelos3d['urubu-mascote-flamengo'] = {
   nome: 'modelos/urubu_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
   zonaNome: 'principal',
+  /* v58 (06/10/2026, áudio 7201): o nome é MODIFICADOR no arquivo (text_shape "Cacá", subtype modifier_part, extruder 1 =
+     ELEGOO PLA Matte White, filament_colour #FFFFFF; no site esse branco é o #F6F6F6 dos acessórios). MEDIDO no 3MF (trimesh,
+     placa 13): 92% do volume da letra fica DENTRO da barrinha e a face passa no máximo 0,44 mm pra fora — o modificador só
+     troca o filamento, não soma volume -> o nome sai RENTE à barrinha (`nomeRente`, personalizar3d.js v19), BRANCO SEMPRE:
+     não segue o Filamento Clássico/Perolizado */
+  nomeRente: true,
+  corNomeFixa: { hex: '#F6F6F6', rugosidade: 0.95, acabamento: 'fosco', fonte: '3MF dele, modificador do nome = extrusora 1 (ELEGOO PLA Matte White)' },
   nomeAtras: true,
   textoFaltaNome: 'Por favor, digite o nome.',
   soUmModo: true,
