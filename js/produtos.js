@@ -154,8 +154,8 @@ window.VITRINE = [
   { produto: 'ālea Laptop Stand',                         nome: 'Laptop Stand', categoria: 'home', sub: 'desk',  preco: null, pagina: 'laptop-stand', recorte: false, fotos: [] },
   { produto: 'ālea Pen Holder',                           nome: 'Pen Holder', categoria: 'home', sub: 'desk',    preco: null, pagina: 'pen-holder', recorte: false, fotos: [] },
   { produto: 'ālea Nodus Organizer',                      nome: 'Nodus Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'nodus-organizer', recorte: false, fotos: [] },
-  { produto: 'ālea Make',                                 nome: 'Make', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
-  { produto: 'ālea Makeup Layer Organizer',               nome: 'Makeup Layer Organizer', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: [] },
+  { produto: 'ālea Cella',                                 nome: 'Cella', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
+  { produto: 'ālea Strata',               nome: 'Strata', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: ['strata_capaq'] },
   { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] },
   /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
      consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
@@ -448,10 +448,20 @@ window.PRODUTOS = [
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
-  { slug: 'make', nome: 'ālea Make', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
-  { slug: 'makeup-layer-organizer', nome: 'ālea Makeup Layer Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+  { slug: 'make', nome: 'ālea Cella', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
+    paragrafos: [   // msg 7113, texto DELE (nome: msg 7122)
+      'A Cella foi criada para reunir, separar e acomodar pequenos objetos de forma prática, sem abrir mão do design. Seus diferentes compartimentos criam espaços pensados para cada necessidade, enquanto a gaveta amplia as possibilidades de organização e mantém aquilo que você prefere guardar mais reservado.',
+      'As linhas verticais que percorrem toda a peça acrescentam textura e ritmo ao desenho, transformando um objeto funcional em parte da composição do ambiente.'
+    ], galeria: [] },
+  { slug: 'makeup-layer-organizer', nome: 'ālea Strata', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'strata_capa', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
+    paragrafos: [   // msg 7115, texto DELE (nome: msg 7122)
+      'A Strata nasce da ideia de construir a organização aos poucos, permitindo que diferentes módulos se encontrem, se sobreponham e formem uma composição única.',
+      'Seu desenho arredondado contrasta com a sequência delicada de linhas que envolve toda a peça, criando textura, movimento e uma presença marcante mesmo nas formas mais simples.',
+      'Modular e versátil, a Strata pode acompanhar diferentes usos e espaços, crescendo de acordo com aquilo que você precisa organizar. Cada camada acrescenta uma nova possibilidade, sem perder a unidade do conjunto.',
+      'Mais do que guardar, a Strata transforma a organização em composição.'
+    ], galeria: ['strata_1', 'strata_2', 'strata_3', 'strata_4'] },
   /* 06/10/2026: formatos viram Ovatum (o oval, lamel_vase) e Longum (o alto, lamel_wavy) — fotos 6809/6810 do Cassiano. */
   { slug: 'lamel', nome: 'ālea Lamel', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
