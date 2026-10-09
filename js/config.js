@@ -80,6 +80,10 @@
       (comedouro = nome gravado pra dentro; com cor escolhida a letra sai na cor) e o Urubu ganha `nomeRente` + `corNomeFixa`
       (personalizar3d.js v19: nome rente, BRANCO fixo = o filamento do modificador no arquivo). Nenhum campo novo de formulário.
       A versão anterior está em 03_site/_versoes_anteriores/urubu_nome_branco_antes_2026-10-06/js/.
+   v59-produto (09/10/2026, áudio 8271 do Cassiano: site de luxo, preço sem centavos e sempre terminando em zero,
+      arredondado PRA CIMA): `precoPorEscolha` e `extraPoopBag.preco` viram o próximo múltiplo de 10 (149->150, 179->180,
+      49->50...). Os valores nos comentários abaixo são o histórico do que ele mandou. Gerador 01_gerar_paginas_v39.
+      A versão anterior está em 03_site/_versoes_anteriores/precos_redondos_antes_2026-10-09/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -660,17 +664,17 @@ window.ALEA.tamanhos = {
    null = ainda sem preço ("Sob consulta"). Os valores vêm DELE — nunca preencher por conta própria. */
 window.ALEA.precoPorEscolha = {
   // msg 6250 do Cassiano (04/10/2026 17:51): "Stria Orbis Mini 79,00 · P 169,00 · Stria Quadrum P 189,00 · G 289,00"
-  'stria-planter': { 'Orbis|Mini': 79, 'Orbis|Pequeno': 169, 'Quadrum|Pequeno': 189, 'Quadrum|Grande': 289 },
+  'stria-planter': { 'Orbis|Mini': 80, 'Orbis|Pequeno': 170, 'Quadrum|Pequeno': 190, 'Quadrum|Grande': 290 },
   /* v45 — msg 6255 do Cassiano (04/10/2026 18:08): "Pet Bowl Matteo 149,00 179,00 / Ayla 299,00 / Luke 149,00 189,00 /
      Claudia 169,00 219,00" (+ Caesar 149/179 e Poop Bag 79, que NÃO entram: Caesar ainda não tem página, 6256; Poop Bag
      fica fora, 6258). 1º valor = M, 2º = G. Sem Formato, a chave é só o tamanho; sem tamanho (Ayla), a chave é ''. */
   /* v57 (áudio 7054): a chave é o rótulo novo do tamanho (era 'M'/'G'); os valores não mudaram */
-  'luke-bowl':         { 'Pequeno porte': 149, 'Médio e grande porte': 189 },
-  'matteo-texturized': { 'Pequeno porte': 149, 'Médio e grande porte': 179 },
-  'claudia-wave':      { 'Pequeno porte': 169, 'Médio e grande porte': 219 },
+  'luke-bowl':         { 'Pequeno porte': 150, 'Médio e grande porte': 190 },
+  'matteo-texturized': { 'Pequeno porte': 150, 'Médio e grande porte': 180 },
+  'claudia-wave':      { 'Pequeno porte': 170, 'Médio e grande porte': 220 },
   /* v57 (06/10/2026): o Caesar anotado em 04/10 18:08 (msg 6255: 149/179; 1º = Pequeno porte, 2º = Médio e grande porte). Prisma e Petra sem preço = Sob consulta. */
-  'pet-bowl-caesar':   { 'Pequeno porte': 149, 'Médio e grande porte': 179 },
-  'ayla-pompom':       { '': 299 }
+  'pet-bowl-caesar':   { 'Pequeno porte': 150, 'Médio e grande porte': 180 },
+  'ayla-pompom':       { '': 300 }
 };
 /* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada
    na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
@@ -859,7 +863,7 @@ window.ALEA.modelos3d['poop-bag-holder'].limiteNome = {"mm":25.4,"folgaMm":2.0,"
    quem fotografa a miniatura: personalizar3d.js v14 (fotoDoPoopBag). Preço DELE (áudios 6281-6290), nunca mexer sem ele. */
 window.ALEA.extraPoopBag = {
   slugs: ['luke-bowl', 'matteo-texturized', 'claudia-wave'],
-  preco: 49,
+  preco: 50,
   rotulo: 'Poop Bag Holder',
   texto: 'Adicionar Poop Bag Holder',
   pagina: 'produto-poop-bag-holder.html'   // v50 (áudio 6402): miniatura e texto levam pra cá; só o quadradinho marca

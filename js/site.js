@@ -83,6 +83,9 @@ window.aleaCorDoTopo = (function () {
   /* ------------------------------------------------------------------ dinheiro */
   window.aleaDinheiro = function (v) {
     if (v === null || v === undefined) return null;
+    /* v39 (09/10/2026, áudio 8271 do Cassiano): preço inteiro sai sem centavos ("R$ 150"); quebrado (parcela, frete)
+       mantém os centavos. */
+    if (Number(v) % 1 === 0) return 'R$ ' + Number(v);
     return 'R$ ' + v.toFixed(2).replace('.', ',');
   };
 

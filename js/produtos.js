@@ -129,7 +129,7 @@ window.VITRINE = [
   { produto: 'ālea Elevated Pet Bowl × Matteo',           nome: 'Matteo',  categoria: 'pet', preco: null, pagina: 'matteo-texturized', recorte: false, fotos: ['matteotex_9262q'] },
   /* 04/10/2026, msg 6255 do Cassiano: Ayla R$ 299 (sem tamanho). Luke/Matteo/Cláudia têm preço por tamanho M/G em
      config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
-  { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 299,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
+  { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 300,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
   /* 06/10/2026 (msg 7047 do Cassiano: "pode adicionar os três (...) pode fazer o campo deles lá"): Caesar, Prisma e Petra,
      logo depois da Cláudia, SEM FOTO por enquanto ("foto em breve") e sem texto. Caesar com preço por tamanho (config.js
@@ -139,13 +139,13 @@ window.VITRINE = [
   { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: null, pagina: 'pet-petra',         recorte: false, fotos: [] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
-  { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 79, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag_capaq'] },
+  { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 80, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag_capaq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
-  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 59, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
+  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 60, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
-  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', sub: 'decor', preco: 89, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
+  { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', sub: 'decor', preco: 90, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
-  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', sub: 'decor', preco: 89, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
+  { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', sub: 'decor', preco: 90, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
   /* 04/10/2026: 4º produto da HOME (Cassiano, msgs 6122-6153). Capa = IMG_2690 (6146). SEM preço até ele fatiar (6092). */
   { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] },
   /* 05/10/2026: os 6 do LOTE msg6689 (áudios 6726/6728/6729/6731 do Cassiano), todos "Em breve" (config.js ALEA.emBreve):
@@ -172,13 +172,13 @@ window.VITRINE = [
 })();
 /* A VITRINE ATÉ 25/09/2026 20:01 (fora do ar por ordem dele, msg 1884) — guardada, não apagada:
 window.VITRINE = [
-  { produto: 'ālea Bowl Wave', nome: 'Luke',       categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['pro_luke_1q','luke_1','luke_2','luke_3','luke_4'] },
-  { produto: 'ālea Bowl Wave', nome: 'Ayla',       categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false, fotos: ['ayla_1','ayla_2','ayla_3','ayla_4'] },
-  { produto: 'ālea Bowl Wave', nome: 'Tina Preta', categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['tina_1','tina_2','tina_3','tina_4'] },
-  { produto: 'ālea Bowl Wave', nome: 'Chica',      categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['chica_1','chica_2','chica_3'] },
-  { produto: 'ālea Bowl Wave', nome: 'Matteo',     categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['matteo_1','matteo_2','matteo_3'] },
-  { produto: 'ālea Bowl Wave', nome: 'Cláudia',    categoria: 'pet', preco: 179,  pagina: 'bowl-wave',       recorte: false,  fotos: ['claudia_1','claudia_2','claudia_3','claudia_4'] },
-  { produto: 'ālea Poop Bag',  nome: 'Chica',      categoria: 'pet', preco: 59,   pagina: 'poop-bag-holder', recorte: false,  fotos: ['saquinho_1','saquinho_2','saquinho_3'] },
+  { produto: 'ālea Bowl Wave', nome: 'Luke',       categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false,  fotos: ['pro_luke_1q','luke_1','luke_2','luke_3','luke_4'] },
+  { produto: 'ālea Bowl Wave', nome: 'Ayla',       categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false, fotos: ['ayla_1','ayla_2','ayla_3','ayla_4'] },
+  { produto: 'ālea Bowl Wave', nome: 'Tina Preta', categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false,  fotos: ['tina_1','tina_2','tina_3','tina_4'] },
+  { produto: 'ālea Bowl Wave', nome: 'Chica',      categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false,  fotos: ['chica_1','chica_2','chica_3'] },
+  { produto: 'ālea Bowl Wave', nome: 'Matteo',     categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false,  fotos: ['matteo_1','matteo_2','matteo_3'] },
+  { produto: 'ālea Bowl Wave', nome: 'Cláudia',    categoria: 'pet', preco: 180,  pagina: 'bowl-wave',       recorte: false,  fotos: ['claudia_1','claudia_2','claudia_3','claudia_4'] },
+  { produto: 'ālea Poop Bag',  nome: 'Chica',      categoria: 'pet', preco: 60,   pagina: 'poop-bag-holder', recorte: false,  fotos: ['saquinho_1','saquinho_2','saquinho_3'] },
   { produto: 'Kit ālea',       nome: 'Tina Preta', categoria: 'pet', preco: null, pagina: 'kit',             recorte: false,  fotos: ['kit_1','kit_2','kit_3'] }
 ];
 */
@@ -326,7 +326,7 @@ window.PRODUTOS = [
     nome: 'ālea Soap Dish',
     linha: 'Home',
     categoria: 'home',
-    preco: 59,
+    preco: 60,
     material: 'PLA',
     capa: 'soapdish_capa',
     cores_peca: ['monocromatico'],
@@ -355,7 +355,7 @@ window.PRODUTOS = [
     nome: 'ālea Ephix Vase',
     linha: 'Home',
     categoria: 'home',
-    preco: 89,
+    preco: 90,
     material: 'PLA',
     capa: 'ephixvase_capa',
     cores_peca: ['monocromatico'],
@@ -385,7 +385,7 @@ window.PRODUTOS = [
     nome: 'ālea Vase Prismatic',
     linha: 'Home',
     categoria: 'home',
-    preco: 89,
+    preco: 90,
     material: 'PLA',
     capa: 'vaseprismatic_capa',
     cores_peca: ['monocromatico'],
@@ -519,7 +519,7 @@ window.PRODUTOS = [
     nome: 'ālea Bowl Wave',
     linha: 'Comedouro',
     categoria: 'pet',
-    preco: 179,
+    preco: 180,
     capa: 'luke_1',
     /* OS ÁLBUNS POR CONFIGURAÇÃO (Cassiano, áudios 25/09/2026 11:19-11:30, msgs 1493, 1517, 1518): a colmeia das 7
        fotos de cima NÃO muda ("são as sete capas, padrão pra todos os produtos"). Embaixo dela entram 3 favos menores,
@@ -570,7 +570,7 @@ window.PRODUTOS = [
     nome: 'ālea Poop Bag Holder',
     linha: 'Passeio',
     categoria: 'pet',
-    preco: 79,
+    preco: 80,
     capa: 'poopbag_1',
     material: 'PLA',
     cores_peca: ['tricolor', 'bicolor', 'monocromatico'],
@@ -583,7 +583,7 @@ window.PRODUTOS = [
   },
   /* A VERSÃO DE 24/09 (fora do ar), guardada:
   { slug: 'poop-bag-holder', medidas_exemplo: { peso_g: 45, altura_cm: 10, largura_cm: 6, comprimento_cm: 7 },
-    nome: 'ālea Poop Bag Holder', linha: 'Passeio', categoria: 'pet', preco: 59, capa: 'saquinho_1', material: 'PLA',
+    nome: 'ālea Poop Bag Holder', linha: 'Passeio', categoria: 'pet', preco: 60, capa: 'saquinho_1', material: 'PLA',
     resumo: 'Porta-saquinho que sai na mesma estampa do comedouro.', ficha_extra: [['Combina com', 'A mesma estampa do ālea Bowl Wave']],
     galeria: ['saquinho_2', 'saquinho_3', 'chica_2'] }, */
 
