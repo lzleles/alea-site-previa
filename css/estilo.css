@@ -2746,4 +2746,9 @@ html.idioma-carregando body { opacity: 0; }
 
 /* 10/10/2026 (audios 8425-8429 do Cassiano): o nome 'ālea' dentro de uma descrição sai na grafia da logo
    (Defante, com o macron), na cor da marca e com 2x o tamanho do texto - 'vamos ver como é que vai ficar'. */
-.descricao-produto .marca-destaque { font-family: var(--fonte-titulo); color: var(--terracota); font-size: 2em; line-height: 1; }
+.descricao-produto .marca-destaque { font-family: var(--fonte-titulo); font-size: 1.3em; line-height: 1; }
+/* v2 (audio 8433): 2x ficou isolado numa linha so; agora 1,3x, colado no 'marca:' e nas 4 cores da logo colorida (alea_nome.svg). */
+.descricao-produto .marca-destaque.l1 { color: var(--azul); }
+.descricao-produto .marca-destaque.l2 { color: var(--laranja); }
+.descricao-produto .marca-destaque.l3 { color: var(--terracota); }
+.descricao-produto .marca-destaque.l4 { color: var(--dourado); }
