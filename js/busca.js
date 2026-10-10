@@ -5,9 +5,10 @@
              iPhone), com um aviso na primeira visita; no computador abre pela lupa "Buscar" do topo. A tela de busca é
              esfumaçada com o site atrás, traz palavras sugeridas e acha a peça por palavra parecida (cachorro, gato, pote...).
    entrada: window.VITRINE e window.PRODUTOS (produtos.js), window.CATEGORIAS; o que a pessoa digita
-   saida: tela de busca por cima do site; clique leva à página da peça (produto-<slug>.html) ou à categoria (index.html#id)
-   status: v6 (03/10/2026) - em prévia
-   validado_em: 03/10/2026
+   saida: tela de busca por cima do site; clique leva à página da peça (produto-<slug>.html) ou à categoria (index.html#id);
+          Enter leva à página de resultados busca.html?q=<texto>, que este mesmo arquivo desenha
+   status: v7 (10/10/2026) - em prévia
+   validado_em: 10/10/2026
    v1 (03/10/2026, Cassiano, áudios 5561/5562/5564/5567/5568 + vídeo 5566 da busca do iPhone):
       "se a pessoa pesquisar por cachorro, ou gato, ou comedouro, ou pote (...) ele cai no comedouro?" -> o site NÃO tinha
       busca. "Quando a gente rola a tela pra baixo e ela já está no topo (...) a gente consegue buscar (...) só se a pessoa
@@ -50,6 +51,16 @@
    v6 (03/10/2026, foto 5812 + áudio 5813 do Cassiano, celular dele na página da saboneteira): o aviso "Arraste a tela
       para baixo..." ficava EM CIMA do "← voltar para o feed" -> "subir ele um pouquinho para ficar entre os dois, para
       conseguir ver tudo". posicionarDica() mede o fundo dos ícones do topo e o topo do link e centra o aviso no vão.
+   v7 (10/10/2026, vídeo 8356 + áudio 8357 do Cassiano, "foi a mesma coisa lá do site do Marcel"):
+      (1) "se eu rolar a tela, quando eu clicar lá no procurar, a tela já tem que voltar para o começo de novo, porque
+          enquanto eu vou digitando, eu vou vendo o que vai aparecendo" -> tocar na caixa Buscar (e cada letra)
+          leva a lista ao topo. No iPhone o teclado encolhe a tela visível: a tela da busca passa a ter a altura
+          do visualViewport, então o topo da lista fica à vista e a barra fica colada no teclado.
+      (2) "quando eu aperto para buscar, está caindo direto no primeiro. Não é para cair no primeiro, é para cair nas
+          buscas (...) se eu digitar vaso, vai ter que abrir uma página com todos os itens que tem a palavra-chave
+          vaso ou que tem o nome vaso no título" -> Enter abre busca.html?q=<texto>: título, quantidade e os cartões
+          de TODOS os resultados (a mesma buscar(), com sinônimos), preço no estilo do site (v61). Campo vazio: nada.
+          Na página, o "Buscar item" reabre a busca já com a palavra.
 */
 (function () {
   'use strict';
@@ -68,8 +79,10 @@
     gato: 'pet comedouro', gatos: 'pet comedouro', gata: 'pet comedouro', felino: 'pet comedouro', cat: 'pet comedouro',
     pote: 'comedouro', potinho: 'comedouro', tigela: 'comedouro', vasilha: 'comedouro', bowl: 'comedouro',
     comida: 'comedouro', racao: 'comedouro', agua: 'comedouro', bebedouro: 'comedouro', prato: 'comedouro',
+    vaso: 'vase', vasos: 'vase', vasinho: 'vase',          // v7 (áudio 8357): os vasos têm nome em inglês (Vase)
     alto: 'elevado', elevada: 'elevado', melancia: 'watermelon', inox: 'comedouro', animal: 'pet', bicho: 'pet'
   };
+  var Q_PAGINA = '';                                                 // v7: a palavra da página busca.html?q=
   var SUGESTOES = ['Comedouro', 'Cachorro', 'Gato', 'Elevado', 'Melancia', 'PET'];
 
   function norm(s) {
@@ -84,6 +97,7 @@
     var p = prodDe(v.pagina) || {};
     var texto = [v.produto, v.nome, p.nome, p.linha, v.categoria, catNome(v.categoria), (p.paragrafos || []).join(' '), p.resumo].join(' ');
     return {
+      v: v,                                                       // v7: a página de resultados usa o preço da vitrine
       titulo: v.produto, linha: p.linha || '', cat: catNome(v.categoria), url: 'produto-' + v.pagina + '.html',
       foto: 'img/produtos/' + (v.fotos && v.fotos[0] ? v.fotos[0] : p.capa) + '_m.jpg',
       forte: norm([v.produto, v.nome, p.linha, catNome(v.categoria)].join(' ')), fraco: norm(texto)
@@ -159,7 +173,11 @@
     '.busca-dica.vis{opacity:1;transform:translate(-50%,0)}',
     '.busca-dica i{display:inline-block;font-style:normal;animation:busca-seta 1.1s ease-in-out infinite}',
     '@keyframes busca-seta{0%,100%{transform:translateY(-3px)}50%{transform:translateY(4px)}}',
-    '@media (prefers-reduced-motion:reduce){.busca-dica i{animation:none}}'
+    '@media (prefers-reduced-motion:reduce){.busca-dica i{animation:none}}',
+    /* v7: a página de resultados (busca.html) - a grade é a mesma da Lista de Desejos (.loja-desejos, loja.css) */
+    '.busca-res-conta{font-size:13px;color:var(--lj-cinza,#6B5D50);margin:-6px 0 18px}',
+    '.busca-res .busca-res-linha{display:block;font-size:11px;color:var(--lj-cinza,#6B5D50);margin:2px 0 4px}',
+    '.busca-res-de-novo{margin:28px 0 8px}'
   ].join('');
   document.head.appendChild(css);
 
@@ -199,8 +217,20 @@
       : '<div class="busca-vazio">Ainda não temos peça com “' + q.replace(/</g, '&lt;') + '”. Fala com a gente: fazemos sob encomenda.</div>';
   }
   campo.addEventListener('input', pintar);
+  /* v7 (1): tocou na caixa ou digitou -> a lista no topo, pra ver o resultado aparecendo */
+  var corpo = tela.querySelector('.busca-corpo');
+  function aoTopo() { corpo.scrollTop = 0; }
+  campo.addEventListener('pointerdown', aoTopo);
+  campo.addEventListener('focus', function () { aoTopo(); setTimeout(aoTopo, 350); });   // de novo depois do teclado subir
+  campo.addEventListener('input', aoTopo);
+  /* v7 (2): Enter NÃO vai pro 1º produto: abre a página com todos os resultados. Campo vazio: nada. */
   campo.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { var a = lista.querySelector('a'); if (a) location.href = a.href; }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var q = campo.value.trim();
+    if (!norm(q)) return;
+    campo.blur();
+    location.href = 'busca.html?q=' + encodeURIComponent(q);
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && aberta) fechar(); });
   tela.querySelector('.busca-cancelar').addEventListener('click', fechar);
@@ -219,7 +249,7 @@
   function limparP() { ['--p', '--b', '--c'].forEach(function (v) { tela.style.removeProperty(v); }); }
   function montarTela() {
     if (montada) return; montada = true; atual = 0;
-    campo.value = ''; pintar();
+    campo.value = Q_PAGINA; pintar();                                // v7: na página de resultados, já com a palavra
     tela.classList.remove('aberta'); tela.classList.add('arrastando'); pintarP(0);
   }
   function levarA(p, ms, fim) {
@@ -239,13 +269,23 @@
     tela.classList.remove('arrastando'); tela.classList.add('aberta'); limparP();
   }
   function terminouDeFechar() {
-    montada = false; tela.classList.remove('arrastando', 'aberta'); limparP();
+    montada = false; tela.classList.remove('arrastando', 'aberta'); limparP(); soltarDaTela();
   }
+  /* v7 (1): com o teclado do iPhone aberto, a tela da busca ocupa só a parte VISÍVEL (visualViewport): o topo da lista
+     não fica escondido em cima e a barra fica logo acima do teclado. */
+  var VV = window.visualViewport;
+  function caberNaTela() {
+    if (!VV || !montada) return;
+    tela.style.top = VV.offsetTop + 'px'; tela.style.height = VV.height + 'px'; tela.style.bottom = 'auto';
+  }
+  function soltarDaTela() { tela.style.top = ''; tela.style.height = ''; tela.style.bottom = ''; }
+  if (VV) { VV.addEventListener('resize', caberNaTela); VV.addEventListener('scroll', caberNaTela); }
 
   var aberta = false;
   function abrir(focar) {
     if (aberta) return; aberta = true;
     montarTela();                                                    // se o dedo já montou, segue de onde está
+    caberNaTela();
     document.documentElement.style.overflow = 'hidden';
     levarA(1, ENTRA_MS, terminouDeAbrir);
     if (focar === true) setTimeout(function () { campo.focus(); }, 60);   // só "/" ou Ctrl+K no computador
@@ -261,6 +301,7 @@
   window.aleaAbrirBusca = abrir;
 
   function montar() {
+    paginaResultados();                                              // v7: antes do campoDoRodape (põe o [data-busca-fim])
     document.body.appendChild(tela);
     campoDoRodape();
     if (CELULAR) ligarPuxar(); else ligarLupa();
@@ -424,6 +465,56 @@
     if (!dica) return;
     clearTimeout(dicaTimer); var d = dica; dica = null;
     d.classList.remove('vis'); setTimeout(function () { d.remove(); }, 450);
+  }
+
+
+  /* ---------- v7 (2): a página de resultados busca.html?q=<texto> (vídeo 8356 + áudio 8357) ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function emIngles() {
+    var m = /[?&]lang=(en|pt)\b/.exec(location.search); if (m) return m[1] === 'en';
+    try { return localStorage.getItem('alea_idioma') === 'en'; } catch (e) { return false; }
+  }
+  function moeda(v) { return (window.aleaDinheiroHTML && window.aleaDinheiroHTML(v)) || 'Sob consulta'; }
+  /* o MESMO preço do cartão da vitrine (feed.js valorDoCard): em breve, preço, "a partir de" o menor, ou sob consulta */
+  function valorDoCard(c) {
+    if ((((window.ALEA || {}).emBreve) || []).indexOf(c.pagina) >= 0) return '<small class="em-breve">Em breve</small>';
+    if (c.preco !== null && c.preco !== undefined) return moeda(c.preco);
+    var tab = ((window.ALEA || {}).precoPorEscolha || {})[c.pagina];
+    var vs = tab ? Object.keys(tab).map(function (k) { return tab[k]; }).filter(function (v) { return typeof v === 'number'; }) : [];
+    if (!vs.length) return 'Sob consulta';
+    return '<small class="a-partir">a partir de</small> ' + moeda(Math.min.apply(null, vs));
+  }
+  function paginaResultados() {
+    var raiz = document.querySelector('[data-busca-resultados]');
+    if (!raiz) return;
+    var q = '';
+    try { q = (new URLSearchParams(location.search).get('q') || '').trim(); } catch (e) { q = ''; }
+    Q_PAGINA = q;
+    var en = emIngles(), r = norm(q) ? buscar(q) : [];
+    var h = '';
+    if (!norm(q)) {
+      h = '<h1 class="loja-titulo grande">Buscar</h1>';
+    } else {
+      h = '<h1 class="loja-titulo grande" data-sem-traducao>' + (en ? 'Results for “' : 'Resultados para “') + esc(q) + '”</h1>' +
+        '<p class="busca-res-conta" data-sem-traducao data-busca-conta="' + r.length + '">' +
+        (en ? r.length + (r.length === 1 ? ' piece' : ' pieces') : r.length + (r.length === 1 ? ' peça' : ' peças')) + '</p>';
+      h += r.length
+        ? '<div class="loja-desejos busca-res">' + r.map(function (it) {
+            return '<div><a href="' + esc(it.url) + '"><img src="' + esc(it.foto) + '" alt="" loading="lazy">' + esc(it.titulo) +
+              '<small class="busca-res-linha">' + esc([it.linha, it.cat].filter(Boolean).join(' · ')) + '</small>' +
+              valorDoCard(it.v) + '</a></div>';
+          }).join('') + '</div>'
+        : '<p class="loja-vazio" data-sem-traducao>' + (en
+            ? 'We don’t have a piece with “' + esc(q) + '” yet. Hit us up: we make things to order.'
+            : 'Ainda não temos peça com “' + esc(q) + '”. Fala com a gente: fazemos sob encomenda.') + '</p>' +
+          '<p class="loja-vazio"><a href="index.html">Ver as peças</a></p>';
+    }
+    raiz.innerHTML = h + '<div class="busca-res-de-novo" data-busca-fim></div>';
+    if (norm(q)) document.title = (en ? 'Search: ' : 'Busca: ') + q + ' · ālea & Co.';
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
