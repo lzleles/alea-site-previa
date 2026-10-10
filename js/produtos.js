@@ -501,7 +501,13 @@ window.PRODUTOS = [
   { slug: 'pet-bowl-caesar', nome: 'ālea Pet Bowl Caesar', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
     capa: 'caesar_capa', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: ['caesar_1', 'caesar_2'] },
   { slug: 'pet-bowl-prisma', nome: 'ālea Pet Bowl Prisma', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
-    capa: 'prisma_capa', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: ['prisma_1', 'prisma_2', 'prisma_3', 'prisma_4'] },
+    capa: 'prisma_capa', cores_peca: ['monocromatico'], resumo: '', 
+    paragrafos: [   // msg 8406, texto DELE (nome do site: audio 8407)
+      'Inspirado na beleza das pedras preciosas e na precisão de suas lapidações, o ālea Pet Bowl Prisma transforma formas geométricas em uma peça de personalidade única.',
+      'Suas facetas cuidadosamente desenhadas criam um jogo de luz e sombra que valoriza cada ângulo, enquanto sua silhueta escultural equilibra elegância, modernidade e funcionalidade.',
+      'Sua estrutura elevada proporciona uma posição mais confortável durante a alimentação, unindo praticidade e bem-estar a um design que valoriza cada detalhe.',
+      'Mais do que um comedouro, o Prisma é um elemento de design que integra o universo pet à decoração, trazendo sofisticação e originalidade aos espaços compartilhados com nossos filhos de quatro patas!'
+    ], galeria: ['prisma_1', 'prisma_2', 'prisma_3', 'prisma_4'] },
   { slug: 'pet-petra', nome: 'ālea Pet Petra', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
     capa: 'petra_capa', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: ['petra_1', 'petra_2', 'petra_3'] },
 

@@ -556,6 +556,10 @@ window.ALEA_EN = {
 "Pequeno porte 13,3 × 16,6 × 16,2 cm · Médio e grande porte 15,0 × 18,8 × 18,4 cm (altura × largura × comprimento)": "Small breeds 13.3 × 16.6 × 16.2 cm · Medium & large breeds 15.0 × 18.8 × 18.4 cm (height × width × length)",
 "ālea Pet Bowl Caesar": "ālea Pet Bowl Caesar",
 "ālea Pet Bowl Prisma": "ālea Pet Bowl Prisma",
+"Inspirado na beleza das pedras preciosas e na precisão de suas lapidações, o ālea Pet Bowl Prisma transforma formas geométricas em uma peça de personalidade única.": "Inspired by the beauty of precious stones and the precision of their cuts, the ālea Pet Bowl Prisma turns geometric shapes into a piece with a unique personality.",
+"Suas facetas cuidadosamente desenhadas criam um jogo de luz e sombra que valoriza cada ângulo, enquanto sua silhueta escultural equilibra elegância, modernidade e funcionalidade.": "Its carefully designed facets create a play of light and shadow that enhances every angle, while its sculptural silhouette balances elegance, modernity and functionality.",
+"Sua estrutura elevada proporciona uma posição mais confortável durante a alimentação, unindo praticidade e bem-estar a um design que valoriza cada detalhe.": "Its raised structure provides a more comfortable position while eating, combining practicality and well-being with a design that values every detail.",
+"Mais do que um comedouro, o Prisma é um elemento de design que integra o universo pet à decoração, trazendo sofisticação e originalidade aos espaços compartilhados com nossos filhos de quatro patas!": "More than a feeder, the Prisma is a design element that brings the pet world into the décor, adding sophistication and originality to the spaces shared with our four-legged children!",
 "ālea Pet Petra": "ālea Pet Petra"
 };
 
