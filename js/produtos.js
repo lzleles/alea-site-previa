@@ -499,7 +499,15 @@ window.PRODUTOS = [
      no arquivo). Texto e fotos: ELE manda depois (paragrafos e galeria vazios, de propósito).
      =================================================================================================== */
   { slug: 'pet-bowl-caesar', nome: 'ālea Pet Bowl Caesar', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
-    capa: 'caesar_capa', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: ['caesar_1', 'caesar_2'] },
+    capa: 'caesar_capa', cores_peca: ['monocromatico'], resumo: '', 
+    paragrafos: [   // msg 8423, texto DELE (nome do site: oficio 3.1.16; 'Alea iacta est' e a frase latina, fica)
+      'Algumas histórias são tão grandiosas que atravessam os séculos e continuam inspirando novas criações.',
+      'O ālea Pet Bowl Caesar é uma homenagem a Júlio César, uma das figuras mais emblemáticas da Roma Antiga, a quem é atribuída a célebre expressão Alea iacta est — “A sorte está lançada” —, que deu origem ao nome e à essência da nossa marca.',
+      'Inspirado na imponência das colunas da arquitetura clássica, seu desenho resgata a grandiosidade dos antigos monumentos romanos, reinterpretando suas formas em uma peça que carrega história, significado e identidade.',
+      'Sua estrutura elevada une a elegância arquitetônica ao cuidado com nossos companheiros, proporcionando uma posição mais confortável durante a alimentação, sem abrir mão da beleza que transforma os pequenos espaços do lar.',
+      'O Caesar não representa apenas uma inspiração histórica. Ele carrega um fragmento da nossa própria história: a coragem de acreditar em uma ideia, desafiar o convencional e transformar um sonho em realidade.',
+      'Porque toda grande história começa com a coragem de dar o primeiro passo.'
+    ], galeria: ['caesar_1', 'caesar_2'] },
   { slug: 'pet-bowl-prisma', nome: 'ālea Pet Bowl Prisma', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
     capa: 'prisma_capa', cores_peca: ['monocromatico'], resumo: '', 
     paragrafos: [   // msg 8406, texto DELE (nome do site: audio 8407)
