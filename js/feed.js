@@ -241,7 +241,9 @@
       /* As FOTOS INTEIRAS vêm todas, inclusive a foto-mãe de onde o objeto foi
          recortado: o visitante tem direito de ver a peça em uso, e é isso que ele
          pediu — "deixando as fotos completas somente se arrastar pro lado". */
-      fotos.forEach(function (f, k) {
+      /* 10/10/2026 (audio 8438): `so_recorte` = a capa e so o recorte (foto em pe, fundo degrade em volta), sem
+         repetir a foto quadrada com faixa bege como 2a imagem. Caesar e Prisma, ate chegarem fotos no padrao. */
+      if (!c.so_recorte) fotos.forEach(function (f, k) {
         var primeira = (!c.recorte && k === 0);   // sem recorte, a foto 1 fica no centro
         imgs += '<img src="img/produtos/' + f + '.jpg" class="cenario' + (primeira ? ' ativa' : '') + '" ' +
           'width="1200" height="1200" loading="lazy" decoding="async" ' +
@@ -254,7 +256,7 @@
         imgs = '<div class="sem-foto" role="img" aria-label="' + c.produto + ' — foto em breve">' +
           '<span class="sem-foto-marca" aria-hidden="true"></span><span class="sem-foto-texto">foto em breve</span></div>';
       }
-      var quantas = fotos.length + (c.recorte ? 1 : 0);
+      var quantas = (c.so_recorte ? 0 : fotos.length) + (c.recorte ? 1 : 0);
 
       /* as bolinhas ficam DENTRO do quadrado da foto, no pé dele (2ª rodada de
          15/09/2026). Elas são botões de verdade: no computador não existe arrastar, e

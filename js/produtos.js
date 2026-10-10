@@ -134,8 +134,8 @@ window.VITRINE = [
   /* 06/10/2026 (msg 7047 do Cassiano: "pode adicionar os três (...) pode fazer o campo deles lá"): Caesar, Prisma e Petra,
      logo depois da Cláudia, SEM FOTO por enquanto ("foto em breve") e sem texto. Caesar com preço por tamanho (config.js
      precoPorEscolha, o feed mostra "a partir de"); Prisma e Petra Sob consulta. Título = nome do arquivo dele (ALEA -> ālea). */
-  { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: false, fotos: ['caesar_capaq'] },
-  { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: false, fotos: ['prisma_capaq'] },
+  { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: true, so_recorte: true, fotos: ['caesar_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
+  { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: true, so_recorte: true, fotos: ['prisma_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: null, pagina: 'pet-petra',         recorte: false, fotos: ['petra_capaq'] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
