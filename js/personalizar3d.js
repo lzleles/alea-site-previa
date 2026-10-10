@@ -137,6 +137,11 @@
       deitada na parede (0,05 mm por fora), como o modificador imprime (no Urubu, 92% da letra fica dentro da barrinha, medido).
       Peça sem as duas = exatamente como na v18. No mesmo dia (áudios 7203/7205, ofício 3.1.13) Caesar/Prisma/Petra perderam o
       `nomeRelevo` no config.js: comedouro é sempre gravado pra dentro.
+   v20 (10/10/2026, prints + áudios 8439-8449 do Cassiano: "esses dois aí estão vazando (...) é pra ficar negativo só"; a v19
+      está em 03_site/_versoes_anteriores/nome_vazado_antes_2026-10-10/js/): no Caesar e no Prisma a gravação do nome furava
+      a parede — o corte usa a profundidade do arquivo (thickness 2 mm) e a parede sob o nome é mais fina (medido no .glb,
+      pelo mesmo raio desta janela: Prisma 1,42-1,73 mm, Caesar mínimo 1,57 mm). Com `cfg.profundidadeNome` (mm) o corte usa
+      esse valor no lugar do thickness. Peça sem o campo = exatamente como na v19.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -748,7 +753,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   corpoRaio.geometry.computeBoundsTree();
   var eixo = new THREE.Box3().setFromBufferAttribute(geo.attributes.position).getCenter(new THREE.Vector3());
   var raio = new THREE.Raycaster(); raio.firstHitOnly = true;
-  var PROF = semNome ? 0 : (parseFloat(quadro.text_info.thickness) || 1.5) / 1000;
+  var PROF = semNome ? 0 : (cfg.profundidadeNome || parseFloat(quadro.text_info.thickness) || 1.5) / 1000;   // v20
   var quadroEscalaMm = semNome ? 1 : new THREE.Vector3().setFromMatrixColumn(quadroMundo, 0).length() * 1000;
   var avaliador = new CSG.Evaluator();
   avaliador.useGroups = true;

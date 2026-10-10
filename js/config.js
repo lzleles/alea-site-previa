@@ -296,7 +296,7 @@ window.ALEA = {
      25/09/2026: a LISTA REAL dele substituiu as de teste (ver o bloco `filamentos` abaixo). */
   filamentos: {
     /* LISTA REAL do Cassiano (25/09/2026, audios 1786-1815, tudo PLA; nomes do site trocados por ele na
-       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079). Gerado por 03_site/07_gerar_filamentos_config_v6_transparente_e_glitter_2026-10-04.py
+       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443). Gerado por 03_site/07_gerar_filamentos_config_v7_rosa_metalizado_2026-10-10.py
        a partir de 03_site/_LISTA_FILAMENTOS_DELE_2026-09-25.json + _TEXTURAS_FILAMENTO.json - nao editar a mao.
        hex = cor OFICIAL do fabricante; eSUN Silk Lime = aproximado (medido na foto oficial da eSUN).
        v4 (26/09/2026): `textura` = filamento com efeito (Marmore: foto IMG_0039 da Chica), `hex_oficial` =
@@ -345,7 +345,8 @@ window.ALEA = {
       { site: 'Azul Céu', hex: '#1B8DCC', original: 'Voolt3D · PLA · V-Silk · Azul Sky (PL-AZ-SY-SK-1)', hex_oficial: '#035EB7' },
       { site: 'Verde Limão', hex: '#A3E810', original: 'eSUN · PLA · PLA-Silk · Lime' },
       { site: 'Verde', hex: '#129856', original: 'Voolt3D · PLA · V-Silk · Verde (PL-VD-SK-1)' },
-      { site: 'Preto com Azul', hex: '#213D4E', original: 'Bambu Lab · PLA · Silk Dual Color · Phantom Blue' }
+      { site: 'Preto com Azul', hex: '#213D4E', original: 'Bambu Lab · PLA · Silk Dual Color · Phantom Blue' },
+      { site: 'Rosa Metalizado', hex: '#BA9594', original: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' }
     ]
   },
   /* O ESTOQUE — peça PRONTA, por produto (03/10/2026, áudios 5727/5729/5731 do Cassiano).
@@ -593,11 +594,19 @@ window.ALEA.modelos3d['vase-prismatic'] = {
    Prisma: corpo Bambu PLA Sparkle #2D2B28 (NÃO está na lista do site; a mais perto é o Preto) -> abre na cor do arquivo,
      SEM `capa` (o formulário não pré-marca uma cor que o site não vende) até ele dizer.
    Petra: corpo Bambu PLA Sparkle Classic Gold = "Dourado com Glitter" (Clássico); nome branco no arquivo (Bambu PLA Basic
-     White, fora da lista) -> sem `capa.nome`. */
+     White, fora da lista) -> sem `capa.nome`.
+   10/10/2026 (prints + áudios 8439-8449 do Cassiano, confirmados no 8449): a janela abre COMO A CAPA e o nome SÓ NEGATIVO,
+   na cor da peça, nunca vazado; nome colorido só se o cliente escolher. Caesar = 'L U K E' (a capa; o arquivo traz 'K L A U S',
+   espaçado do mesmo jeito) em Mármore; Prisma = 'Matteo' em Transparente (Elegoo PETG); Petra = 'Zoe' em Rosa Metalizado
+   (Bambu Silk+ Rose Gold 13206, cor nova do Perolizado, gerador v7). `profundidadeNome` (personalizar3d.js v20): o corte
+   do nome furava a parede (thickness 2 mm > parede medida no .glb sob o nome: Prisma 1,42 mm, Caesar 1,57 mm) -> ~57% da
+   parede mais fina. Versão anterior: 03_site/_versoes_anteriores/nome_vazado_antes_2026-10-10/js/. */
 window.ALEA.modelos3d['pet-bowl-caesar'] = {
   glb: 'modelos/caesar.glb?v=2026-10-06',
   nome: 'modelos/caesar_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
+  nomeInicial: 'L U K E',
+  profundidadeNome: 0.9,
   capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Mármore' }] },
   original: {
     topo:      { site: 'Mármore', hex: '#E4E4E4', acabamento: 'basico', oficial: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble' },
@@ -609,21 +618,25 @@ window.ALEA.modelos3d['pet-bowl-prisma'] = {
   glb: 'modelos/prisma.glb?v=2026-10-06',
   nome: 'modelos/prisma_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
+  nomeInicial: 'Matteo',
+  profundidadeNome: 0.8,
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Transparente' }] },
   original: {
-    topo:      { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
-    principal: { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' },
-    base:      { site: 'Preto', hex: '#2D2B28', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle (cor do arquivo #2D2B28)' }
+    topo:      { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
+    principal: { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
+    base:      { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' }
   }
 };
 window.ALEA.modelos3d['pet-petra'] = {
   glb: 'modelos/petra.glb?v=2026-10-06',
   nome: 'modelos/petra_nome.json?v=2026-10-06',
   fonte: 'fonts/defante.otf',
-  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Dourado com Glitter' }] },
+  nomeInicial: 'Zoe',
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'perolizado', cor: 'Rosa Metalizado' }] },
   original: {
-    topo:      { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
-    principal: { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
-    base:      { site: 'Dourado com Glitter', hex: '#CEA629', acabamento: 'basico', oficial: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
+    topo:      { site: 'Rosa Metalizado', hex: '#BA9594', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' },
+    principal: { site: 'Rosa Metalizado', hex: '#BA9594', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' },
+    base:      { site: 'Rosa Metalizado', hex: '#BA9594', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' }
   }
 };
 
