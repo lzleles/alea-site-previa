@@ -2743,3 +2743,7 @@ html.idioma-carregando body { opacity: 0; }
 .produto-topo .valor-grande .preco-alea, .produto-topo .valor-final-preco .preco-alea { font-size: 1.6667em; }
 #gaveta-carrinho .valor-linha .preco-alea, .loja-item .valor .preco-alea, .loja-resumo .linha .preco-alea,
 .loja-totais > div:not(.total) .preco-alea { font-size: 2em; }
+
+/* 10/10/2026 (audios 8425-8429 do Cassiano): o nome 'ālea' dentro de uma descrição sai na grafia da logo
+   (Defante, com o macron), na cor da marca e com 2x o tamanho do texto - 'vamos ver como é que vai ficar'. */
+.descricao-produto .marca-destaque { font-family: var(--fonte-titulo); color: var(--terracota); font-size: 2em; line-height: 1; }
