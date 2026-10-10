@@ -2735,3 +2735,11 @@ html.idioma-carregando body { opacity: 0; }
 .feed .legenda .valor .preco-alea { font-size: 2.3em; }
 #gaveta-carrinho .preco-alea, .loja-item .valor .preco-alea, .loja-totais .preco-alea, .loja-resumo .preco-alea,
 .loja-desejos .preco-alea, [data-loja-conta] .preco-alea { font-size: 3em; }
+
+/* v62 (10/10/2026, áudio 8363 do Cassiano: "o preço das categorias ficou legal, desse tamanho; o preço dentro da página
+   do produto, diminuir um terço"): SÓ o preço da página do produto (topo e final) cai pra 2/3 do v61 (2.5em -> 1.6667em).
+   E (foto 8365 + áudio 8366): na sacola e na finalizar compra o PREÇO DO ITEM e o SUBTOTAL também caem 1/3 (3em -> 2em);
+   o TOTAL fica como está. O R$ segue metade do número; vitrine, desejos e conta continuam no v61. */
+.produto-topo .valor-grande .preco-alea, .produto-topo .valor-final-preco .preco-alea { font-size: 1.6667em; }
+#gaveta-carrinho .valor-linha .preco-alea, .loja-item .valor .preco-alea, .loja-resumo .linha .preco-alea,
+.loja-totais > div:not(.total) .preco-alea { font-size: 2em; }
