@@ -50,6 +50,8 @@
     });
   }
   function dinheiro(v) { return window.aleaDinheiro ? window.aleaDinheiro(v) : 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+  /* v60 (10/10/2026): preço na tela no estilo do Cassiano (Cormorant, R$ pela metade); texto puro segue no dinheiro(). */
+  function dinheiroTela(v) { return window.aleaDinheiroHTML ? window.aleaDinheiroHTML(v) : dinheiro(v); }
   function secao() { return (location.hash || '').replace(/^#\/?/, '') || ''; }
   function ir(s) { if (secao() === s) pintar(); else location.hash = '#/' + s; }
 
@@ -317,7 +319,7 @@
       var itens = p.itens || [];
       return '<li><div><strong>Pedido ' + esc(p.numero) + '</strong><br>' + quando + ' · ' + itens.length + (itens.length === 1 ? ' peça' : ' peças') +
         '<br>' + itens.map(function (i) { return esc(i.nome); }).join(', ') + '</div>' +
-        '<div>' + ((p.total_pecas || p.total) ? dinheiro(p.total_pecas || p.total) : '') + '</div></li>';
+        '<div>' + ((p.total_pecas || p.total) ? dinheiroTela(p.total_pecas || p.total) : '') + '</div></li>';
     }).join('') + '</ul>' : '<p class="loja-vazio">Você ainda não fez nenhum pedido.</p>');
   }
 
@@ -349,7 +351,7 @@
     return cabecaSecao('Lista de Desejos') + (l.length ? '<div class="loja-desejos">' + l.map(function (p) {
       return '<div><a href="produto-' + esc(p.slug) + '.html"><img src="img/produtos/' + esc(p.capa) + '_obj_m.webp" alt="" loading="lazy" ' +
         'onerror="this.onerror=null;this.src=&quot;img/produtos/' + esc(p.capa) + '_m.jpg&quot;">' + esc(p.nome) + '<br>' +
-        (p.preco ? dinheiro(p.preco) : 'Sob consulta') + '</a><br><button type="button" class="tirar" data-tirar-desejo="' + esc(p.slug) + '">remover</button></div>';
+        (p.preco ? dinheiroTela(p.preco) : 'Sob consulta') + '</a><br><button type="button" class="tirar" data-tirar-desejo="' + esc(p.slug) + '">remover</button></div>';
     }).join('') + '</div>' : '<p class="loja-vazio">Sua lista está vazia. Toque no coração na página de uma peça para guardá-la aqui.</p>');
   }
 

@@ -25,6 +25,8 @@
     });
   }
   function dinheiro(v) { return window.aleaDinheiro ? window.aleaDinheiro(v) : 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+  /* v60 (10/10/2026): preço na tela no estilo do Cassiano (Cormorant, R$ pela metade); texto puro segue no dinheiro(). */
+  function dinheiroTela(v) { return window.aleaDinheiroHTML ? window.aleaDinheiroHTML(v) : dinheiro(v); }
 
   function pintar() {
     var raiz = document.querySelector('[data-lista-desejos]');
@@ -38,7 +40,7 @@
       ? '<div class="loja-desejos">' + l.map(function (p) {
           return '<div><a href="produto-' + esc(p.slug) + '.html"><img src="img/produtos/' + esc(p.capa) + '_obj_m.webp" alt="" loading="lazy" ' +
             'onerror="this.onerror=null;this.src=&quot;img/produtos/' + esc(p.capa) + '_m.jpg&quot;">' + esc(p.nome) + '<br>' +
-            (p.preco ? dinheiro(p.preco) : 'Sob consulta') + '</a><br>' +
+            (p.preco ? dinheiroTela(p.preco) : 'Sob consulta') + '</a><br>' +
             '<button type="button" class="tirar" data-tirar-desejo="' + esc(p.slug) + '">remover</button></div>';
         }).join('') + '</div>'
       : '<p class="loja-vazio">Sua lista está vazia. Toque no coração na página de uma peça para guardá-la aqui.</p>' +

@@ -78,6 +78,11 @@
   /* 25/09/2026 (lote das 20:01, msg 1885): os 4 produtos novos são "sob consulta" (preço null). Com a sacola SÓ de
      peças sob consulta o total virava "R$ 0,00 + itens sob consulta" — parece que a peça é de graça. Agora: nada com
      preço -> "Sob consulta"; mistura -> "R$ x + itens sob consulta" (como antes). O pedido pelo WhatsApp não muda. */
+  /* v60: o total da sacola na tela, com o preço no estilo (o textoTotal segue pro texto puro). */
+  function htmlTotal() {
+    if (temSobConsulta() && !total()) return 'Sob consulta';
+    return window.aleaDinheiroHTML(total()) + (temSobConsulta() ? ' + itens sob consulta' : '');
+  }
   function textoTotal() {
     if (temSobConsulta() && !total()) return 'Sob consulta';
     return window.aleaDinheiro(total()) + (temSobConsulta() ? ' + itens sob consulta' : '');
@@ -207,10 +212,10 @@
     var i = itens[n];
     if (!linha || !i) { pintarGaveta(); return; }
     linha.querySelector('.passos .n').textContent = qtd(i);
-    linha.querySelector('.valor-linha').textContent = i.preco ? window.aleaDinheiro(i.preco * qtd(i)) : 'Sob consulta';
+    linha.querySelector('.valor-linha').innerHTML = i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta';
     var alvoTotal = g.querySelector('[data-total]');
     if (alvoTotal) {
-      alvoTotal.textContent = textoTotal();
+      alvoTotal.innerHTML = htmlTotal();
     }
     linha.classList.remove('mexeu');
     void linha.offsetWidth;
@@ -232,7 +237,7 @@
     }
 
     corpo.innerHTML = itens.map(function (i, n) {
-      var valor = i.preco ? window.aleaDinheiro(i.preco * qtd(i)) : 'Sob consulta';
+      var valor = i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta';
       /* ETAPA 33: o layout do modelo — foto à esquerda; à direita o nome, o que foi escolhido,
          a linha "Quantidade  − 1 +" com o traço embaixo, e o preço por último. Saiu o "tirar":
          quem tira é o − com 1 unidade. */
@@ -260,7 +265,7 @@
     }).join('');
 
     if (alvoTotal) {
-      alvoTotal.textContent = textoTotal();
+      alvoTotal.innerHTML = htmlTotal();
     }
     if (botao) {
       botao.disabled = false;

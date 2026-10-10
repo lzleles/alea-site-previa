@@ -1221,10 +1221,10 @@
     var t = emBreve ? null : precoTotal();
     var html, valorParcela = t;
     if (emBreve) html = '<small>Em breve</small>';   // v49
-    else if (t !== null) html = window.aleaDinheiro(t);
+    else if (t !== null) html = window.aleaDinheiroHTML(t);
     else if (precosEscolha && !escolhaCompleta() && menorPrecoDaEscolha() !== null) {
       valorParcela = menorPrecoDaEscolha();
-      html = '<small class="a-partir">a partir de</small> ' + window.aleaDinheiro(valorParcela);
+      html = '<small class="a-partir">a partir de</small> ' + window.aleaDinheiroHTML(valorParcela);
     } else html = '<small>Sob consulta</small>';
     alvoValor.innerHTML = html;
     var par = textoParcela(valorParcela);

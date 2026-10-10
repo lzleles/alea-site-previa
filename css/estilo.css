@@ -2693,3 +2693,36 @@ html.idioma-carregando body { opacity: 0; }
 /* v56 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6897-6904 do Cassiano): "Filamento" Clássico/Perolizado SEM escolher cor —
    a caixa de cor de filamento fixo (produto.js v51) mostra só as bolinhas; a lista de cores existe (o pedido lê dela), escondida. */
 .campo-cor.filamento-fixo select { display: none; }
+
+/* v59 (09/10/2026, áudio 8276 do Cassiano: "um degrau acima ficou legal" — opção B da pesquisa de 12 marcas de luxo,
+   56_pesquisa_preco_luxo_2026-10-09/PESQUISA_TAMANHO_PRECO_LUXO_v1.md: em nenhuma o preço é maior que o título). SUBSTITUI
+   o tamanho do v43 (24/20 px peso 500) e o da vitrine (.feed .valor, clamp 1.2-1.7rem, maior que o nome do produto):
+   página 20 px peso 400 em toda tela; vitrine 20 px, 15 px até 600 px. A fonte do preço ele ainda escolhe (msg 8281). */
+.produto-topo .valor-grande, .produto-topo .valor-final-preco { font-size: 20px; font-weight: 400; }
+.feed .legenda .valor { font-size: 20px; font-weight: 400; }
+@media (max-width: 600px) { .feed .legenda .valor { font-size: 15px; } }
+
+/* v60 (10/10/2026, msgs 8340-8343 + áudios 8345/8346 do Cassiano: "esse vai ser nosso estilo de preço"): o preço em
+   Cormorant Garamond (SIL OFL, fonts/cormorantgaramond_OFL.txt) com ALGARISMOS ANTIGOS - o 1 baixo, o 8 sobe, o 9 desce,
+   como a imagem dele ("quero que todos sigam esse padrão"); o R$ com METADE do tamanho do número, na linha de base; nunca
+   centavo. O tamanho do v59 (opção B) fica; só a letra muda. HTML: window.aleaDinheiroHTML (site.js). */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('../fonts/cormorantgaramond.woff2') format('woff2');
+  font-weight: 300 700; font-style: normal; font-display: swap;
+}
+.preco-alea {
+  font-family: 'Cormorant Garamond', 'EB Garamond Linktree', Georgia, serif;
+  font-weight: 500;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-feature-settings: "onum" 1, "pnum" 1, "lnum" 0, "tnum" 0;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.preco-alea .moeda { font-size: .5em; vertical-align: baseline; letter-spacing: .02em; }
+.produto-topo .valor-grande .preco-alea, .produto-topo .valor-final-preco .preco-alea { font-size: 1.25em; }
+.feed .legenda .valor .preco-alea { font-size: 1.15em; }
+/* sacola, finalizar compra, desejos e conta: a letra em volta é miúda (~13 px) e o R$ pela metade sumia - o número sobe meio
+   degrau pra o R$ continuar legível (conferido nas fotos de 1440 e 390). */
+#gaveta-carrinho .preco-alea, .loja-item .valor .preco-alea, .loja-totais .preco-alea, .loja-resumo .preco-alea,
+.loja-desejos .preco-alea, [data-loja-conta] .preco-alea { font-size: 1.5em; line-height: 1; }

@@ -113,7 +113,7 @@
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function moeda(v) {
-    return (window.aleaDinheiro && window.aleaDinheiro(v)) || 'Sob consulta';
+    return (window.aleaDinheiroHTML && window.aleaDinheiroHTML(v)) || 'Sob consulta';
   }
   /* v39 (áudio 6234): o preço do card. Com preço por variante, "a partir de" + o menor preço preenchido. */
   function valorDoCard(c) {

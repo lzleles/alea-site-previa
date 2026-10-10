@@ -38,6 +38,8 @@
     });
   }
   function dinheiro(v) { return window.aleaDinheiro ? window.aleaDinheiro(v) : 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+  /* v60 (10/10/2026): preço na tela no estilo do Cassiano (Cormorant, R$ pela metade); texto puro segue no dinheiro(). */
+  function dinheiroTela(v) { return window.aleaDinheiroHTML ? window.aleaDinheiroHTML(v) : dinheiro(v); }
   function mascaraTelefone(v) {
     var d = String(v || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '').slice(0, 11);
     if (d.length <= 2) return d.length ? '(' + d : '';
@@ -107,9 +109,9 @@
     /* 25/09/2026 (msg 1885, produtos "sob consulta"): sacola só com peça sem preço mostrava "R$ 0,00" no subtotal e
        no total. Agora diz "Sob consulta" (a regra mora no carrinho.js, textoTotal). O WhatsApp segue igual. */
     var soConsulta = sobConsulta() && !subtotal();
-    return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiro(subtotal())) + '</span></div>' +
+    return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal())) + '</span></div>' +
       (semFrete ? '' : '<div><span>Frete</span><span>a calcular</span></div>') +
-      '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiro(subtotal()) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
+      '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal()) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
   }
 
   /* ======================================================= SACOLA DE COMPRAS */
@@ -129,7 +131,7 @@
         '<div class="linha-qtd"><span class="loja-passos">' +
           '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
           '<button type="button" data-passo="1" data-item="' + n + '" aria-label="Aumentar">+</button></span>' +
-          '<span class="valor">' + (i.preco ? dinheiro(i.preco * qtd(i)) : 'Sob consulta') + '</span></div></div>';
+          '<span class="valor">' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</span></div></div>';
     }).join('');
     h += '<div class="loja-presente">' +
       '<label class="loja-marca"><input type="checkbox" data-presente' + (st.presente ? ' checked' : '') + '>' +
@@ -257,7 +259,7 @@
       var det = descrever(i);
       return '<div class="linha"><img src="' + esc(foto(i)) + '" alt="" onerror="' + fotoReserva(i) + '">' +
         '<div>' + (qtd(i) > 1 ? qtd(i) + '× ' : '') + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
-        '<div>' + (i.preco ? dinheiro(i.preco * qtd(i)) : 'Sob consulta') + '</div></div>';
+        '<div>' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</div></div>';
     }).join('') + '<a class="voltar-sacola" href="#/sacola">Voltar para a Sacola de Compras</a>' + htmlTotais() + '</div>';
   }
 

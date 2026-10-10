@@ -88,6 +88,14 @@ window.aleaCorDoTopo = (function () {
     if (Number(v) % 1 === 0) return 'R$ ' + Number(v);
     return 'R$ ' + v.toFixed(2).replace('.', ',');
   };
+  /* v60 (10/10/2026, msgs 8340-8346 do Cassiano): o preço na TELA - Cormorant com algarismos antigos e o R$ com
+     metade do tamanho (css .preco-alea/.moeda). Nunca terá centavo; quebrado (parcela, frete) sai como texto.
+     O aleaDinheiro acima segue pro texto puro (WhatsApp, pedido). */
+  window.aleaDinheiroHTML = function (v) {
+    if (v === null || v === undefined) return null;
+    if (Number(v) % 1 !== 0) return window.aleaDinheiro(v);
+    return '<span class="preco-alea"><span class="moeda">R$</span> ' + Number(v) + '</span>';
+  };
 
   /* ------------------------------------------------------------------ WhatsApp */
   function linkZap(assunto) {
