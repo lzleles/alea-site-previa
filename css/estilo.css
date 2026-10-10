@@ -2726,3 +2726,12 @@ html.idioma-carregando body { opacity: 0; }
    degrau pra o R$ continuar legível (conferido nas fotos de 1440 e 390). */
 #gaveta-carrinho .preco-alea, .loja-item .valor .preco-alea, .loja-totais .preco-alea, .loja-resumo .preco-alea,
 .loja-desejos .preco-alea, [data-loja-conta] .preco-alea { font-size: 1.5em; line-height: 1; }
+
+/* v61 (10/10/2026, áudio 8350 do Cassiano: "pode colocar o dobro do tamanho, tanto o R$ quanto o numeral, no site
+   inteiro, só os preços, ficou muito pequenininho"): o preço do v60 em DOBRO em todo lugar; o R$ segue metade do
+   número (.moeda .5em) e os algarismos antigos ficam. Nada além do preço muda. */
+.preco-alea { font-size: 2em; }
+.produto-topo .valor-grande .preco-alea, .produto-topo .valor-final-preco .preco-alea { font-size: 2.5em; }
+.feed .legenda .valor .preco-alea { font-size: 2.3em; }
+#gaveta-carrinho .preco-alea, .loja-item .valor .preco-alea, .loja-totais .preco-alea, .loja-resumo .preco-alea,
+.loja-desejos .preco-alea, [data-loja-conta] .preco-alea { font-size: 3em; }
