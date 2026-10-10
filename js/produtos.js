@@ -443,7 +443,14 @@ window.PRODUTOS = [
        Centrum, que NÃO é produto separado — 6731).
      =================================================================================================== */
   { slug: 'laptop-stand', nome: 'ālea Laptop Stand', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msgs 8599/8600, texto DELE (nome do site: regra 3.1.16)
+      'Pequeno no tamanho. Inteligente nos detalhes.',
+      'O ālea Laptop Stand foi criado para transformar pequenos momentos da rotina em experiências mais confortáveis e funcionais.',
+      'Com um design minimalista e contemporâneo, ele eleva suavemente o notebook, proporcionando uma inclinação que favorece a visualização da tela, melhora a circulação de ar sob o equipamento e contribui para uma experiência de uso mais agradável.',
+      'Sua estrutura compacta e discreta combina praticidade e estética, integrando-se naturalmente a diferentes ambientes, seja no escritório, em casa ou onde a criatividade acontecer.',
+      'Leve, portátil e cheio de personalidade, é a prova de que grandes soluções não precisam ocupar grandes espaços.'
+    ], galeria: [] },
   { slug: 'pen-holder', nome: 'ālea Pen Holder', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
