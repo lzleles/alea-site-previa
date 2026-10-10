@@ -509,7 +509,13 @@ window.PRODUTOS = [
       'Mais do que um comedouro, o Prisma é um elemento de design que integra o universo pet à decoração, trazendo sofisticação e originalidade aos espaços compartilhados com nossos filhos de quatro patas!'
     ], galeria: ['prisma_1', 'prisma_2', 'prisma_3', 'prisma_4'] },
   { slug: 'pet-petra', nome: 'ālea Pet Petra', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
-    capa: 'petra_capa', cores_peca: ['monocromatico'], resumo: '', paragrafos: [], galeria: ['petra_1', 'petra_2', 'petra_3'] },
+    capa: 'petra_capa', cores_peca: ['monocromatico'], resumo: '', 
+    paragrafos: [   // msg 8414, texto DELE (nome do site: audio 8407, oficio 3.1.16)
+      'A natureza não busca a perfeição das formas. É justamente em suas irregularidades que revela sua beleza mais autêntica.',
+      'Inspirado na essência das rochas e na maneira como o tempo esculpe a matéria, o ālea Pet Petra nasce do encontro entre a força da natureza e a delicadeza do nosso design low poly, uma das expressões mais marcantes da identidade da ālea & Co.',
+      'Suas formas geométricas reinterpretam a beleza das pedras sob um olhar contemporâneo, transformando a inspiração natural em uma criação autoral, onde cada ângulo revela personalidade, equilíbrio e originalidade.',
+      'Criado para quem acredita que o cuidado com nossos companheiros também faz parte da maneira como escolhemos viver e decorar, o Petra leva ao universo pet uma estética singular, que traduz nossa paixão por transformar formas simples em peças extraordinárias.'
+    ], galeria: ['petra_1', 'petra_2', 'petra_3'] },
 
   /* ===================================================================================================
      OS PRODUTOS ANTIGOS — fora da vitrine desde 25/09/2026 (msg 1884). As páginas continuam no disco e
