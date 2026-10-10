@@ -296,11 +296,12 @@ window.ALEA = {
      25/09/2026: a LISTA REAL dele substituiu as de teste (ver o bloco `filamentos` abaixo). */
   filamentos: {
     /* LISTA REAL do Cassiano (25/09/2026, audios 1786-1815, tudo PLA; nomes do site trocados por ele na
-       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443). Gerado por 03_site/07_gerar_filamentos_config_v7_rosa_metalizado_2026-10-10.py
+       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443; Transparente translucido audio 8459). Gerado por 03_site/07_gerar_filamentos_config_v8_transparente_translucido_2026-10-10.py
        a partir de 03_site/_LISTA_FILAMENTOS_DELE_2026-09-25.json + _TEXTURAS_FILAMENTO.json - nao editar a mao.
        hex = cor OFICIAL do fabricante; eSUN Silk Lime = aproximado (medido na foto oficial da eSUN).
        v4 (26/09/2026): `textura` = filamento com efeito (Marmore: foto IMG_0039 da Chica), `hex_oficial` =
-       o do catalogo quando o hex veio da foto dele, `rugosidade`/`metal` = brilho proprio da cor. */
+       o do catalogo quando o hex veio da foto dele, `rugosidade`/`metal` = brilho proprio da cor.
+       v8 (10/10/2026): `translucido` = filamento que deixa ver atraves (Transparente: foto IMG_2984, msg 8460). */
     basico: [
       { site: 'Laranja', hex: '#FF671F', original: 'Bambu Lab · PLA · Lite · Orange (16301)' },
       { site: 'Vermelho', hex: '#C6001A', original: 'Bambu Lab · PLA · Lite · Red (16200)' },
@@ -314,7 +315,7 @@ window.ALEA = {
       { site: 'Roxo', hex: '#603BA0', original: 'Elegoo · PLA · PLA · Purple' },
       { site: 'Marrom', hex: '#5F3839', original: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' },
       { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
-      { site: 'Transparente', hex: '#EEF2F3', original: 'Elegoo · PETG · PETG · Transparente' },
+      { site: 'Transparente', hex: '#D9DEE2', original: 'Elegoo · PETG · PETG · Transparente', hex_oficial: '#EEF2F3', rugosidade: 0.25, metal: 0.15, translucido: { opacidade: 0.85 } },
       { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
     ],
     fosco: [
@@ -600,7 +601,8 @@ window.ALEA.modelos3d['vase-prismatic'] = {
    espaçado do mesmo jeito) em Mármore; Prisma = 'Matteo' em Transparente (Elegoo PETG); Petra = 'Zoe' em Rosa Metalizado
    (Bambu Silk+ Rose Gold 13206, cor nova do Perolizado, gerador v7). `profundidadeNome` (personalizar3d.js v20): o corte
    do nome furava a parede (thickness 2 mm > parede medida no .glb sob o nome: Prisma 1,42 mm, Caesar 1,57 mm) -> ~57% da
-   parede mais fina. Versão anterior: 03_site/_versoes_anteriores/nome_vazado_antes_2026-10-10/js/. */
+   parede mais fina. Versão anterior: 03_site/_versoes_anteriores/nome_vazado_antes_2026-10-10/js/.
+   10/10/2026 (áudios 8459/8461 + foto IMG_2984 msg 8460): o Transparente do Prisma = #D9DEE2 (variante A: leitoso prateado, opacidade 0.85; tom da foto dele #AEB5BC) e translúcido (gerador v8 + personalizar3d.js v21). Antes: _versoes_anteriores/transparente_antes_2026-10-10/js/. */
 window.ALEA.modelos3d['pet-bowl-caesar'] = {
   glb: 'modelos/caesar.glb?v=2026-10-06',
   nome: 'modelos/caesar_nome.json?v=2026-10-06',
@@ -622,9 +624,9 @@ window.ALEA.modelos3d['pet-bowl-prisma'] = {
   profundidadeNome: 0.8,
   capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Transparente' }] },
   original: {
-    topo:      { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
-    principal: { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
-    base:      { site: 'Transparente', hex: '#EEF2F3', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' }
+    topo:      { site: 'Transparente', hex: '#D9DEE2', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
+    principal: { site: 'Transparente', hex: '#D9DEE2', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' },
+    base:      { site: 'Transparente', hex: '#D9DEE2', acabamento: 'basico', oficial: 'Elegoo · PETG · PETG · Transparente' }
   }
 };
 window.ALEA.modelos3d['pet-petra'] = {

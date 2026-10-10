@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v19 (06/10/2026, Urubu: nome rente na cor fixa do modificador do arquivo, `cfg.nomeRente` + `cfg.corNomeFixa`)
+   status: v21 (10/10/2026, filamento translúcido: `translucido` na cor deixa a peça ver-através, o Transparente deixa de ser branco chapado)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -142,6 +142,13 @@
       a parede — o corte usa a profundidade do arquivo (thickness 2 mm) e a parede sob o nome é mais fina (medido no .glb,
       pelo mesmo raio desta janela: Prisma 1,42-1,73 mm, Caesar mínimo 1,57 mm). Com `cfg.profundidadeNome` (mm) o corte usa
       esse valor no lugar do thickness. Peça sem o campo = exatamente como na v19.
+   v21 (10/10/2026, áudios 8459/8461 + foto IMG_2984 msg 8460 do Cassiano: "parece que o nosso transparente aí tá branco (...)
+      esse aqui seria o transparente"; a v20 está em 03_site/_versoes_anteriores/transparente_antes_2026-10-10/js/): cor com
+      `translucido: { opacidade }` (ALEA.filamentos, escrito pelo gerador v8) pinta a peça TRANSLÚCIDA — o material fica
+      transparente com essa opacidade e o three desenha as duas faces em duas passadas (de trás e da frente), então se vê a parede
+      de trás e o fundo através da peça, como no PETG impresso. Sem gravar profundidade (depthWrite desligado): com ela ligada
+      a peça saía com faixas verticais de ordem de desenho (teste de 10/10, 390_prisma_*_v21 do 1º ensaio). A letra sem cor e a gravação da logo herdam a translucidez da
+      parede (`copiarVidro`). Trocar pra uma cor sem o campo volta ao opaco de sempre. Cor sem `translucido` = exatamente como na v20.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -650,11 +657,21 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     m.roughness = extra.rugosidade != null ? extra.rugosidade : a.roughness;
     m.metalness = extra.metal != null ? extra.metal : a.metalness;
     m.userData.acab = acab;
+    /* v21: filamento translúcido (Transparente) — vê-se através; sem o campo, opaco como sempre */
+    var tr = extra.translucido;
+    if (m.transparent !== !!tr) { m.transparent = !!tr; m.needsUpdate = true; }
+    m.opacity = tr ? (tr.opacidade != null ? tr.opacidade : 0.5) : 1;
+    m.depthWrite = !tr;
     var tx = extra.textura, u = m._alea;
     if (!u) return;
     u.uUsaMapa.value = tx ? 1 : 0;
     u.uMapa.value = tx ? texturaDe(tx.img) : branco1px;
     if (tx) { u.uMapaMm.value.set(tx.mm[0], tx.mm[1]); u.uContraste.value = tx.contraste != null ? tx.contraste : 1; }
+  }
+  /* v21: a letra sem cor e a gravação da logo são a mesma parede -> mesma translucidez */
+  function copiarVidro(dst, src) {
+    if (dst.transparent !== src.transparent) { dst.transparent = src.transparent; dst.needsUpdate = true; }
+    dst.opacity = src.opacity; dst.depthWrite = src.depthWrite;
   }
   /* a cor de um filamento pelo acabamento + nome do site (traz a textura e o brilho próprio, se tiver) */
   var FIL = (window.ALEA || {}).filamentos || {};
@@ -904,6 +921,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       /* v18: letra em relevo SEM cor = o mesmo filamento da peça, sem a sombra de gravação (o relevo aparece na luz) */
       var mzR = mats[zonaNome];
       matLetra.color.copy(mzR.color); matLetra.roughness = mzR.roughness; matLetra.metalness = mzR.metalness;
+      copiarVidro(matLetra, mzR);                                        // v21
       ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mzR._alea[k].value; });
       matLetra._alea.uMapaMm.value.copy(mzR._alea.uMapaMm.value);
     } else {
@@ -914,6 +932,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       if (Lp < 0.18) matLetra.color.copy(mz.color).lerp(new THREE.Color(0xffffff), 0.12);
       else matLetra.color.copy(mz.color).multiplyScalar(0.72);
       matLetra.roughness = mz.roughness; matLetra.metalness = mz.metalness;
+      copiarVidro(matLetra, mz);                                         // v21
       /* v8: a gravação é o mesmo filamento da parede -> mesma textura (as pintas do mármore seguem dentro da letra) */
       ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mz._alea[k].value; });
       matLetra._alea.uMapaMm.value.copy(mz._alea.uMapaMm.value);
@@ -944,6 +963,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     if (L < 0.18) dst.color.copy(src.color).lerp(new THREE.Color(0xffffff), 0.12);
     else dst.color.copy(src.color).multiplyScalar(0.72);
     dst.roughness = src.roughness; dst.metalness = src.metalness;
+    copiarVidro(dst, src);                                               // v21
     ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { dst._alea[k].value = src._alea[k].value; });
     dst._alea.uMapaMm.value.copy(src._alea.uMapaMm.value);
   }
