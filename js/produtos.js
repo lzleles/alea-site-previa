@@ -159,7 +159,7 @@ window.VITRINE = [
   { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] },
   /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
      consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
-  { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: [] }
+  { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: ['urubu_capaq'] }
 ];
 /* 06/10/2026 (áudios 6772/6773 do Cassiano): "os itens do home, você pode colocar tudo em ordem alfabética (...) os
    comedouros não, a parte do pet pode deixar do jeito que está". Só os itens HOME trocam de lugar entre si (pelo nome do
@@ -490,13 +490,13 @@ window.PRODUTOS = [
      - medidas do ARQUIVO, montado (placa 1, 100%): 25,8 cm de altura × 21,2 de largura (asas) × 7,8 de profundidade.
      =================================================================================================== */
   { slug: 'urubu-mascote-flamengo', nome: 'ālea Urubu Mascote Flamengo', linha: 'Fan', categoria: 'fan', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], resumo: '',
+    capa: 'urubu_capa', cores_peca: ['monocromatico'], resumo: '',
     paragrafos: [   // msgs 6918-6922, texto fechado com ELE
       'O ālea Urubu Mascote Flamengo nasce para quem carrega o time no peito e quer ter essa paixão à vista, na estante, na mesa de trabalho ou no cantinho da coleção.',
       'Cheio de detalhes, das cores da camisa à postura de quem entra em campo, ele é produzido peça por peça em PLA, com acabamento Clássico ou Perolizado no vermelho, que ganha brilho e profundidade com a luz.',
       'Disponível em três tamanhos: Pequeno, Médio e Gigante. E com um toque só seu: o nome que você escolher vai nas costas, acima do número da camisa.',
       'Mais do que um boneco, é a torcida em forma de peça.'
-    ], galeria: [] },
+    ], galeria: ['urubu_1', 'urubu_2', 'urubu_3', 'urubu_4', 'urubu_5', 'urubu_6'] },
 
   /* ===================================================================================================
      CAESAR, PRISMA e PETRA (06/10/2026, msg 7047 do Cassiano: "pode adicionar os três, depois a gente faz a descrição").
