@@ -705,7 +705,9 @@ window.ALEA.formatos = {
   'lamel': ['Ovatum', 'Longum'],
   /* v52: ālea Nodus Organizer — áudios 6729/6731: Opção 1 = 5 peças (placa 1 + placa 9), Opção 2 = 3 peças (placa 2 + placa 8),
      Opção 3 = o Centrum (part A + part B). "Opção 1/2/3" são PROVISÓRIOS, ele escolhe os nomes depois. */
-  'nodus-organizer': ['Opção 1', 'Opção 2', 'Opção 3']
+  /* 11/10/2026 (lista de ajustes da prévia, item 5): os nomes DELE, sem "Nodus" — Opção 1 = Quinque, Opção 2 = Trio, Opção 3 =
+     Centrum (msgs 8689, 8691 e 8697 "Pode deixar a Centrum mesmo"). */
+  'nodus-organizer': ['Quinque', 'Trio', 'Centrum']
 };
 /* v52 — EM BREVE (05/10/2026, áudio 6726 do Cassiano: "você deixa na frente escrito em breve, no lugar do valor (...) amanhã eu vou
    organizar questão de foto, imprimir"). Produto listado aqui: card e página dizem "Em breve" no lugar do preço, o botão de compra
@@ -730,6 +732,14 @@ window.ALEA.iconeFormato = {
     modo: 'miniatura',
     lado: 'depois',
     miniatura: { Ovatum: 'img/lamel_formato_ovatum.png?v=2026-10-06', Longum: 'img/lamel_formato_longum.png?v=2026-10-06' }
+  },
+  /* 11/10/2026 (lista de ajustes da prévia, item 4 — msg 8684 "Colocar as miniaturas na frente das opções da linha Nodus" e 8680
+     "O que a gente já tiver feito nos outros!"): igual ao Lamel e ao Stria, miniatura DEPOIS do nome. Render do .glb do site nas
+     cores em que cada opção abre (coresIniciais) pelo 37_produtos_home_lote_2026-10-05/miniatura_formato_nodus_v1_cores_iniciais.py. */
+  'nodus-organizer': {
+    modo: 'miniatura',
+    lado: 'depois',
+    miniatura: { Quinque: 'img/nodus_formato_quinque.png?v=2026-10-11', Trio: 'img/nodus_formato_trio.png?v=2026-10-11', Centrum: 'img/nodus_formato_centrum.png?v=2026-10-11' }
   }
 };
 
@@ -795,9 +805,9 @@ window.ALEA.modelos3d['stria-planter'] = {
     'Longum': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy) — v55: era 'Wavy'
   } });
   window.ALEA.modelos3d['nodus-organizer'] = cfg('modelos/nodus_opcao1.glb' + V, { pecas: true, soUmModo: true, glbPorEscolha: {
-    'Opção 1': 'modelos/nodus_opcao1.glb' + V,   // 5 peças: bandeja grande (placa 1) + placa 9, encaixadas
-    'Opção 2': 'modelos/nodus_opcao2.glb' + V,   // 3 peças: bandeja 4 gomos (placa 2) + placa 8
-    'Opção 3': 'modelos/nodus_opcao3.glb' + V    // Centrum: part A + part B no centro
+    'Quinque': 'modelos/nodus_opcao1.glb' + V,   // era 'Opção 1' (11/10/2026, msg 8689);   // 5 peças: bandeja grande (placa 1) + placa 9, encaixadas
+    'Trio': 'modelos/nodus_opcao2.glb' + V,      // era 'Opção 2';   // 3 peças: bandeja 4 gomos (placa 2) + placa 8
+    'Centrum': 'modelos/nodus_opcao3.glb' + V    // era 'Opção 3';   // Centrum: part A + part B no centro
   },
   /* v54 (06/10/2026, foto 6799 + áudio 6800 e foto 6802 + msg 6803 do Cassiano): abre nas cores que ELE deixou na prévia.
      Nome de cada cor = o tom medido nas fotos dele contra a lista Fosco (o dropdown mostrava Caramelo na 6799 e Areia na

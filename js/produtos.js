@@ -439,7 +439,7 @@ window.PRODUTOS = [
      - SEM TEXTO (paragrafos vazios): "amanhã eu vou organizando um por um, falando de descrição e tudo" (6726) — nunca inventar.
      - capa 'em_breve' = a capa PROVISÓRIA bege "foto em breve" (03_site/_gerar_capa_em_breve_v1_2026-10-05.py), só pra busca
        e lista de desejos não quebrarem; sai quando chegar a foto dele.
-     - Lamel: formatos Vase/Wavy (nomes provisórios, 6728). Nodus Organizer: Opção 1/2/3 (provisórios, 6729/6731; a Opção 3 é o
+     - Lamel: formatos Vase/Wavy (nomes provisórios, 6728). Nodus Organizer: Opção 1/2/3 (provisórios, 6729/6731; 11/10/2026: Quinque/Trio/Centrum, msgs 8689/8691/8697; a Opção 3 é o
        Centrum, que NÃO é produto separado — 6731).
      =================================================================================================== */
   { slug: 'laptop-stand', nome: 'ālea Laptop Stand', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
@@ -452,9 +452,21 @@ window.PRODUTOS = [
       'Leve, portátil e cheio de personalidade, é a prova de que grandes soluções não precisam ocupar grandes espaços.'
     ], galeria: [] },
   { slug: 'pen-holder', nome: 'ālea Pen Holder', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
+    paragrafos: [   // msgs 8682/8683, texto DELE (ALEA Pen Holder -> nome do site, regra 3.1.16)
+      'Organizar também pode ser uma forma de expressão.',
+      'O ālea Pen Holder transforma um objeto cotidiano em uma peça de design, onde linhas fluidas e formas orgânicas se encontram para criar uma composição surpreendente.',
+      'Seu interior revela um desenho de curvas contínuas que se entrelaçam, formando diferentes espaços para acomodar canetas, lápis e outros instrumentos de escrita. Um contraste elegante entre a simplicidade de sua estrutura externa e a riqueza dos detalhes que ganham vida em seu interior.',
+      'Mais do que um porta-canetas, uma peça que une criatividade, funcionalidade e personalidade, trazendo um toque de arte até para os pequenos momentos do dia a dia.'
+    ], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', paragrafos: [], galeria: [] },
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
+    paragrafos: [   // msgs 8674/8675, texto DELE (linha Nodus / Nodus = a linha, ficam como ele escreveu)
+      'Criada a partir da ideia de conexão, a linha Nodus transforma organização em composição.',
+      'Seus módulos se encontram, se encaixam e criam diferentes formas de uso, dando liberdade para organizar canetas, lápis, marcadores e pequenos objetos de maneira funcional, mas sem perder o cuidado com o desenho.',
+      'A textura canelada percorre toda a superfície e reforça a identidade da coleção, enquanto as curvas suaves deixam o conjunto leve, contemporâneo e fácil de combinar com diferentes ambientes.',
+      'Mais do que organizar, Nodus foi pensada para fazer parte da decoração — uma linha modular, versátil e cheia de possibilidades, onde cada peça encontra seu lugar e cada combinação ganha uma forma diferente.'
+    ], galeria: [] },
   { slug: 'make', nome: 'ālea Cella', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
     paragrafos: [   // msg 7113, texto DELE (nome: msg 7122)
