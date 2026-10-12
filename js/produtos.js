@@ -74,7 +74,8 @@ window.CATEGORIAS = [
      Peça liga na subcategoria pelo campo `sub` da VITRINE. Sem peça = "em breve" (igual categoria vazia). */
   { id: 'home',   nome: 'HOME',   descricao: '',     // sugestão minha: casa e decoração
     subcategorias: [ { id: 'desk', nome: 'DESK' }, { id: 'decor', nome: 'DECOR' }, { id: 'daily', nome: 'DAILY' },
-                     { id: 'meet', nome: 'MEET' }, { id: 'aura', nome: 'AURA' } ] },
+                     { id: 'meet', nome: 'MEET' }, { id: 'aura', nome: 'AURA' },
+                     { id: 'etc', nome: 'ETC.' } ] },   // v46 (12/10/2026): ETC. nova, áudio 9087 + msg 9088 (Pluvia)
   /* ⚠️ TEXTO PROVISÓRIO (etapa 3, 22/09/2026): o Cassiano pediu um placeholder sobre golden
      retriever "só pra ver o espaçamento do título e da descrição antes das fotos" — ele escreve
      o texto de verdade depois. TROCAR quando ele mandar o definitivo. */
@@ -136,6 +137,8 @@ window.VITRINE = [
      precoPorEscolha, o feed mostra "a partir de"); Prisma e Petra Sob consulta. Título = nome do arquivo dele (ALEA -> ālea). */
   { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: true, so_recorte: true, fotos: ['caesar_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: true, so_recorte: true, fotos: ['prisma_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
+  /* 12/10/2026 (v46): Retis, texto dele msg 9130, nome 9140. Em breve, SEM FOTO, sem preço. */
+  { produto: 'ālea Pet Bowl Retis', nome: 'Retis', categoria: 'pet', preco: null, pagina: 'pet-bowl-retis', recorte: false, fotos: [] },
   { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: null, pagina: 'pet-petra',         recorte: false, fotos: ['petra_capaq'] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
@@ -163,6 +166,9 @@ window.VITRINE = [
   { produto: 'ālea Vitta', nome: 'Vitta', categoria: 'home', sub: 'decor', preco: null, pagina: 'vitta', recorte: false, fotos: [] },
   { produto: 'ālea Orbis', nome: 'Orbis', categoria: 'home', sub: 'decor', preco: null, pagina: 'orbis', recorte: false, fotos: [] },
   { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: null, pagina: 'travel-kit', recorte: false, fotos: [] },
+  /* 12/10/2026 (v46): Pluvia (ETC.) e Aurea (Decor), texto dele msgs 9075/9072. Em breve, SEM FOTO, sem preço. */
+  { produto: 'ālea Pluvia', nome: 'Pluvia', categoria: 'home', sub: 'etc', preco: null, pagina: 'pluvia', recorte: false, fotos: [] },
+  { produto: 'ālea Aurea', nome: 'Aurea', categoria: 'home', sub: 'decor', preco: null, pagina: 'aurea', recorte: false, fotos: [] },
   /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
      consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
   { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: ['urubu_capaq'] }
@@ -499,6 +505,29 @@ window.PRODUTOS = [
       'Criado para tornar a organização durante as viagens mais prática e elegante, o ālea Travel Kit reúne quatro recipientes de diferentes tamanhos, pensados para acomodar pequenos itens essenciais da rotina.',
       'Com um design inspirado nas formas geométricas low poly, característica da identidade da ālea & Co., cada peça combina personalidade e funcionalidade em uma composição compacta e versátil.',
       'De escovas de dentes e cotonetes a acessórios de beleza e pequenos objetos pessoais, o conjunto permite que cada detalhe encontre seu próprio lugar, mantendo tudo organizado na sua mala.'
+    ], galeria: [] },
+  { slug: 'pluvia', nome: 'ālea Pluvia', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9075, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
+      'Inspirado na delicadeza da chuva e na beleza das formas geométricas, o ālea Pluvia transforma um gesto simples de cuidado em uma experiência cheia de personalidade.',
+      'Seu corpo é composto por facetas triangulares que traduzem a identidade low poly da ālea & Co., enquanto o bico alongado e a alça geométrica completam uma composição que une funcionalidade e design autoral.',
+      'Mais do que um regador, Pluvia é uma peça decorativa que encontra seu lugar entre vasos, flores e pequenos jardins, trazendo originalidade até mesmo aos momentos mais simples do dia a dia.',
+      'Porque cultivar também é uma forma de cuidar.'
+    ], galeria: [] },
+  { slug: 'pet-bowl-retis', nome: 'ālea Pet Bowl Retis', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: [], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9130, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
+      'Da união entre geometria, tecnologia e design nasce o ālea Pet Bowl Retis, um comedouro que transforma a essência da impressão 3D em uma expressão de identidade e sofisticação.',
+      'Inspirado no latim rete, que significa rede ou malha, o Retis apresenta o Mesh autoral da ālea & Co., uma trama de triângulos interligados que traduz nossa paixão pelas formas geométricas em uma estrutura contemporânea, elegante e cheia de personalidade.',
+      'Suas linhas suavemente curvas contrastam com a precisão dos vazados, enquanto o recipiente elevado em aço inoxidável complementa uma composição que une beleza, funcionalidade e praticidade.',
+      'Mais do que um comedouro, o ālea Pet Bowl Retis é uma peça de decoração que encontra seu lugar na sua casa. Com um design exclusivo e a possibilidade de receber o nome do seu pet, transforma o cantinho de quem você ama em um espaço cheio de estilo, personalidade e afeto.'
+    ], galeria: [] },
+  { slug: 'aurea', nome: 'ālea Aurea', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: [], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9072, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
+      'Entre curvas e reflexos, nasce uma peça que encontra na harmonia das formas a sua expressão mais elegante.',
+      'O ālea Aurea combina uma silhueta arredondada e generosa com ondulações delicadas que percorrem sua superfície, criando um movimento sutil de luz e sombra. Ao centro, uma faixa dourada envolve o vaso como um detalhe de joalheria, estabelecendo um contraste sofisticado entre textura, forma e cor.',
+      'Com suas proporções marcantes e um design que equilibra delicadeza e personalidade, o Aurea transforma qualquer ambiente com sua presença singular.'
     ], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 

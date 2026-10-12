@@ -83,7 +83,7 @@
 
   function marca(s) {
     /* nome de peça, categoria e preço ficam como estão */
-    return /^ā?lea\b/i.test(s) || /^(PET|HOME|FAN|GLOW|PLAY|SENSE|CUSTOM|DESK|AURA|DECOR|DAILY|MEET)$/.test(s) || /^R\$\s?[\d.,]+$/.test(s) ||
+    return /^ā?lea\b/i.test(s) || /^(PET|HOME|FAN|GLOW|PLAY|SENSE|CUSTOM|DESK|AURA|DECOR|DAILY|MEET|ETC\.)$/.test(s) || /^R\$\s?[\d.,]+$/.test(s) ||
       /^[×x]\s/.test(s) || !TEM_LETRA.test(s);
   }
 
