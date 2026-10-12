@@ -2752,3 +2752,8 @@ html.idioma-carregando body { opacity: 0; }
 .descricao-produto .marca-destaque.l2 { color: var(--laranja); }
 .descricao-produto .marca-destaque.l3 { color: var(--terracota); }
 .descricao-produto .marca-destaque.l4 { color: var(--dourado); }
+
+/* ---- v53 (12/10/2026): "Em breve" — o produto.js v49 põe `hidden` na declaração e na sacola, mas o `display: flex` do `.aceite`
+   e o `display: grid` do `.botao-sacola` venciam o atributo (medido em 390 e 1440 px, prévia e no ar: hidden=true e visível).
+   Mesmo remédio do `.extra-poopbag[hidden]` (v49). */
+.aceite[hidden], .botao-sacola[hidden] { display: none; }
