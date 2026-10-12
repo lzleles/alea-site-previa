@@ -157,6 +157,12 @@ window.VITRINE = [
   { produto: 'ālea Cella',                                 nome: 'Cella', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
   { produto: 'ālea Strata',               nome: 'Strata', categoria: 'home', sub: 'aura', preco: null, pagina: 'makeup-layer-organizer', recorte: false, fotos: ['strata_capaq'] },
   { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] },
+  /* 12/10/2026: os 4 do texto antes da impressão (áudio 9011; msgs 9013/9020/9025/9027), categorias msg 9039. Em breve,
+     SEM FOTO (feed.js v41 mostra "foto em breve") e sem preço. Gerados pelo 01_gerar_paginas_v45. */
+  { produto: 'ālea Unda Organizer', nome: 'Unda Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'unda-organizer', recorte: false, fotos: [] },
+  { produto: 'ālea Vitta', nome: 'Vitta', categoria: 'home', sub: 'decor', preco: null, pagina: 'vitta', recorte: false, fotos: [] },
+  { produto: 'ālea Orbis', nome: 'Orbis', categoria: 'home', sub: 'decor', preco: null, pagina: 'orbis', recorte: false, fotos: [] },
+  { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: null, pagina: 'travel-kit', recorte: false, fotos: [] },
   /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
      consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
   { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: ['urubu_capaq'] }
@@ -458,6 +464,41 @@ window.PRODUTOS = [
       'O ālea Pen Holder transforma um objeto cotidiano em uma peça de design, onde linhas fluidas e formas orgânicas se encontram para criar uma composição surpreendente.',
       'Seu interior revela um desenho de curvas contínuas que se entrelaçam, formando diferentes espaços para acomodar canetas, lápis e outros instrumentos de escrita. Um contraste elegante entre a simplicidade de sua estrutura externa e a riqueza dos detalhes que ganham vida em seu interior.',
       'Mais do que um porta-canetas, uma peça que une criatividade, funcionalidade e personalidade, trazendo um toque de arte até para os pequenos momentos do dia a dia.'
+    ], galeria: [] },
+  { slug: 'unda-organizer', nome: 'ālea Unda Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9013, texto DELE (nome do site: regra 3.1.16)
+      'Organizar também é uma forma de decorar.',
+      'Inspirada no movimento natural das ondas, a ālea Unda Organizer traz uma nova perspectiva para a organização dos espaços, unindo formas orgânicas, linhas fluidas e um design que foge do convencional.',
+      'Cada peça possui sua própria personalidade, mas é na combinação entre elas que a coleção revela sua essência: diferentes formatos que se complementam, criando composições harmoniosas e funcionais para acompanhar as necessidades do cotidiano.',
+      'Disponível nas versões Mini e Core, a ālea Unda Organizer foi pensada para quem acredita que organização e criatividade podem caminhar juntas.',
+      'Porque até os objetos mais simples merecem um lugar especial.'
+    ], galeria: [] },
+  { slug: 'vitta', nome: 'ālea Vitta', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9020, texto DELE (nome do site: regra 3.1.16)
+      'A vida floresce nos pequenos detalhes.',
+      'Inspirado na beleza das formas geométricas, o ālea Vitta traduz a identidade low poly da ālea & Co. em uma peça que celebra a natureza através do design.',
+      'Sua silhueta alongada é formada por uma composição de facetas que se encontram em diferentes ângulos, criando uma estrutura marcante, cheia de personalidade e originalidade.',
+      'Pensado especialmente para valorizar flores de hastes longas e arranjos verticais, o ālea Vitta une a força de suas linhas geométricas à delicadeza da natureza, fazendo de cada composição uma expressão única de beleza.',
+      'ālea Vitta. Uma nova forma de celebrar a vida.'
+    ], galeria: [] },
+  { slug: 'orbis', nome: 'ālea Orbis', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['bicolor'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9027, texto DELE (nome do site: regra 3.1.16)
+      'A natureza não precisa seguir linhas perfeitas para revelar sua beleza.',
+      'Inspirado na harmonia das formas circulares, o ālea Orbis une a suavidade de uma silhueta arredondada à personalidade do nosso design low poly, transformando a geometria em uma expressão de delicadeza e originalidade.',
+      'Suas facetas cuidadosamente distribuídas dão forma a uma peça de identidade marcante, enquanto o acabamento contrastante da borda acrescenta um toque de elegância à composição.',
+      'Pensado para acolher desde pequenas plantas até a delicadeza das orquídeas, o ālea Orbis valoriza a beleza natural de cada espécie, criando um encontro entre a precisão das formas geométricas e a liberdade da natureza.',
+      'ālea Orbis. A natureza em uma nova perspectiva.'
+    ], galeria: [] },
+  { slug: 'travel-kit', nome: 'ālea Travel Kit', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9025, texto DELE (nome do site: regra 3.1.16)
+      'Seu cuidado pessoal merece acompanhar você aonde for.',
+      'Criado para tornar a organização durante as viagens mais prática e elegante, o ālea Travel Kit reúne quatro recipientes de diferentes tamanhos, pensados para acomodar pequenos itens essenciais da rotina.',
+      'Com um design inspirado nas formas geométricas low poly, característica da identidade da ālea & Co., cada peça combina personalidade e funcionalidade em uma composição compacta e versátil.',
+      'De escovas de dentes e cotonetes a acessórios de beleza e pequenos objetos pessoais, o conjunto permite que cada detalhe encontre seu próprio lugar, mantendo tudo organizado na sua mala.'
     ], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 

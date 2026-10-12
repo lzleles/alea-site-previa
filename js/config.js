@@ -707,13 +707,16 @@ window.ALEA.formatos = {
      Opção 3 = o Centrum (part A + part B). "Opção 1/2/3" são PROVISÓRIOS, ele escolhe os nomes depois. */
   /* 11/10/2026 (lista de ajustes da prévia, item 5): os nomes DELE, sem "Nodus" — Opção 1 = Quinque, Opção 2 = Trio, Opção 3 =
      Centrum (msgs 8689, 8691 e 8697 "Pode deixar a Centrum mesmo"). */
-  'nodus-organizer': ['Quinque', 'Trio', 'Centrum']
+  'nodus-organizer': ['Quinque', 'Trio', 'Centrum'],
+  /* v45 (12/10/2026): ālea Unda Organizer — versões Mini e Core (texto dele msg 9013; uma página só, D-20261012-12). */
+  'unda-organizer': ['Mini', 'Core']
 };
 /* v52 — EM BREVE (05/10/2026, áudio 6726 do Cassiano: "você deixa na frente escrito em breve, no lugar do valor (...) amanhã eu vou
    organizar questão de foto, imprimir"). Produto listado aqui: card e página dizem "Em breve" no lugar do preço, o botão de compra
    fica desligado e a sacola não aceita (produto.js v49, feed.js v41, carrinho.js); o "Personalize agora" com o 3D funciona.
    Pra pôr à venda: tirar o slug daqui e dar o preço (VITRINE/PRODUTOS em produtos.js ou precoPorEscolha). */
-window.ALEA.emBreve = ['laptop-stand', 'pen-holder', 'nodus-organizer', 'make', 'makeup-layer-organizer', 'lamel'];
+window.ALEA.emBreve = ['laptop-stand', 'pen-holder', 'nodus-organizer', 'make', 'makeup-layer-organizer', 'lamel',
+  'unda-organizer', 'vitta', 'orbis', 'travel-kit'];  // v45 (12/10/2026): os 4 do texto antes da impressão (msg 9039)
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,
