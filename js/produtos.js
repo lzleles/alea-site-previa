@@ -151,7 +151,7 @@ window.VITRINE = [
   /* 05/10/2026: os 6 do LOTE msg6689 (áudios 6726/6728/6729/6731 do Cassiano), todos "Em breve" (config.js ALEA.emBreve):
      SEM FOTO por enquanto (fotos: [] -> feed.js v41 mostra o bloco "foto em breve") e sem preço. Subcategorias confirmadas
      por ele (6731): Desk = Laptop Stand, Pen Holder, Nodus Organizer; Aura = Make, Makeup Layer Organizer; Decor = Lamel. */
-  { produto: 'ālea Laptop Stand',                         nome: 'Laptop Stand', categoria: 'home', sub: 'desk',  preco: null, pagina: 'laptop-stand', recorte: false, fotos: [] },
+  { produto: 'ālea Laptop Stand',                         nome: 'Laptop Stand', categoria: 'home', sub: 'desk',  preco: null, pagina: 'laptop-stand', recorte: false, fotos: ['laptop_capaq'] },
   { produto: 'ālea Pen Holder',                           nome: 'Pen Holder', categoria: 'home', sub: 'desk',    preco: null, pagina: 'pen-holder', recorte: false, fotos: [] },
   { produto: 'ālea Nodus Organizer',                      nome: 'Nodus Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'nodus-organizer', recorte: false, fotos: [] },
   { produto: 'ālea Cella',                                 nome: 'Cella', categoria: 'home', sub: 'aura',          preco: null, pagina: 'make', recorte: false, fotos: [] },
@@ -443,14 +443,14 @@ window.PRODUTOS = [
        Centrum, que NÃO é produto separado — 6731).
      =================================================================================================== */
   { slug: 'laptop-stand', nome: 'ālea Laptop Stand', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    capa: 'laptop_capa', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
     paragrafos: [   // msgs 8599/8600, texto DELE (nome do site: regra 3.1.16)
       'Pequeno no tamanho. Inteligente nos detalhes.',
       'O ālea Laptop Stand foi criado para transformar pequenos momentos da rotina em experiências mais confortáveis e funcionais.',
       'Com um design minimalista e contemporâneo, ele eleva suavemente o notebook, proporcionando uma inclinação que favorece a visualização da tela, melhora a circulação de ar sob o equipamento e contribui para uma experiência de uso mais agradável.',
       'Sua estrutura compacta e discreta combina praticidade e estética, integrando-se naturalmente a diferentes ambientes, seja no escritório, em casa ou onde a criatividade acontecer.',
       'Leve, portátil e cheio de personalidade, é a prova de que grandes soluções não precisam ocupar grandes espaços.'
-    ], galeria: [] },
+    ], galeria: ['laptop_1', 'laptop_2', 'laptop_3', 'laptop_4', 'laptop_5', 'laptop_6'] },
   { slug: 'pen-holder', nome: 'ālea Pen Holder', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 
     paragrafos: [   // msgs 8682/8683, texto DELE (ALEA Pen Holder -> nome do site, regra 3.1.16)
