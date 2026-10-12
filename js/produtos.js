@@ -169,6 +169,8 @@ window.VITRINE = [
   /* 12/10/2026 (v46): Pluvia (ETC.) e Aurea (Decor), texto dele msgs 9075/9072. Em breve, SEM FOTO, sem preço. */
   { produto: 'ālea Pluvia', nome: 'Pluvia', categoria: 'home', sub: 'etc', preco: null, pagina: 'pluvia', recorte: false, fotos: [] },
   { produto: 'ālea Aurea', nome: 'Aurea', categoria: 'home', sub: 'decor', preco: null, pagina: 'aurea', recorte: false, fotos: [] },
+  /* 12/10/2026 (v47): Una (Decor), texto dele msg 9214, cadastro 9217-9225. Em breve, SEM FOTO, sem preço. */
+  { produto: 'ālea Una', nome: 'Una', categoria: 'home', sub: 'decor', preco: null, pagina: 'una', recorte: false, fotos: [] },
   /* 06/10/2026: 1º produto da FAN (Cassiano, msgs 6884-6926: nome 6887, categoria nova FAN 6890, sem linha 6892/6894, preço sob
      consulta 6894). SEM FOTO por enquanto (6924: "ele manda depois") -> bloco "foto em breve" do feed.js v41. Vende (não é Em breve). */
   { produto: 'ālea Urubu Mascote Flamengo',               nome: 'Urubu Mascote Flamengo', categoria: 'fan', preco: null, pagina: 'urubu-mascote-flamengo', recorte: false, fotos: ['urubu_capaq'] }
@@ -528,6 +530,16 @@ window.PRODUTOS = [
       'Entre curvas e reflexos, nasce uma peça que encontra na harmonia das formas a sua expressão mais elegante.',
       'O ālea Aurea combina uma silhueta arredondada e generosa com ondulações delicadas que percorrem sua superfície, criando um movimento sutil de luz e sombra. Ao centro, uma faixa dourada envolve o vaso como um detalhe de joalheria, estabelecendo um contraste sofisticado entre textura, forma e cor.',
       'Com suas proporções marcantes e um design que equilibra delicadeza e personalidade, o Aurea transforma qualquer ambiente com sua presença singular.'
+    ], galeria: [] },
+  { slug: 'una', nome: 'ālea Una', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
+    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    paragrafos: [   // msg 9214, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
+      'Uma única flor. Toda a beleza que ela merece.',
+      'Há uma elegância especial na simplicidade. O ālea Una nasce desse conceito: valorizar a delicadeza de uma única flor e transformar sua presença em um detalhe capaz de encantar qualquer ambiente.',
+      'Sua estrutura alongada, revestida por uma delicada trama de triângulos, traduz a identidade geométrica da ālea & Co. em um design contemporâneo, que une leveza, originalidade e sofisticação.',
+      'Pensado especialmente para rosas e outras flores de haste longa, o Una transforma um gesto simples, como presentear alguém com uma flor, em uma experiência ainda mais especial.',
+      'Disponível em 15 e 22 centímetros, é uma peça que encontra beleza no essencial.',
+      'Porque, às vezes, uma única flor é tudo o que precisamos para dizer muito.'
     ], galeria: [] },
   { slug: 'nodus-organizer', nome: 'ālea Nodus Organizer', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '', 

@@ -717,7 +717,8 @@ window.ALEA.formatos = {
    Pra pôr à venda: tirar o slug daqui e dar o preço (VITRINE/PRODUTOS em produtos.js ou precoPorEscolha). */
 window.ALEA.emBreve = ['laptop-stand', 'pen-holder', 'nodus-organizer', 'make', 'makeup-layer-organizer', 'lamel',
   'unda-organizer', 'vitta', 'orbis', 'travel-kit',  // v45 (12/10/2026): os 4 do texto antes da impressão (msg 9039)
-  'pluvia', 'pet-bowl-retis', 'aurea'];  // v46 (12/10/2026): Pluvia, Retis, Aurea (áudio 9145)
+  'pluvia', 'pet-bowl-retis', 'aurea',  // v46 (12/10/2026): Pluvia, Retis, Aurea (áudio 9145)
+  'una'];  // v47 (12/10/2026): Una (msg 9214)
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,
