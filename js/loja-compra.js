@@ -157,9 +157,8 @@
     var g = C.freteGratis || {}, sub = subtotal();
     var lim = regiaoDoCep(st.entrega.cep) === 'sseco' ? g.sul_sudeste_centro_oeste : g.demais;
     var gratis = !!lim && sub >= lim;
-    /* regra F (áudio 9459): batendo o grátis, só a Jadlog grátis + o SEDEX com o valor normal (o PAC some) */
-    var outra = gratis ? { servico: 'exemplo:correios-2', empresa: 'Correios', nome: 'SEDEX', valor: 61.7, prazo_dias: 3 }
-                       : { servico: 'exemplo:correios-1', empresa: 'Correios', nome: 'PAC', valor: 38.4, prazo_dias: 9 };
+    /* áudio 9759 (13/10/2026): SEMPRE só duas opções, Jadlog + SEDEX com o valor normal; o PAC some sempre, não só no grátis */
+    var outra = { servico: 'exemplo:correios-2', empresa: 'Correios', nome: 'SEDEX', valor: 61.7, prazo_dias: 3 };
     return { chave: chave, estado: 'ok', exemplo: true, escolhido: 'exemplo:jadlog-3',
              opcoes: [{ servico: 'exemplo:jadlog-3', empresa: 'Jadlog', nome: '.Package', valor: gratis ? 0 : 32.9, prazo_dias: 7, gratis: gratis },
                       outra] };
@@ -198,7 +197,7 @@
       return '<p class="loja-rotulo">Forma de Entrega</p>' + f.opcoes.map(function (o) {
         var sel = o.servico === f.escolhido;
         return '<label class="loja-radio' + (sel ? ' escolhido' : '') + '"><input type="radio" name="frete" value="' + esc(o.servico) + '"' +
-          (sel ? ' checked' : '') + '><span class="txt">' + esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : '') +
+          (sel ? ' checked' : '') + '><span class="txt">' + (o.valor === 0 ? 'Frete grátis' /* áudio 9759: sem o nome da Jadlog */ : esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : '')) +
           '<small>' + (o.prazo_dias ? 'Chega em até ' + o.prazo_dias + ' dias úteis depois de pronta' : 'Prazo confirmado com o pedido') + '</small></span>' +
           '<span class="preco' + (o.valor === 0 ? ' gratis' : '') + '">' + textoFrete(o.valor) + '</span></label>';
       }).join('') + (f.exemplo ? '<p class="loja-miudo" style="margin-top:6px">Prévia: valores de frete de EXEMPLO. No site, o valor vem da transportadora pelo CEP.</p>' : '');
