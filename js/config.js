@@ -317,7 +317,7 @@ window.ALEA = {
       { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
       { site: 'Transparente', hex: '#D9DEE2', original: 'Elegoo · PETG · PETG · Transparente', hex_oficial: '#EEF2F3', rugosidade: 0.25, metal: 0.15, translucido: { opacidade: 0.85 } },
       { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
-      { site: 'Azul com Glitter', hex: '#153751', original: 'Elegoo · PLA · Galaxy · Galaxy Blue' }
+      { site: 'Azul com Glitter', hex: '#153751', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' }
     ],
     fosco: [
       { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White' },
@@ -667,9 +667,9 @@ window.ALEA.modelos3d['pet-bowl-retis'] = {
   profundidadeNome: 0.6,
   capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Azul com Glitter' }] },
   original: {
-    topo:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Blue' },
-    principal: { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Blue' },
-    base:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Blue' }
+    topo:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
+    principal: { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
+    base:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' }
   }
 };
 /* LIMITE-NOME-RETIS (gerado por 64_onami_fechado_low_poly_2026-10-10/ferramentas/medir_limite_nome_retis_v2_defante.py — não editar à mão) */
