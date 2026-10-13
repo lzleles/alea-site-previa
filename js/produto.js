@@ -4,7 +4,9 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v53 (13/10/2026, ālea Una: caixas de cor "Corpo" e "Aro" sem janela 3D, áudio 10093 + texto 10103)
+   status: ativo — v54 (13/10/2026, ālea Una com janela 3D: acessoriosPorEscolha, ofício 3.1.28 / áudio 10170)
+   v54 (13/10/2026): cfgDaEscolha() também troca o acessório fixo pela escolha (modelos3d[slug].acessoriosPorEscolha, o tubo
+     PETG do Una 15 / 22 cm). Só isso mudou; a v53 está em 03_site/_versoes_anteriores/3d_todos_com_cor_antes_2026-10-13/js/.
    v53 (13/10/2026): partesCorDoProduto() também lê `ALEA.partesCor[slug]` (config.js v62) quando o produto não tem
      modelos3d — o Una (sem .glb) ganha as caixas Corpo/Aro, as frases de falta e o `partes` na sacola. Só isso mudou;
      a v52 está em 03_site/_versoes_anteriores/una_duas_cores_antes_2026-10-13/js/.
@@ -445,6 +447,9 @@
       if (!glb) return null;
       var c = {}; for (var k in cfg3d) c[k] = cfg3d[k];
       c.glb = glb;
+      /* v54: acessório fixo que muda com a escolha (o tubo PETG do Una 15 / 22 cm) */
+      var ac = (cfg3d.acessoriosPorEscolha || {})[chave];
+      if (ac && cfg3d.acessorios) c.acessorios = { glb: ac, materiais: cfg3d.acessorios.materiais };
       return c;
     }
     function abrir(depoisDeMontar, opcoes) {

@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v23 (13/10/2026, CHUTEIRA do Urubu: passo próprio, as duas partes piscam e pintam pela caixa Chuteira, áudio 9891)
+   status: v24 (13/10/2026, ofício 3.1.28: no passo das cores a parte de cada caixa PISCA, em todo produto com cor, áudio 10170)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -163,6 +163,14 @@
       (`partes[].malha`) deixam de ter cor fixa e ganham o material da janela, pintado pela janela de cor de cada parte (com
       textura e glitter, como a peça); (3) ao entrar no passo a peça vira de frente e as duas partes PISCAM (escurecem e voltam a
       cada 0,9 s) até o cliente mexer numa cor da chuteira ou sair do passo. Peça sem `chuteira` = exatamente como na v22.
+   v24 (13/10/2026, áudio 10170 do Cassiano: "todo produto nosso que escolhe cor (...) tem que abrir aquela aba, mostrar o
+      produto 3D pro cliente, tudo bonitinho, piscar pra mostrar onde que muda"; a v23 está em
+      03_site/_versoes_anteriores/3d_todos_com_cor_antes_2026-10-13/js/): no passo "Cores da peça" a peça vira de frente e
+      PISCA a parte de cada caixa de cor, uma de cada vez (2 piscadas por caixa: Corpo, depois Aro...; no Monocromático, a peça
+      toda), até o cliente tocar numa caixa — aí pisca SÓ a parte daquela caixa, e para quando ele escolhe a cor nela (a cor
+      nova aparece parada). Trocou o modo (Bicolor/Tricolor...) -> recomeça. Zona de cada caixa: tricolor topo/principal/base,
+      bicolor por `cfg.bicolor`, mono todas. Peça de TOQUE NA PEÇA (`pecas`) não pisca (tem o tutorial). O mesmo
+      escurecer-e-voltar da chuteira (v23, 0,9 s). O teste lê `window.aleaZonasPiscando`. Chuteira = igual à v23.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -1029,6 +1037,8 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     });
     ajustarFundo(modoPecas ? pecasDaPeca.map(function (ch) { return '#' + matsExtra[ch].color.getHexString(); })
                            : ordemZonas.map(function (z) { return '#' + mats[z].color.getHexString(); }));
+
+    ordemZonas.forEach(function (z) { baseZona[z] = mats[z].color.clone(); });   // v24: a cor parada de cada zona (o pisca escurece a partir dela)
   }
   /* v15: o mesmo cálculo da letra sem cor (item 6): peça escura -> um pouco mais clara; clara -> um pouco mais escura */
   function sombraDe(dst, src) {
@@ -1057,6 +1067,42 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       Object.keys(matsChuteira).forEach(function (n) {
         if (baseChuteira[n]) matsChuteira[n].color.copy(baseChuteira[n]).multiplyScalar(1 - 0.75 * k);
       });
+      requestAnimationFrame(passo);
+    })();
+  }
+  /* ---------------- v24: AS PARTES DE CADA CAIXA DE COR PISCAM (ofício 3.1.28, áudio 10170) */
+  var baseZona = {}, zonasPiscando = [], cicloCores = false, caixaTocada = -1, idPisca = 0;
+  function zonasDaCaixa(k) {
+    var modo = form && form.querySelector('input[name="cores_peca"]:checked');
+    var m = modo ? modo.value : 'monocromatico';
+    if (m === 'tricolor') return [['topo', 'principal', 'base'][k]].filter(Boolean);
+    if (m === 'bicolor') return ordemZonas.filter(function (z) { return BICOLOR[z] === k; });
+    return ordemZonas.slice();
+  }
+  function quantasCaixas() { return form ? form.querySelectorAll('.cores-campos .campo-cor').length : 0; }
+  function pararPiscaCores() {
+    idPisca++; cicloCores = false; zonasPiscando = [];
+    window.aleaZonasPiscando = [];
+    ordemZonas.forEach(function (z) { if (baseZona[z]) mats[z].color.copy(baseZona[z]); });
+  }
+  /* k >= 0: pisca só a caixa k, sem parar; k = -1: ciclo (cada caixa 2 piscadas, uma depois da outra) */
+  function piscarCores(k) {
+    if (modoPecas) return;
+    pararPiscaCores();
+    var n = quantasCaixas(); if (!n) return;
+    var meu = idPisca, t0 = performance.now();
+    cicloCores = k < 0;
+    (function passo() {
+      if (meu !== idPisca || !vivo) return;
+      var t = (performance.now() - t0) / 900;
+      var caixa = k >= 0 ? k : Math.floor(t / 2) % n;
+      var zs = zonasDaCaixa(caixa);
+      if (zs.join() !== zonasPiscando.join()) {
+        ordemZonas.forEach(function (z) { if (baseZona[z]) mats[z].color.copy(baseZona[z]); });
+        zonasPiscando = zs; window.aleaZonasPiscando = zs.slice(); window.aleaCaixaPiscando = caixa;
+      }
+      var f = (1 - Math.cos(t * 2 * Math.PI)) / 2;
+      zs.forEach(function (z) { if (baseZona[z]) mats[z].color.copy(baseZona[z]).multiplyScalar(1 - 0.75 * f); });
       requestAnimationFrame(passo);
     })();
   }
@@ -1234,14 +1280,31 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   fundo.querySelector('.janela3d-carregando').hidden = true;
   /* v23: entrou no passo Chuteira -> de frente + pisca (se ainda não mexeu nela); saiu -> para */
   var blocoChuteira = form && form.querySelector('[data-chuteira]');
-  if (blocoChuteira) {
+  var blocoCores = form && form.querySelector('[data-cores-peca]');      // v24
+  if (blocoChuteira || blocoCores) {
     aoMostrarPasso = function (els) {
-      var nele = els.indexOf(blocoChuteira) >= 0;
+      var nele = !!blocoChuteira && els.indexOf(blocoChuteira) >= 0;
       if (nele) virarPraFrente();
       piscarChuteira(nele && !jaMexeuNaChuteira);
+      /* v24: entrou no passo das cores -> de frente + ciclo do pisca; saiu -> para */
+      var nasCores = !!blocoCores && els.indexOf(blocoCores) >= 0 && !modoPecas;
+      if (nasCores) { virarPraFrente(); caixaTocada = -1; piscarCores(-1); }
+      else pararPiscaCores();
     };
     aoMostrarPasso(passos[passoAtual] || []);
   }
+  /* v24: tocou numa caixa de cor -> pisca só a parte dela; escolheu a cor nela -> para */
+  function caixaDoAlvo(alvo) {
+    var c = alvo && alvo.closest && alvo.closest('.cores-campos .campo-cor');
+    if (!c) return -1;
+    return Array.prototype.indexOf.call(form.querySelectorAll('.cores-campos .campo-cor'), c);
+  }
+  function aoTocarCaixa(ev) {
+    if (modoPecas || !blocoCores || (passos[passoAtual] || []).indexOf(blocoCores) < 0) return;
+    var k = caixaDoAlvo(ev.target);
+    if (k >= 0 && (k !== caixaTocada || cicloCores || !zonasPiscando.length)) { caixaTocada = k; piscarCores(k); }
+  }
+  if (form) { form.addEventListener('pointerdown', aoTocarCaixa, true); form.addEventListener('focusin', aoTocarCaixa); }
   var espera = null;
   function aoMexer(ev) {
     if (ev.target === campoNome) {
@@ -1256,6 +1319,11 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       if (ev.target.checked) recadoPasso.hidden = true;
       espera = setTimeout(function () { gravar(nomeParaMostrar()); }, 0);
     }
+    /* v24: escolheu a cor numa caixa -> para (a cor nova aparece parada); trocou o modo -> recomeça o ciclo */
+    if (!modoPecas && blocoCores && ev.type === 'change' && ev.target) {
+      if (ev.target.matches && ev.target.matches('.cores-campos .campo-cor select') && ev.target.value) { caixaTocada = -1; pararPiscaCores(); }
+      else if (ev.target.name === 'cores_peca' && (passos[passoAtual] || []).indexOf(blocoCores) >= 0) setTimeout(function () { caixaTocada = -1; piscarCores(-1); }, 0);
+    }
     /* v23: mexeu numa cor da chuteira -> para de piscar (a cor nova aparece parada) */
     if (blocoChuteira && ev.target && blocoChuteira.contains(ev.target)) { jaMexeuNaChuteira = true; piscarChuteira(false); }
     setTimeout(aplicarForm, 0);   // depois que o produto.js redesenhar as janelas de cor
@@ -1264,6 +1332,8 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
 
   limpar = function () {
     piscarChuteira(false); aoMostrarPasso = null;                       // v23
+    pararPiscaCores();                                                  // v24
+    if (form) { form.removeEventListener('pointerdown', aoTocarCaixa, true); form.removeEventListener('focusin', aoTocarCaixa); }
     if (tutorial) tutorial.limpar();
     var guiaV = form && form.querySelector('.janela3d-guia'); if (guiaV) guiaV.remove();
     var travaV = form && form.querySelector('.trava-pecas'); if (travaV) travaV.remove();
