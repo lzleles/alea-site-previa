@@ -250,7 +250,7 @@ window.aleaCorDoTopo = (function () {
   /* o segundo Instagram (o do canal "eaí, bora?") usa o mesmo desenho; quem diferencia os
      dois é o nome, que aparece no toque longo e é o que o leitor de tela fala */
   ICONES.instagram_canal = ICONES.instagram;
-  var NOMES = { linktree: 'Linktree', instagram: 'Instagram @alea.co_',
+  var NOMES = { linktree: 'Linktree', instagram: 'Instagram @aleaandco3d',
                 instagram_canal: 'Instagram @eaibora.3d', youtube: 'YouTube', twitch: 'Twitch' };
 
   /* ⚠️ O LINKTREE É UM SÍMBOLO CHEIO, não um contorno (4ª rodada, item 5).
@@ -261,7 +261,7 @@ window.aleaCorDoTopo = (function () {
 
   /* ⚠️ v29 (Cassiano, áudio 1997, 26/09/2026 03:10): "o ālea preto também do site, ele não vai direto pro Instagram,
      arruma isso também". A logo grande do rodapé (preto) vira link pro Instagram da ālea, em aba nova. O endereço
-     sai do `C.instagram` do config.js ('alea.co_', conferido na API da Meta em 16/09/2026) — não é digitado aqui.
+     sai do `C.instagram` do config.js ('aleaandco3d' desde 13/10/2026; antes 'alea.co_') — não é digitado aqui.
      Sem @ no config, a logo continua só imagem (nunca link morto). Só no computador (v29b). */
   function ligarLogoDoRodape() {
     /* v29b (áudios 2000/2004): "tudo que eu pedi pra mexer no site do computador é no computador; no celular não mexe" */

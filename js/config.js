@@ -176,7 +176,7 @@ window.ALEA = {
   /* 28/09/2026 (áudios 3035/3037 do Cassiano): o botão "Orçamentos e personalizados" FICA, mas em vez do WhatsApp abre o
      e-mail da pessoa endereçado a este e-mail ("esse e-mail já existe" — dito por ele; MX do domínio = Google). site.js. */
   email_orcamento: 'comercial@alea3d.co',
-  instagram: 'alea.co_',        // trocado em 16/09/2026: o @alea.decor3d deixou de existir; @alea.co_ conferido na API da Meta ("ālea & Co")
+  instagram: 'aleaandco3d',     // trocado em 13/10/2026 (ordem do Lázaro): o @alea.co_ deixou de abrir; @aleaandco3d conferido na página pública do Instagram ("ālea & Co."). Antes: 16/09 @alea.decor3d -> @alea.co_
   instagram_canal: 'eaibora.3d',
 
   /* AS REDES DO RODAPÉ. Endereço vazio = o ícone não aparece — nunca vira link morto.
@@ -195,7 +195,7 @@ window.ALEA = {
     /* ⚠️ ETAPA 2 do Cassiano (22/09/2026): "dos 3 ícones abaixo das categorias, tira os 2 do
        Instagram, deixa só o Linktree". Vazio = o ícone não aparece (ver site.js). Os endereços
        ficam aqui guardados pra voltar num piscar se ele mudar de ideia:
-         alea.co_        -> https://www.instagram.com/alea.co_/
+         aleaandco3d     -> https://www.instagram.com/aleaandco3d/  (era @alea.co_ ate 13/10/2026)
          eaibora.3d      -> https://www.instagram.com/eaibora.3d/  (o do canal segue no topo, na logo do @eaibora.3d) */
     instagram: '',
     instagram_canal: '',
