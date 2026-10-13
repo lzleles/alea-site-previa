@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v22 (13/10/2026, GLITTER: `glitter` na cor desenha as partículas da foto dele, prateadas e acendendo com a luz)
+   status: v23 (13/10/2026, CHUTEIRA do Urubu: passo próprio, as duas partes piscam e pintam pela caixa Chuteira, áudio 9891)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -156,6 +156,13 @@
       mais lisa e um pouco metálica (0,35 / 0,2: com 0,85 de metal a partícula saía ESCURA, a janela não tem reflexo de ambiente), e cada partícula (célula de 1/3 mm) inclina a normal pra um lado — girando a peça, umas acendem e
       outras apagam, como o glitter de verdade. De longe a máscara vira média (mipmap) e a face fica levemente prateada, como
       na foto. Letra sem cor, relevo e gravação da logo herdam o glitter (é o mesmo filamento). Cor sem o campo = igual à v21.
+   v23 (13/10/2026, áudio 9891 do Cassiano: "o nosso urubu também pode deixar personalizar a chuteira (...) fica piscando a
+      chuteira e abre duas opções de cor (...) onde fica dourado na chuteira e onde fica branco na chuteira. Só lá."; a v22 está
+      em 03_site/_versoes_anteriores/urubu_chuteira_antes_2026-10-13/js/): com `cfg.chuteira` (config.js v60) e a caixa
+      [data-chuteira] (produto.js v52), (1) a caixa vira o ÚLTIMO passo da janela; (2) as malhas da chuteira do _fixas.glb
+      (`partes[].malha`) deixam de ter cor fixa e ganham o material da janela, pintado pela janela de cor de cada parte (com
+      textura e glitter, como a peça); (3) ao entrar no passo a peça vira de frente e as duas partes PISCAM (escurecem e voltam a
+      cada 0,9 s) até o cliente mexer numa cor da chuteira ou sair do passo. Peça sem `chuteira` = exatamente como na v22.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -232,7 +239,8 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     var extraRot = form.querySelector('[data-extra]');
     var corNomeRot = form.querySelector('.campo-cor-nome') ? form.querySelector('.campo-cor-nome').closest('label') : null;
     var coresRot = form.querySelector('[data-cores-peca]');
-    passos = [[nomeRot], [extraRot, corNomeRot], [coresRot]].map(function (els) { return els.filter(Boolean); })
+    var chuteiraRot = form.querySelector('[data-chuteira]');          // v23: o passo da chuteira (Urubu), depois das cores
+    passos = [[nomeRot], [extraRot, corNomeRot], [coresRot], [chuteiraRot]].map(function (els) { return els.filter(Boolean); })
       .filter(function (els) { return els.length; });
   }
   var recadoPasso = document.createElement('p');
@@ -241,6 +249,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   var nav = document.createElement('div');
   nav.className = 'janela3d-nav';
   var passoAtual = 0;
+  var aoMostrarPasso = null;                                          // v23: a cena (quando pronta) reage à troca de passo
   var botaoPronto = fundo.querySelector('.janela3d-pronto');
   botaoPronto.parentNode.insertBefore(recadoPasso, botaoPronto);
   botaoPronto.parentNode.insertBefore(nav, botaoPronto);
@@ -318,6 +327,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     nav.innerHTML = html;
     nav.setAttribute('data-quantos', String(nav.children.length));
     fundo.querySelector('.janela3d-passo').textContent = (passoAtual + 1) + ' de ' + passos.length;
+    if (aoMostrarPasso) aoMostrarPasso(passos[passoAtual] || []);
   }
   nav.addEventListener('click', function (e) {
     var b = e.target.closest('[data-nav]'); if (!b) return;
@@ -890,7 +900,17 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   var caixa = new THREE.Box3().setFromBufferAttribute(geo.attributes.position);
   /* v14: os acessórios entram na cena com material PRÓPRIO e FIXO (não seguem o formulário) e só alargam o enquadramento;
      o eixo do nome continua o da peça (o `eixo` lá em cima é só do corpo) */
-  if (gltfAcess) caixa.union(montarAcessorios(THREE, gltfAcess, cfg.acessorios, cena));
+  /* v23: as malhas da CHUTEIRA (cfg.chuteira.partes[].malha) saem dos acessórios com o material da janela (pintável,
+     com textura e glitter como o resto da peça) — as outras continuam fixas */
+  var matsChuteira = {}, baseChuteira = {};
+  function fabricaChuteira(nome) {
+    var pt = (cfg.chuteira.partes || []).filter(function (x) { return x.malha === nome; })[0];
+    if (!pt) return null;
+    var f = filamento(pt.acabamento, pt.cor) || {};
+    matsChuteira[nome] = material(f.hex || '#FFFFFF', pt.acabamento, f);
+    return matsChuteira[nome];
+  }
+  if (gltfAcess) caixa.union(montarAcessorios(THREE, gltfAcess, cfg.acessorios, cena, cfg.chuteira ? fabricaChuteira : null));
   var centro = caixa.getCenter(new THREE.Vector3()), tam = caixa.getSize(new THREE.Vector3());
   (function sombra() {
     var c = document.createElement('canvas'); c.width = c.height = 128;
@@ -995,6 +1015,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       });
       gravarCoresPorPeca();
     }
+    /* v23: a chuteira — cada parte na cor da sua janela (caixa "Chuteira", produto.js v52); sem escolha, a cor do arquivo */
+    if (cfg.chuteira) (cfg.chuteira.partes || []).forEach(function (pt) {
+      var m = matsChuteira[pt.malha]; if (!m) return;
+      var x = escolhaDoCampo(form.querySelector('.campo-chuteira[data-malha="' + pt.malha + '"]'));
+      if (!x) { var f0 = filamento(pt.acabamento, pt.cor); x = f0 && f0.hex ? { hex: f0.hex, acab: pt.acabamento, fil: f0 } : null; }
+      if (x) pintar(m, x.hex, x.acab, x.fil);
+      baseChuteira[pt.malha] = m.color.clone();
+    });
     /* v15 (1): a gravação da logo = a cor da sua zona/peça com a sombra de dentro */
     chaveDoIndice.forEach(function (ch) {
       if (/_logo$/.test(ch)) sombraDe(matDaChave(ch), matDaChave(ch.replace(/_logo$/, '')));
@@ -1011,6 +1039,26 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     dst.roughness = src.roughness; dst.metalness = src.metalness;
     copiarVidro(dst, src);                                               // v21
     copiarMapa(dst, src);                                                // v22 (era só a textura)
+  }
+  /* ---------------- v23: a CHUTEIRA PISCA (áudio 9891: "fica piscando a chuteira e abre duas opções de cor") — ao entrar no
+     passo Chuteira a peça vira de frente e as duas partes escurecem e voltam a cada 0,9 s, até o cliente mexer numa cor da
+     chuteira (aí ela para, pra ele ver a cor) ou sair do passo */
+  var piscando = false, jaMexeuNaChuteira = false;
+  function piscarChuteira(ligar) {
+    ligar = !!ligar && Object.keys(matsChuteira).length > 0;
+    if (ligar === piscando) return;
+    piscando = ligar;
+    window.aleaChuteiraPiscando = piscando;                           // o teste confere
+    if (!ligar) { Object.keys(matsChuteira).forEach(function (n) { if (baseChuteira[n]) matsChuteira[n].color.copy(baseChuteira[n]); }); return; }
+    var t0 = performance.now();
+    (function passo() {
+      if (!piscando || !vivo) return;
+      var k = (1 - Math.cos((performance.now() - t0) / 900 * 2 * Math.PI)) / 2;
+      Object.keys(matsChuteira).forEach(function (n) {
+        if (baseChuteira[n]) matsChuteira[n].color.copy(baseChuteira[n]).multiplyScalar(1 - 0.75 * k);
+      });
+      requestAnimationFrame(passo);
+    })();
   }
   /* ---------------- v15 (2): TOQUE NA PEÇA + TUTORIAL */
   var pecaEscolhida = null, corDaPeca = {}, sincronizando = false, tutorial = null, raioPecas = null;
@@ -1184,6 +1232,16 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
   /* o tutorial abre sempre (a cor só pinta a peça tocada: sem toque, a janela de cor não teria dono) */
   if (modoPecas) tutorial = montarTutorial();
   fundo.querySelector('.janela3d-carregando').hidden = true;
+  /* v23: entrou no passo Chuteira -> de frente + pisca (se ainda não mexeu nela); saiu -> para */
+  var blocoChuteira = form && form.querySelector('[data-chuteira]');
+  if (blocoChuteira) {
+    aoMostrarPasso = function (els) {
+      var nele = els.indexOf(blocoChuteira) >= 0;
+      if (nele) virarPraFrente();
+      piscarChuteira(nele && !jaMexeuNaChuteira);
+    };
+    aoMostrarPasso(passos[passoAtual] || []);
+  }
   var espera = null;
   function aoMexer(ev) {
     if (ev.target === campoNome) {
@@ -1198,11 +1256,14 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       if (ev.target.checked) recadoPasso.hidden = true;
       espera = setTimeout(function () { gravar(nomeParaMostrar()); }, 0);
     }
+    /* v23: mexeu numa cor da chuteira -> para de piscar (a cor nova aparece parada) */
+    if (blocoChuteira && ev.target && blocoChuteira.contains(ev.target)) { jaMexeuNaChuteira = true; piscarChuteira(false); }
     setTimeout(aplicarForm, 0);   // depois que o produto.js redesenhar as janelas de cor
   }
   if (form) { form.addEventListener('input', aoMexer); form.addEventListener('change', aoMexer); }
 
   limpar = function () {
+    piscarChuteira(false); aoMostrarPasso = null;                       // v23
     if (tutorial) tutorial.limpar();
     var guiaV = form && form.querySelector('.janela3d-guia'); if (guiaV) guiaV.remove();
     var travaV = form && form.querySelector('.trava-pecas'); if (travaV) travaV.remove();
@@ -1223,21 +1284,23 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
 /* v14 — ACESSÓRIOS FIXOS (Poop Bag, msg 6367 "B" + 6369 do Cassiano, 04/10/2026): malhas que NÃO são pintadas pelo
    formulário nem cortadas pelo nome. cfg = { glb, materiais: { <nome da malha no glb>: { cor, transparente } } }.
    Transparente = PETG translúcido (vidro fosco leve). Devolve a caixa (Box3) do que entrou, pra o enquadramento. */
-function montarAcessorios(THREE, gltf, cfg, cena) {
+function montarAcessorios(THREE, gltf, cfg, cena, fabrica) {
   var caixa = new THREE.Box3();
   var mats = (cfg && cfg.materiais) || {};
   gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse(function (o) {
     if (!o.isMesh) return;
     var def = mats[o.name] || mats[(o.parent && o.parent.name) || ''] || { cor: '#BBBBBB' };
-    var m = def.transparente
+    /* v23: `fabrica(nome)` (opcional) devolve o material PINTÁVEL da malha (a chuteira do Urubu); null = a cor fixa de sempre */
+    var mf = fabrica ? (fabrica(o.name) || fabrica((o.parent && o.parent.name) || '')) : null;
+    var m = mf ? mf : def.transparente
       ? new THREE.MeshPhysicalMaterial({ color: new THREE.Color(def.cor), roughness: 0.25, metalness: 0, transparent: true,
           opacity: def.opacidade != null ? def.opacidade : 0.45, transmission: 0, clearcoat: 0.6, side: THREE.DoubleSide, depthWrite: false })
       : new THREE.MeshStandardMaterial({ color: new THREE.Color(def.cor), roughness: def.rugosidade != null ? def.rugosidade : 0.95, metalness: 0 });
     var g = o.geometry.clone().applyMatrix4(o.matrixWorld);
     if (!g.attributes.normal) g.computeVertexNormals();
     var malha = new THREE.Mesh(g, m);
-    malha.renderOrder = def.transparente ? 2 : 0;
+    malha.renderOrder = !mf && def.transparente ? 2 : 0;
     cena.add(malha);
     g.computeBoundingBox(); caixa.union(g.boundingBox);
   });

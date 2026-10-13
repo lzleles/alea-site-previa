@@ -74,7 +74,7 @@ window.ALEA_EN = {
 ". CNPJ": ". CNPJ",
 ". Contato:": ". Contact:",
 "2026 — Todos os direitos reservados.": "2026 — All rights reserved.",
-"@aleaandco3d": "@aleaandco3d",
+"@alea.co_": "@alea.co_",
 "@eaibora.3d": "@eaibora.3d",
 "A Cláudia foi a nossa modelo na divulgação da coleção Pet Bowl Wave. Muito fotogênica, foi quem mais fez a equipe rir na hora das fotos, com seu jeito brincalhão e medroso.": "Cláudia was our model for the Pet Bowl Wave launch. Super photogenic, she was the one who made the crew laugh the most during the shoot, with her playful, scaredy-cat way.",
 "A aleatoriedade.": "The randomness.",
@@ -214,7 +214,7 @@ window.ALEA_EN = {
 "Home · HOME": "Home · HOME",
 "Ideal para flores secas, pequenos arranjos ou até mesmo para ser usado sozinho, como objeto decorativo.": "Perfect for dried flowers, small arrangements or even on its own, as a decorative object.",
 "Infelizmente, um dia depois das fotos, ela foi atropelada e não resistiu. Por isso resolvi fazer essa collab com o nome dela, pra que a Cláudia siga com a gente em cada peça.": "Sadly, the day after the shoot, she was hit by a car and didn’t make it. That’s why I decided to do this collab with her name, so Cláudia stays with us in every piece.",
-"Instagram da ālea & Co. (@aleaandco3d)": "ālea & Co. on Instagram (@aleaandco3d)",
+"Instagram da ālea & Co. (@alea.co_)": "ālea & Co. on Instagram (@alea.co_)",
 "Instagram do canal eai, bora? (@eaibora.3d)": "Instagram for the eai, bora? channel (@eaibora.3d)",
 "Interior": "Interior",
 "Kit ālea": "ālea Kit",
@@ -541,6 +541,11 @@ window.ALEA_EN = {
 "Filamento": "Filament",
 "Filamento: Clássico": "Filament: Classic",
 "Filamento: Perolizado": "Filament: Pearl",
+"Chuteira": "Boots",
+"Parte dourada": "Gold part",
+"Parte branca": "White part",
+"Por favor, escolha a cor da parte dourada da chuteira.": "Please choose the color of the gold part of the boots.",
+"Por favor, escolha a cor da parte branca da chuteira.": "Please choose the color of the white part of the boots.",
 "Por favor, digite o nome.": "Please type the name.",
 "Por favor, escolha o filamento.": "Please choose the filament.",
 "Pequeno": "Small",
@@ -688,5 +693,22 @@ window.ALEA_EN_RE = [
     [/^(.+): escolha a cor$/, function (_, k) { return (D[k] || k) + ': choose the color'; }],
     /* o carrinho monta a linha com o rotulo ja traduzido na pagina + a cor em portugues: "Monochrome: Branco Perolizado" */
     [/^(Monochrome|Two-tone|Three-tone|Exterior|Interior|Base color|Top color|Main color|Name color): (.+)$/, function (_, k, c) { return D[c] ? k + ': ' + D[c] : null; }]
+  );
+})();
+
+
+/* 13/10/2026 (áudio 9891 do Cassiano, Urubu: a chuteira personalizável, produto.js v52): a linha da sacola do Urubu vira
+   "Filamento: Perolizado, Parte dourada da chuteira: Dourado Perolizado, Parte branca da chuteira: Branco Perolizado" */
+(function () {
+  var D = window.ALEA_EN;
+  var ACAB = { ' Perolizado': 'Pearl ', ' Fosco': 'Matte ' };
+  function cor(c) {
+    if (D[c]) return D[c];
+    for (var k in ACAB) if (c.slice(-k.length) === k && D[c.slice(0, -k.length)]) return ACAB[k] + D[c.slice(0, -k.length)];
+    return c;
+  }
+  window.ALEA_EN_RE.unshift(
+    [/^Filamento: (.+?), Parte dourada da chuteira: (.+), Parte branca da chuteira: (.+)$/,
+      function (_, f, a, b) { return 'Filament: ' + cor(f) + ', Boots gold part: ' + cor(a) + ', Boots white part: ' + cor(b); }]
   );
 })();
