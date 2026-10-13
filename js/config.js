@@ -710,7 +710,7 @@ window.ALEA.tamanhos = {
      Petra: o arquivo tem UM tamanho só (20,0 × 6,8 cm, boca do M) -> sem o grupo Tamanho até ele dizer. */
   'pet-bowl-caesar':   ['Pequeno porte', 'Médio e grande porte'],
   'pet-bowl-prisma':   ['Pequeno porte', 'Médio e grande porte'],
-  /* v60 (12/10/2026, audio 9487): o Una tem dois precos (15 cm R$ 140, 22 cm R$ 170) -> escolha obrigatoria */
+  /* v60 (12/10/2026, audio 9487): o Una tem dois precos -> escolha obrigatoria (v61, 13/10: 15 cm R$ 100, 22 cm R$ 120) */
   'una':               ['15 cm', '22 cm']
 };
 /* PREÇO POR ESCOLHA (04/10/2026, áudio 6234 do Cassiano): produto com variantes de preço diferente. A chave é
@@ -718,30 +718,34 @@ window.ALEA.tamanhos = {
    preenchido; escolhido, a página mostra o preço daquela escolha (em cima e logo acima de "Encomendar agora", 6237).
    null = ainda sem preço ("Sob consulta"). Os valores vêm DELE — nunca preencher por conta própria. */
 window.ALEA.precoPorEscolha = {
+  // v61 (13/10/2026, audios 9788/9789 do Cassiano + msg 9799 Una 22 = 120): precos novos peca a peca, ditos por ele.
+  // Script 03_site/02_precos_v3_audios_9788_9789_2026-10-13.py. Antes (v60 + 9713): Stria 140/200/200/300, Luke 160/190,
+  // Matteo 190/220, Claudia 200/230, Caesar 190/230, Prisma 200/230, Petra 180, Retis 230, Laptop 100, Pen 120, Strata 330,
+  // Lamel 190/180, Aurea 200, Una 140/170, Travel Kit 200, Pluvia 200, Orbis 190 (versao anterior no git: 8bdd1ba).
   // v60 (12/10/2026, audios 9484/9486/9487 do Cassiano): REGUA v2 = lucro liquido 30% + frete R$ 30 + redondo na dezena.
   // Fonte: 80_calculo_preco_grama_2026-10-12/PRECOS_DECIDIDOS_PELO_CASSIANO_v1.md (coluna ele). Antes: Stria 80/170/190/290,
   // Luke 150/190, Matteo 150/180, Claudia 170/220, Caesar 150/180, Ayla 300 (versao anterior no git: ecf1b78).
   // Sem tamanho/formato a chave e vazia (como a Ayla). Peca em ALEA.emBreve continua Em breve: o preco fica so no dado.
-  'stria-planter': { 'Orbis|Mini': 140, 'Orbis|Pequeno': 200, 'Quadrum|Pequeno': 200, 'Quadrum|Grande': 300 },
-  'luke-bowl':         { 'Pequeno porte': 160, 'Médio e grande porte': 190 },
-  'matteo-texturized': { 'Pequeno porte': 190, 'Médio e grande porte': 220 },
-  'claudia-wave':      { 'Pequeno porte': 200, 'Médio e grande porte': 230 },
-  'pet-bowl-caesar':   { 'Pequeno porte': 190, 'Médio e grande porte': 230 },
-  'pet-bowl-prisma':   { 'Pequeno porte': 200, 'Médio e grande porte': 230 },
+  'stria-planter': { 'Orbis|Mini': 100, 'Orbis|Pequeno': 180, 'Quadrum|Pequeno': 180, 'Quadrum|Grande': 300 },
+  'luke-bowl':         { 'Pequeno porte': 150, 'Médio e grande porte': 180 },
+  'matteo-texturized': { 'Pequeno porte': 180, 'Médio e grande porte': 200 },
+  'claudia-wave':      { 'Pequeno porte': 180, 'Médio e grande porte': 200 },
+  'pet-bowl-caesar':   { 'Pequeno porte': 170, 'Médio e grande porte': 200 },
+  'pet-bowl-prisma':   { 'Pequeno porte': 170, 'Médio e grande porte': 200 },
   'ayla-pompom':       { '': 400 },
-  'pet-petra':         { '': 180 },
-  'pet-bowl-retis':    { '': 230 },
-  'laptop-stand':      { '': 100 },
-  'pen-holder':        { '': 120 },
+  'pet-petra':         { '': 160 },
+  'pet-bowl-retis':    { '': 200 },
+  'laptop-stand':      { '': 50 },
+  'pen-holder':        { '': 80 },
   'make':              { '': 300 },   // Cella
-  'makeup-layer-organizer': { '': 330 },   // Strata (330 desde 13/10/2026, audio 9713; era 350)
-  'lamel':             { 'Ovatum': 190, 'Longum': 180 },
+  'makeup-layer-organizer': { '': 340 },   // Strata (340 desde 13/10/2026, audio 9789; era 330, antes 350)
+  'lamel':             { 'Ovatum': 170, 'Longum': 150 },
   'urubu-mascote-flamengo': { 'Pequeno': 300, 'Médio': null, 'Gigante': null },   // Pequeno 300 desde 13/10/2026 (audio 9713; era 330). Medio e Gigante: sem preco dele ainda
-  'aurea':             { '': 200 },
-  'una':               { '15 cm': 140, '22 cm': 170 },
-  'travel-kit':        { '': 200 },
-  'pluvia':            { '': 200 },
-  'orbis':             { '': 190 }   // o Orbis low poly
+  'aurea':             { '': 190 },
+  'una':               { '15 cm': 100, '22 cm': 120 },
+  'travel-kit':        { '': 150 },
+  'pluvia':            { '': 170 },
+  'orbis':             { '': 180 }   // o Orbis low poly
 };
 /* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada
    na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
