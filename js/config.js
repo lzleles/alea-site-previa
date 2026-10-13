@@ -734,9 +734,9 @@ window.ALEA.precoPorEscolha = {
   'laptop-stand':      { '': 100 },
   'pen-holder':        { '': 120 },
   'make':              { '': 300 },   // Cella
-  'makeup-layer-organizer': { '': 350 },   // Strata
+  'makeup-layer-organizer': { '': 330 },   // Strata (330 desde 13/10/2026, audio 9713; era 350)
   'lamel':             { 'Ovatum': 190, 'Longum': 180 },
-  'urubu-mascote-flamengo': { 'Pequeno': 330, 'Médio': null, 'Gigante': null },   // Medio e Gigante: sem preco dele ainda
+  'urubu-mascote-flamengo': { 'Pequeno': 300, 'Médio': null, 'Gigante': null },   // Pequeno 300 desde 13/10/2026 (audio 9713; era 330). Medio e Gigante: sem preco dele ainda
   'aurea':             { '': 200 },
   'una':               { '15 cm': 140, '22 cm': 170 },
   'travel-kit':        { '': 200 },

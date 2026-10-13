@@ -157,7 +157,7 @@ window.VITRINE = [
   { produto: 'ālea Laptop Stand',                         nome: 'Laptop Stand', categoria: 'home', sub: 'desk',  preco: 100, pagina: 'laptop-stand', recorte: false, fotos: ['laptop_capaq'] },
   { produto: 'ālea Pen Holder',                           nome: 'Pen Holder', categoria: 'home', sub: 'desk',    preco: 120, pagina: 'pen-holder', recorte: false, fotos: [] },
   { produto: 'ālea Cella',                                 nome: 'Cella', categoria: 'home', sub: 'aura',          preco: 300, pagina: 'make', recorte: false, fotos: [] },
-  { produto: 'ālea Strata',               nome: 'Strata', categoria: 'home', sub: 'aura', preco: 350, pagina: 'makeup-layer-organizer', recorte: false, fotos: ['strata_capaq'] },
+  { produto: 'ālea Strata',               nome: 'Strata', categoria: 'home', sub: 'aura', preco: 330, pagina: 'makeup-layer-organizer', recorte: false, fotos: ['strata_capaq'] },
   { produto: 'ālea Lamel',                                nome: 'Lamel', categoria: 'home', sub: 'decor',        preco: null, pagina: 'lamel', recorte: false, fotos: [] },
   /* 12/10/2026: os 4 do texto antes da impressão (áudio 9011; msgs 9013/9020/9025/9027), categorias msg 9039. Em breve,
      SEM FOTO (feed.js v41 mostra "foto em breve") e sem preço. Gerados pelo 01_gerar_paginas_v45. */
