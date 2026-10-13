@@ -2794,8 +2794,3 @@ html.idioma-carregando body { opacity: 0; }
 /* no checkout o `.loja a { color: inherit }` (loja.css) vencia a cor e a faixa ficava escura sem texto (print 390 px, 12/10) */
 body.loja .faixa-topo { position: static; color: var(--off); }
 body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; }
-/* v-chuteira (13/10/2026, áudio 9891 do Cassiano, Urubu: "onde fica dourado na chuteira e onde fica branco na chuteira"):
-   a caixa "Chuteira" (produto.js v52) usa as mesmas janelas de cor; o nome de cada parte vai em cima dela, no tom das letras */
-.chuteira-peca { margin-top: 14px; }
-.chuteira-peca .titulo-chuteira { font-size: 15.5px; color: var(--tinta); font-weight: 600; }
-.chuteira-peca .campo-cor.faltou .titulo-chuteira { color: var(--terracota); }
