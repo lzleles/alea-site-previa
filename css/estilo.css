@@ -2769,6 +2769,10 @@ html.idioma-carregando body { opacity: 0; }
   letter-spacing: .08em; text-transform: uppercase; text-decoration: none; line-height: 1.4;
 }
 .faixa-topo:hover, .faixa-topo:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+/* 12/10/2026 — páginas de texto (trocas, privacidade, frete grátis): o `.texto` (padding-block 26px, mais abaixo no arquivo)
+   vencia o `.pagina` (que desconta o cabeçalho fixo + a faixa) e o título ficava embaixo do cabeçalho (medido 390 px:
+   h1 em 26 px, cabeçalho até 95 px). Já acontecia antes da faixa; a faixa piorava 31 px. */
+.texto.pagina { padding-top: calc(var(--tarja, 0px) + 92px); }
 /* no checkout o `.loja a { color: inherit }` (loja.css) vencia a cor e a faixa ficava escura sem texto (print 390 px, 12/10) */
 body.loja .faixa-topo { position: static; color: var(--off); }
 body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; }
