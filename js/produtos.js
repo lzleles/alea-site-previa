@@ -130,7 +130,7 @@ window.VITRINE = [
   { produto: 'ālea Elevated Pet Bowl × Matteo',           nome: 'Matteo',  categoria: 'pet', preco: null, pagina: 'matteo-texturized', recorte: false, fotos: ['matteotex_9262q'] },
   /* 04/10/2026, msg 6255 do Cassiano: Ayla R$ 299 (sem tamanho). Luke/Matteo/Cláudia têm preço por tamanho M/G em
      config.js ALEA.precoPorEscolha (v45): aqui ficam null e o feed mostra "a partir de" o M. */
-  { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 400,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
+  { produto: 'ālea Pet Bowl + Poop Bag Holder – Watermelon Edition × Ayla Pompom', nome: 'Ayla Pompom',    categoria: 'pet', preco: 440,  pagina: 'ayla-pompom',       recorte: false, fotos: ['aylapompom_capaq'] },
   { produto: 'ālea Pet Bowl Wave × Cláudia',              nome: 'Cláudia', categoria: 'pet', preco: null, pagina: 'claudia-wave',      recorte: false, fotos: ['claudiawave_anjoq'] },
   /* 06/10/2026 (msg 7047 do Cassiano: "pode adicionar os três (...) pode fazer o campo deles lá"): Caesar, Prisma e Petra,
      logo depois da Cláudia, SEM FOTO por enquanto ("foto em breve") e sem texto. Caesar com preço por tamanho (config.js
@@ -138,13 +138,13 @@ window.VITRINE = [
   { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: true, so_recorte: true, fotos: ['caesar_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: true, so_recorte: true, fotos: ['prisma_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   /* 12/10/2026 (v46): Retis, texto dele msg 9130, nome 9140. Em breve, SEM FOTO, sem preço. */
-  { produto: 'ālea Pet Bowl Retis', nome: 'Retis', categoria: 'pet', preco: 200, pagina: 'pet-bowl-retis', recorte: false, fotos: ['retis_capaq'] },
-  { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: 160, pagina: 'pet-petra',         recorte: false, fotos: ['petra_capaq'] },
+  { produto: 'ālea Pet Bowl Retis', nome: 'Retis', categoria: 'pet', preco: null, pagina: 'pet-bowl-retis', recorte: false, fotos: ['retis_capaq'] },
+  { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: null, pagina: 'pet-petra',        recorte: false, fotos: ['petra_capaq'] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
   { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 80, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag2_capaq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
-  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 70, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
+  { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 80, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
   { produto: 'ālea Ephix Vase',                           nome: 'branco', categoria: 'home', sub: 'decor', preco: 100, pagina: 'ephix-vase',      recorte: false, fotos: ['ephixvase_capaq'] },
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
@@ -164,7 +164,7 @@ window.VITRINE = [
   { produto: 'ālea Unda Organizer', nome: 'Unda Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'unda-organizer', recorte: false, fotos: [] },
   { produto: 'ālea Vitta', nome: 'Vitta', categoria: 'home', sub: 'decor', preco: null, pagina: 'vitta', recorte: false, fotos: [] },
   { produto: 'ālea Orbis', nome: 'Orbis', categoria: 'home', sub: 'decor', preco: 180, pagina: 'orbis', recorte: false, fotos: [] },
-  { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: 150, pagina: 'travel-kit', recorte: false, fotos: ['travel_capaq'] },
+  { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: 160, pagina: 'travel-kit', recorte: false, fotos: ['travel_capaq'] },
   /* 12/10/2026 (v46): Pluvia (ETC.) e Aurea (Decor), texto dele msgs 9075/9072. Em breve, SEM FOTO, sem preço. */
   { produto: 'ālea Pluvia', nome: 'Pluvia', categoria: 'home', sub: 'etc', preco: 170, pagina: 'pluvia', recorte: false, fotos: [] },
   { produto: 'ālea Aurea', nome: 'Aurea', categoria: 'home', sub: 'decor', preco: 190, pagina: 'aurea', recorte: false, fotos: [] },
@@ -339,7 +339,7 @@ window.PRODUTOS = [
     nome: 'ālea Soap Dish',
     linha: 'Home',
     categoria: 'home',
-    preco: 70,
+    preco: 80,
     material: 'PLA',
     capa: 'soapdish_capa',
     cores_peca: ['monocromatico'],
