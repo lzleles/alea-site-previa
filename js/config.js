@@ -349,7 +349,7 @@ window.ALEA = {
       { site: 'Verde', hex: '#129856', original: 'Voolt3D · PLA · V-Silk · Verde (PL-VD-SK-1)' },
       { site: 'Preto com Azul', hex: '#213D4E', original: 'Bambu Lab · PLA · Silk Dual Color · Phantom Blue' },
       { site: 'Rosa Metalizado', hex: '#BA9594', original: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' },
-      { site: 'Azul com Glitter', hex: '#283B51', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue', hex_oficial: '#153751', glitter: { img: 'img/texturas/glitter_azul_galaxy.png', mm: [25, 25], cor: '#CCCAC7', forca: 1 } }
+      { site: 'Azul com Glitter', hex: '#283B51', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue', hex_oficial: '#153751', glitter: { img: 'img/texturas/glitter_azul_galaxy.png', mm: [25, 25], cor: '#CCCAC7', forca: 0.5 } }
     ]
   },
   /* O ESTOQUE — peça PRONTA, por produto (03/10/2026, áudios 5727/5729/5731 do Cassiano).
