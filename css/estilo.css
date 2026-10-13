@@ -2757,3 +2757,18 @@ html.idioma-carregando body { opacity: 0; }
    e o `display: grid` do `.botao-sacola` venciam o atributo (medido em 390 e 1440 px, prévia e no ar: hidden=true e visível).
    Mesmo remédio do `.extra-poopbag[hidden]` (v49). */
 .aceite[hidden], .botao-sacola[hidden] { display: none; }
+
+/* 12/10/2026 — A FAIXA DO FRETE GRÁTIS (áudio 9449; site.js monta, ALEA.faixaTopo no config.js). Fixa no topo, acima do
+   cabeçalho (que desce a altura dela pelo --tarja, como na tarja de obra). Tinta da marca com o off por cima: discreta,
+   lida em uma linha no celular. */
+.faixa-topo {
+  position: fixed; inset: 0 0 auto 0; z-index: 90;
+  display: block; padding: 7px var(--gutter); text-align: center;
+  background: var(--tinta); color: var(--off);
+  font-family: var(--fonte-corpo, 'Hanken Grotesk', sans-serif); font-size: 12px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; text-decoration: none; line-height: 1.4;
+}
+.faixa-topo:hover, .faixa-topo:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+/* no checkout o `.loja a { color: inherit }` (loja.css) vencia a cor e a faixa ficava escura sem texto (print 390 px, 12/10) */
+body.loja .faixa-topo { position: static; color: var(--off); }
+body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; }

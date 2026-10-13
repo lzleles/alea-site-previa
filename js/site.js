@@ -622,3 +622,25 @@ window.aleaCorDoTopo = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
 })();
+/* 12/10/2026 — A FAIXA DO FRETE GRÁTIS NO TOPO (áudio 9449 do Cassiano: "lá no cabeçalho, a gente vai colocar essa
+   propaganda, de frete grátis para todo o Brasil e com um asterisco; quando a pessoa clicar, abre uma página explicando").
+   Texto e link em ALEA.faixaTopo (config.js). Usa o mesmo mecanismo da tarja de obra: a altura vira `--tarja` e o
+   cabeçalho fixo desce. No checkout (body.loja, topo próprio e não fixo) ela fica no fluxo, sem mexer no `--tarja`.
+   Sem ALEA.faixaTopo, ou com a tarja de obra na tela, nada aparece. */
+(function () {
+  function montar() {
+    var F = (window.ALEA || {}).faixaTopo;
+    if (!F || !F.texto || document.getElementById('tarja-config') || document.querySelector('.faixa-topo')) return;
+    var a = document.createElement('a');
+    a.className = 'faixa-topo';
+    a.href = F.link || 'frete-gratis.html';
+    a.textContent = F.texto;
+    document.body.insertBefore(a, document.body.firstChild);
+    if (document.body.classList.contains('loja')) return;
+    document.documentElement.classList.add('com-faixa-topo');
+    var medir = function () { document.documentElement.style.setProperty('--tarja', a.offsetHeight + 'px'); };
+    medir();
+    window.addEventListener('resize', medir);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();

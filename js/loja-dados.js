@@ -280,6 +280,9 @@
     /* PAGAMENTO PELA INFINITEPAY (05/10/2026): o servidor cobra pela tabela e devolve o link; o cliente paga lá e volta.
        statusLink confere na volta (o servidor pergunta à InfinitePay; o navegador nunca aprova sozinho). */
     pagarLink: function (p) { return api('POST', '/api/pagamento/link', p); },
+    /* FRETE NO CEP (12/10/2026, áudio 9451 do Cassiano): o servidor cota (SuperFrete) e já devolve o valor final de cada
+       opção, com as regras da loja (frete grátis, etc.). O navegador só mostra; o pagamento cobra pelo id da cotação. */
+    cotarFrete: function (p) { return api('POST', '/api/frete', p); },
     statusLink: function (numero, q) {
       var s = Object.keys(q).filter(function (k) { return q[k]; }).map(function (k) {
         return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]);
@@ -342,6 +345,7 @@
     guardarEndereco: motor.guardarEndereco, tirarEndereco: motor.tirarEndereco, principalEndereco: motor.principalEndereco,
     registrarPedido: motor.registrarPedido, sair: motor.sair, exportar: motor.exportar, excluir: motor.excluir,
     pagarLink: PREVIA ? null : servidor.pagarLink, statusLink: PREVIA ? null : servidor.statusLink,   // 05/10/2026
+    cotarFrete: PREVIA ? null : servidor.cotarFrete,   // 12/10/2026
     config: PREVIA ? function () { return Promise.resolve({ metodos: ['google', 'codigo', 'senha'] }); } : servidor.config,
     /* ETAPA 69 (condição da casa, 23/09/2026): quais jeitos de entrar o servidor JÁ faz. Sem "metodos" no /api/config
        = só Google. Código e senha aparecem sozinhos quando a casa ligar ("metodos": ["google","codigo","senha"]). */

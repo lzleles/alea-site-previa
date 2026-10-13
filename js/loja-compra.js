@@ -6,6 +6,15 @@
    saida: pedido registrado; até o pagamento do site existir, o pedido completo segue pelo WhatsApp da ālea
    status: prévia (23/09/2026)
    validado_em: 2026-09-23 (Playwright 390 px, motor prévia)
+   12/10/2026 (áudios 9448/9449/9451/9453/9454/9455 do Cassiano): (1) FRETE PELO CEP na Entrega — o servidor cota
+      (/api/frete, só quando o /api/config diz "frete": true) e devolve o valor FINAL de cada opção (frete grátis e as
+      regras da loja moram lá); escolhida a opção, ela entra no total e no link de pagamento (id da cotação). Na PRÉVIA
+      (sem servidor) aparecem valores de EXEMPLO, marcados como exemplo, só com a regra pública do frete grátis.
+      (2) PIX COM DESCONTO: "Desconto Pix (5%)" no total e na caixa do Pix — a % vem do servidor (/api/config
+      "pix_desconto"; na prévia, do ALEA.pagamento); a conta é a mesma do servidor (centavos, meio centavo pra cima).
+      (3) CARTÃO "em até 6x sem juros" (parcelas do servidor/ALEA.pagamento). (4) a volta 'pago_a_menor' (escolheu Pix
+      e pagou no cartão com o valor do Pix): a tela explica que a loja vai entrar em contato.
+      Antes: 03_site/_versoes_anteriores/frete_pix_antes_2026-10-12/js/loja-compra.js
 */
 /* =============================================================================
    loja-compra.js — "some o fechar pedido pelo WhatsApp, aparece concluir compra" (Cassiano, 23/09/2026 20:44)
@@ -103,15 +112,118 @@
   function subtotal() { return CAR() ? CAR().total() : 0; }
   function sobConsulta() { return itens().some(function (i) { return !i.preco; }); }
 
+  /* ---------------------------------------------- 12/10/2026: Pix, parcelas e frete */
+  var C = window.ALEA || {};
+  var FRETE = false;                          // o /api/config diz "frete": true quando o servidor cota
+  function centavos(v) { return Math.round(Number(v || 0) * 100); }
+  function pagCfg() {
+    if (PAG) return { pix: Number(PAG.pix_desconto) || 0, parcelas: PAG.parcelas_max || 0 };
+    if (L.previa) { var p = C.pagamento || {}; return { pix: Number(p.pix_desconto) || 0, parcelas: p.parcelas_max || 0 }; }
+    return { pix: 0, parcelas: 0 };
+  }
+  function pctPix() { return Math.round(pagCfg().pix * 100); }
+  /* a MESMA conta do servidor (regras_loja_v1.desconto_pix_centavos): só nas peças, meio centavo arredonda pra cima */
+  function descontoPixDe(sub) {
+    var bp = Math.round(pagCfg().pix * 10000);
+    return bp ? Math.floor((centavos(sub) * bp + 5000) / 10000) / 100 : 0;
+  }
+  function descontoPix() { return (st.pagamento === 'pix' && !sobConsulta()) ? descontoPixDe(subtotal()) : 0; }
+  function opcaoFrete() {
+    var f = st.frete;
+    if (!f || f.estado !== 'ok') return null;
+    return (f.opcoes || []).filter(function (o) { return o.servico === f.escolhido; })[0] || null;
+  }
+  function freteValor() { var o = opcaoFrete(); return o ? Number(o.valor) : null; }
+  function totalFinal() { return (centavos(subtotal()) + centavos(freteValor() || 0) - centavos(descontoPix())) / 100; }
+  function itensServidor() {                  // as miniaturas (imagem) ficam no aparelho: o servidor só precisa da escolha
+    return itens().map(function (i) {
+      var c = JSON.parse(JSON.stringify(i)); delete c.miniatura;
+      (c.extras || []).forEach(function (x) { if (x) delete x.miniatura; });
+      return c;
+    });
+  }
+  function chaveFrete() {
+    return (st.entrega.cep || '') + '|' + JSON.stringify(itens().map(function (i) {
+      return [i.slug, qtd(i), i.personalizacao || null, (i.extras || []).map(function (x) { return x && x.id; })];
+    }));
+  }
+  /* região pelo CEP (as faixas dos Correios, iguais às do servidor): Sudeste, DF/GO, MT/MS e Sul = "sseco" */
+  function regiaoDoCep(cep) {
+    var n = parseInt(String(cep || '').replace(/\D/g, ''), 10) || 0;
+    return ((n >= 1000000 && n <= 39999999) || (n >= 70000000 && n <= 76799999) || n >= 78000000) ? 'sseco' : 'demais';
+  }
+  /* PRÉVIA: sem servidor, a tela mostra valores de EXEMPLO (marcados) e só a regra PÚBLICA do frete grátis */
+  function freteDeExemplo(chave) {
+    var g = C.freteGratis || {}, sub = subtotal();
+    var lim = regiaoDoCep(st.entrega.cep) === 'sseco' ? g.sul_sudeste_centro_oeste : g.demais;
+    var gratis = !!lim && sub >= lim;
+    /* regra F (áudio 9459): batendo o grátis, só a Jadlog grátis + o SEDEX com o valor normal (o PAC some) */
+    var outra = gratis ? { servico: 'exemplo:correios-2', empresa: 'Correios', nome: 'SEDEX', valor: 61.7, prazo_dias: 3 }
+                       : { servico: 'exemplo:correios-1', empresa: 'Correios', nome: 'PAC', valor: 38.4, prazo_dias: 9 };
+    return { chave: chave, estado: 'ok', exemplo: true, escolhido: 'exemplo:jadlog-3',
+             opcoes: [{ servico: 'exemplo:jadlog-3', empresa: 'Jadlog', nome: '.Package', valor: gratis ? 0 : 32.9, prazo_dias: 7, gratis: gratis },
+                      outra] };
+  }
+  function cotar() {
+    var e = st.entrega;
+    if (!e || !e.cep || String(e.cep).length !== 8 || !itens().length || sobConsulta()) return;
+    var chave = chaveFrete(), f = st.frete;
+    var vencida = f && f.expira && Date.parse(f.expira) < Date.now() + 60000;
+    if (f && f.chave === chave && f.estado !== 'erro' && !vencida) return;
+    if (L.previa) { st.frete = freteDeExemplo(chave); guardar(); return; }
+    if (!FRETE || !L.cotarFrete) return;
+    var antes = f && f.escolhido;
+    st.frete = { chave: chave, estado: 'carregando' };
+    L.cotarFrete({ cep: e.cep, itens: itensServidor() }).then(function (j) {
+      if (!st.frete || st.frete.chave !== chave) return;
+      if (!j || !j.disponivel || !(j.opcoes || []).length) {
+        st.frete = { chave: chave, estado: 'indisponivel', motivo: (j && j.motivo) || '' };
+      } else {
+        var manter = j.opcoes.some(function (o) { return o.servico === antes; });
+        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: j.opcoes,
+                     escolhido: manter ? antes : j.opcoes[0].servico };
+      }
+      guardar(); pintar();
+    }).catch(function () {
+      if (st.frete && st.frete.chave === chave) { st.frete = { chave: chave, estado: 'erro' }; guardar(); pintar(); }
+    });
+  }
+  function textoFrete(v) { return v === 0 ? 'Grátis' : dinheiroTela(v); }
+  function htmlOpcoesFrete() {
+    var f = st.frete;
+    if (f && f.estado === 'carregando') {
+      return '<p class="loja-rotulo">Forma de Entrega</p><p class="loja-miudo" data-frete-calculando>Calculando o frete…</p>';
+    }
+    if (f && f.estado === 'ok') {
+      return '<p class="loja-rotulo">Forma de Entrega</p>' + f.opcoes.map(function (o) {
+        var sel = o.servico === f.escolhido;
+        return '<label class="loja-radio' + (sel ? ' escolhido' : '') + '"><input type="radio" name="frete" value="' + esc(o.servico) + '"' +
+          (sel ? ' checked' : '') + '><span class="txt">' + esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : '') +
+          '<small>' + (o.prazo_dias ? 'Chega em até ' + o.prazo_dias + ' dias úteis depois de pronta' : 'Prazo confirmado com o pedido') + '</small></span>' +
+          '<span class="preco' + (o.valor === 0 ? ' gratis' : '') + '">' + textoFrete(o.valor) + '</span></label>';
+      }).join('') + (f.exemplo ? '<p class="loja-miudo" style="margin-top:6px">Prévia: valores de frete de EXEMPLO. No site, o valor vem da transportadora pelo CEP.</p>' : '');
+    }
+    return '<p class="loja-rotulo">Forma de Entrega</p>' +
+      '<label class="loja-radio escolhido"><input type="radio" name="forma" value="padrao" checked>' +
+      '<span class="txt">Entrega Padrão<small>' + (f && f.estado === 'indisponivel' && f.motivo ? esc(f.motivo) : 'Prazo de produção e envio confirmado com o pedido') +
+      '</small></span><span class="preco">a calcular</span></label>';
+  }
+
   /* ETAPA 62 (22:08, Cassiano): "ninguém mais fica preocupado com quanto vai pagar de frete nessa página (...)
      vamos deixar essa página mais clean" — na SACOLA sai o bloco Entrega e a linha do frete; ele volta no fim. */
   function htmlTotais(semFrete) {
     /* 25/09/2026 (msg 1885, produtos "sob consulta"): sacola só com peça sem preço mostrava "R$ 0,00" no subtotal e
        no total. Agora diz "Sob consulta" (a regra mora no carrinho.js, textoTotal). O WhatsApp segue igual. */
     var soConsulta = sobConsulta() && !subtotal();
+    /* 12/10/2026: o frete escolhido e o desconto do Pix entram aqui (a mesma conta que o servidor cobra) */
+    var fv = semFrete ? null : freteValor(), dp = semFrete ? 0 : descontoPix();
+    var carregando = st.frete && st.frete.estado === 'carregando';
+    var total = semFrete ? subtotal() : totalFinal();
     return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal())) + '</span></div>' +
-      (semFrete ? '' : '<div><span>Frete</span><span>a calcular</span></div>') +
-      '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal()) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
+      (semFrete ? '' : '<div><span>Frete</span><span' + (fv === 0 ? ' class="gratis"' : '') + '>' +
+        (fv === null ? (carregando ? 'calculando…' : 'a calcular') : textoFrete(fv)) + '</span></div>') +
+      (dp ? '<div class="desconto-pix"><span>Desconto Pix (' + pctPix() + '%)</span><span>− ' + dinheiroTela(dp) + '</span></div>' : '') +
+      '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(total) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
   }
 
   /* ======================================================= SACOLA DE COMPRAS */
@@ -190,7 +302,9 @@
         '<button type="button" class="editar" data-etapa="entrega" aria-label="Editar entrega">' + ICONE.lapis + '</button></header>' +
         '<div class="feito">' + esc(e.logradouro) + ' ' + esc(e.numero) + (e.complemento ? ' — ' + esc(e.complemento) : '') + '<br>' +
         esc(e.bairro) + ' - ' + esc(e.cidade) + ' - ' + esc(e.uf) + '<br>' + esc(String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2')) +
-        '<br>Destinatário: ' + esc(e.destinatario) + '<br>Envio: prazo e frete confirmados com o pedido</div>' +
+        '<br>Destinatário: ' + esc(e.destinatario) + '<br>Envio: ' + (opcaoFrete()
+          ? esc(opcaoFrete().empresa) + (opcaoFrete().nome ? ' · ' + esc(opcaoFrete().nome) : '') + ' — ' + (freteValor() === 0 ? 'Grátis' : esc(dinheiro(freteValor())))
+          : 'prazo e frete confirmados com o pedido') + '</div>' +
         '<p style="margin:14px 0 0"><button type="button" class="loja-bt contorno largo" data-etapa="entrega">Alterar Opções de Entrega</button></p></section>';
     }
     var temRua = !!(e.logradouro && e.cidade);
@@ -201,9 +315,7 @@
         esc(e.cep ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '') + '"></label>' +
         '<a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></div>';
     if (temRua) {
-      h += '<p class="loja-rotulo">Forma de Entrega</p>' +
-        '<label class="loja-radio escolhido"><input type="radio" name="forma" value="padrao" checked>' +
-          '<span class="txt">Entrega Padrão<small>Prazo de produção e envio confirmado com o pedido</small></span><span class="preco">a calcular</span></label>' +
+      h += htmlOpcoesFrete() +
         '<p class="loja-rotulo">Endereço de Entrega</p>' +
         '<div class="loja-endereco" data-endereco-caixa' + (e.editando ? ' hidden' : '') + '>' + ICONE.casaCheia + '<div>' + esc(e.logradouro) + '<br>' +
           (e.bairro ? esc(e.bairro) + ' - ' : '') + esc(e.cidade) + ' - ' + esc(e.uf) + ' - <button type="button" data-alterar-endereco>Alterar</button></div></div>' +
@@ -232,25 +344,29 @@
     }
     var p = st.pagamento;
     var caixa = '';
+    var pct = pctPix(), parc = pagCfg().parcelas;
+    /* 12/10/2026: o desconto do Pix em reais, na caixa (o "5%" sozinho obriga a pessoa a fazer conta) */
+    var linhaPix = pct && !sobConsulta() ? '<p class="pix-desconto"><strong>' + pct + '% de desconto no Pix</strong>: ' +
+      dinheiro(descontoPixDe(subtotal())) + ' a menos nas peças.</p>' : '';
     if (usaLink() && p === 'pix') {
-      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div><p>Ao finalizar, você vai para a página segura ' +
+      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div>' + linhaPix + '<p>Ao finalizar, você vai para a página segura ' +
         'de pagamento, paga o Pix e volta para cá. A aprovação é na hora.</p></div>';
     } else if (usaLink() && p === 'cartao') {
       caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
-        '<p>Em até ' + (PAG.parcelas_max || 10) + 'x sem juros. Ao finalizar, você digita o cartão na página segura de pagamento ' +
+        '<p>Em até ' + (parc || 10) + 'x sem juros. Ao finalizar, você digita o cartão na página segura de pagamento ' +
         'e volta para cá. A ālea & Co. não recebe nem guarda o número do seu cartão.</p></div>';
     } else if (p === 'pix') {
-      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div><p>Para pagar, finalize sua compra abaixo.</p></div>';
+      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div>' + linhaPix + '<p>Para pagar, finalize sua compra abaixo.</p></div>';
     } else if (p === 'cartao') {
       caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
-        '<p>Você digita os dados do cartão na página segura do pagamento, logo depois de finalizar a compra. ' +
+        '<p>' + (parc ? 'Em até ' + parc + 'x sem juros. ' : '') + 'Você digita os dados do cartão na página segura do pagamento, logo depois de finalizar a compra. ' +
         'A ālea & Co. não recebe nem guarda o número do seu cartão.</p></div>';
     }
     return '<section class="loja-etapa"><header>' + ICONE.cartao + '<h2>Pagamento</h2></header>' +
       '<label class="loja-radio' + (p === 'cartao' ? ' escolhido' : '') + '"><input type="radio" name="pagamento" value="cartao"' + (p === 'cartao' ? ' checked' : '') + '>' +
-        '<span class="txt">Cartão de crédito</span></label>' +
+        '<span class="txt">Cartão de crédito' + (parc ? '<small>Em até ' + parc + 'x sem juros</small>' : '') + '</span></label>' +
       '<label class="loja-radio' + (p === 'pix' ? ' escolhido' : '') + '"><input type="radio" name="pagamento" value="pix"' + (p === 'pix' ? ' checked' : '') + '>' +
-        '<span class="txt">Pix</span></label>' + caixa +
+        '<span class="txt">Pix' + (pct && !sobConsulta() ? '<small>' + pct + '% de desconto</small>' : '') + '</span></label>' + caixa +
       (erro ? '<p class="loja-erro" role="alert">' + esc(erro) + '</p>' : '') + '</section>';
   }
 
@@ -269,7 +385,8 @@
       htmlResumo() +
       (st.etapa === 'pagamento' ? '<button type="button" class="loja-bt largo" data-concluir' + (st.pagamento ? '' : ' disabled') + '>Finalizar Compra</button>' +
         '<p class="loja-miudo" style="text-align:center;margin-top:10px">' + (usaLink()
-          ? 'O valor pago agora é o das peças. O frete é combinado com a ālea & Co. pelo WhatsApp, depois do pagamento.'
+          ? (opcaoFrete() ? 'O frete já está no total. Você paga tudo de uma vez, na página segura.'
+                          : 'O valor pago agora é o das peças. O frete é combinado com a ālea & Co. pelo WhatsApp, depois do pagamento.')
           : 'Enquanto o pagamento pelo site não liga, o pedido completo segue pelo WhatsApp da ālea & Co.') + '</p>' : '');
   }
 
@@ -279,9 +396,18 @@
     if (r.estado === 'aprovado') {
       return '<div class="loja-concluido"><h1>Pagamento aprovado</h1><p class="numero">' + esc(r.numero) + '</p>' +
         '<p>Obrigado' + (r.nome ? ', ' + esc(r.nome) : '') + '! Seu pagamento foi confirmado e a confirmação chega no seu e-mail. ' +
-        'Agora é só combinar o frete com a ālea & Co. pelo WhatsApp.</p>' +
-        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">Combinar o frete no WhatsApp</a></p>' : '') +
+        (r.comFrete ? 'O frete já foi pago junto: agora sua peça entra na produção.</p>' : 'Agora é só combinar o frete com a ālea & Co. pelo WhatsApp.</p>') +
+        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">' + (r.comFrete ? 'Falar com a ālea & Co. no WhatsApp' : 'Combinar o frete no WhatsApp') + '</a></p>' : '') +
         '<p><a class="loja-mais-produtos" href="index.html">Continuar comprando</a></p></div>';
+    }
+    if (r.estado === 'pago_a_menor') {
+      /* 12/10/2026: escolheu Pix aqui (com o desconto) e pagou no CARTÃO lá — o desconto é só do Pix. A loja recebeu
+         o aviso e acerta a diferença (ou devolve) com a pessoa. */
+      return '<div class="loja-concluido"><h1>Recebemos o seu pagamento</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Você escolheu Pix aqui, mas pagou com cartão na página de pagamento. O desconto vale só para o Pix, então ' +
+        'a ālea & Co. vai falar com você para acertar a diferença antes de produzir a peça.</p>' +
+        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">Falar com a ālea & Co. no WhatsApp</a></p>' : '') +
+        '<p><a class="loja-mais-produtos" href="index.html">Voltar para a loja</a></p></div>';
     }
     if (r.estado === 'conferindo') {
       return '<div class="loja-concluido"><h1>Confirmando o pagamento…</h1><p class="numero">' + esc(r.numero) + '</p>' +
@@ -304,12 +430,13 @@
     if (!guardado || guardado.numero !== numero || !L.statusLink) {
       retorno = { estado: 'sem_chave', numero: numero }; pintar(); return;
     }
-    retorno = { estado: 'conferindo', numero: numero, nome: guardado.nome, zap: guardado.zap, tentativas: 0 };
+    retorno = { estado: 'conferindo', numero: numero, nome: guardado.nome, zap: guardado.zap, comFrete: !!guardado.comFrete, tentativas: 0 };
     pintar();
     (function perguntar() {
       L.statusLink(numero, { chave: guardado.chave, transaction_nsu: q.get('transaction_nsu') || '', slug: q.get('slug') || '',
                              receipt_url: q.get('receipt_url') || '' }).then(function (s) {
         retorno.link = s.link;
+        if (s.estado === 'pago_a_menor') { retorno.estado = 'pago_a_menor'; gravarPag(null); pintar(); return; }
         if (s.estado === 'aprovado') {
           retorno.estado = 'aprovado';
           gravarPag(null); L.compra.limpar(); if (CAR()) CAR().limpar();
@@ -336,6 +463,7 @@
 
   /* ================================================================ desenhar */
   function pintar() {
+    if (!retorno && !concluido && tela() === 'compra' && st.etapa !== 'dados') cotar();   // 12/10/2026: frete pelo CEP
     raiz.innerHTML = FAIXA + (retorno ? htmlRetorno() : concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
     ligar();
     erro = '';
@@ -438,6 +566,9 @@
         tremerEIr(f.querySelector('.faltou input'));
         return;
       }
+      if (st.frete && st.frete.estado === 'carregando') {      // 12/10/2026: espera a cotação (segundos)
+        erro = 'Calculando o frete, um instante…'; pintar(); return;
+      }
       e.editando = false; st.etapa = 'pagamento'; guardar();
       if (eu.logado && !(eu.enderecos || []).some(function (x) { return x.cep === e.cep && String(x.numero) === String(e.numero); })) {
         L.guardarEndereco({ cep: e.cep, logradouro: e.logradouro, numero: e.numero, complemento: e.complemento,
@@ -466,6 +597,9 @@
       'Destinatário: ' + e.destinatario,
       'Pagamento escolhido: ' + (st.pagamento === 'pix' ? 'Pix' : 'Cartão de crédito')
     ];
+    if (opcaoFrete()) linhas.push('Frete: ' + opcaoFrete().empresa + (opcaoFrete().nome ? ' ' + opcaoFrete().nome : '') + ' — ' +
+      (freteValor() === 0 ? 'Grátis' : dinheiro(freteValor())));
+    if (descontoPix()) linhas.push('Desconto Pix (' + pctPix() + '%): − ' + dinheiro(descontoPix()) + ' · Total: ' + dinheiro(totalFinal()));
     if (st.presente && st.presente_texto) linhas.push('Mensagem para presente: "' + st.presente_texto + '"');
     var pedido = { itens: car.itens(), total: car.total(), dados: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, telefone: d.telefone, cpf: d.cpf },
                    entrega: e, pagamento: st.pagamento, presente: st.presente ? (st.presente_texto || '') : null,
@@ -489,24 +623,23 @@
     var car = CAR(), d = st.dados, e = st.entrega;
     var corpo = {
       forma: st.pagamento === 'pix' ? 'pix' : 'cartao',
-      itens: car.itens().map(function (i) {        // as miniaturas (imagem) ficam no aparelho: o servidor só precisa da escolha
-        var c = JSON.parse(JSON.stringify(i)); delete c.miniatura;
-        (c.extras || []).forEach(function (x) { if (x) delete x.miniatura; });
-        return c;
-      }),
-      total: car.total(),
+      itens: itensServidor(),
+      total: totalFinal(),                         // 12/10/2026: peças + frete escolhido − desconto do Pix
       comprador: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, cpf: d.cpf, telefone: d.telefone },
       entrega: { cep: e.cep, logradouro: e.logradouro, numero: e.numero, complemento: e.complemento || '',
                  bairro: e.bairro || '', cidade: e.cidade, uf: e.uf, destinatario: e.destinatario },
       presente: pedido.presente, visitante: pedido.visitante, consent_marketing: !!d.consent_marketing
     };
+    var of = opcaoFrete();
+    if (of && st.frete.id_cotacao) corpo.frete = { id_cotacao: st.frete.id_cotacao, servico: of.servico };
     if (botao) botao.textContent = 'Indo para o pagamento…';
     L.pagarLink(corpo).then(function (r) {
-      var extras = linhas.concat(['', 'PAGO pelo site: pedido ' + r.numero + ' (' + dinheiro(r.total) + '). Falta combinar o frete.']);
-      gravarPag({ numero: r.numero, chave: r.chave, nome: d.nome, zap: car.linkWhatsApp ? car.linkWhatsApp(extras) : null });
+      var extras = linhas.concat(['', 'PAGO pelo site: pedido ' + r.numero + ' (' + dinheiro(r.total) + ').' + (corpo.frete ? '' : ' Falta combinar o frete.')]);
+      gravarPag({ numero: r.numero, chave: r.chave, nome: d.nome, comFrete: !!corpo.frete, zap: car.linkWhatsApp ? car.linkWhatsApp(extras) : null });
       location.href = r.url;
     }).catch(function (x) {
       erro = (x && x.message) || 'O pagamento não respondeu agora. Nada foi cobrado. Tente de novo em instantes.';
+      if (/frete/i.test(erro)) st.frete = null;              // frete vencido ou sacola mudou: cota de novo
       pintar(); rolarPara('.loja-etapa:nth-of-type(3)');
     });
   }
@@ -544,6 +677,7 @@
       if (t.checked) raiz.querySelector('[data-presente-texto]').focus();
     }
     if (t.matches('[name="pagamento"]')) { st.pagamento = t.value; guardar(); pintar(); }
+    if (t.matches('[name="frete"]') && st.frete) { st.frete.escolhido = t.value; guardar(); pintar(); }
   });
   raiz.addEventListener('input', function (ev) {
     if (ev.target.matches('[data-presente-texto]')) { st.presente_texto = ev.target.value; guardar(); }
@@ -558,8 +692,9 @@
     cfg.then(function (c) {
       var pg = c && c.pagamento;
       PAG = (pg && pg.provedor === 'infinitepay') ? pg : null;
+      FRETE = !!(c && c.frete);
       if (PAG && (q.get('pedido') || q.get('order_nsu'))) conferirRetorno(q);   // a volta da InfinitePay
-      else if (PAG) pintar();
+      else if (PAG || FRETE) pintar();
     });
     L.eu().then(function (j) {
       eu = j || { logado: false };

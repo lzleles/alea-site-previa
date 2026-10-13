@@ -695,6 +695,16 @@ window.ALEA.precoPorEscolha = {
    na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
    vezes cai até caber). null = a linha não aparece. */
 window.ALEA.parcelamento = null;
+/* PAGAMENTO (12/10/2026, áudio 9448 do Cassiano: "5% de desconto no Pix e parcelamento só em 6 vezes sem juros").
+   O SERVIDOR LÊ ESTA LINHA (pagamento_infinitepay_v2): o desconto do Pix sai da mesma conta no site e na cobrança,
+   só nas peças (o frete não tem desconto). No site do ar o checkout só mostra o desconto quando o servidor confirma
+   (/api/config "pix_desconto") — servidor antigo = sem desconto na tela e na cobrança, nunca um valor diferente.
+   ⚠ As 6x "sem juros" de verdade dependem do app da InfinitePay dele ("Assumindo até 6x"). */
+window.ALEA.pagamento = { pix_desconto: 0.05, parcelas_max: 6 };
+/* FRETE GRÁTIS (12/10/2026, áudio 9449): a faixa no topo de toda página e a página que explica (frete-gratis.html).
+   Os valores aqui são o TEXTO público; quem decide o frete de verdade é o servidor (regras_loja_alea, mesmos números). */
+window.ALEA.faixaTopo = { texto: 'Frete grátis para todo o Brasil*', link: 'frete-gratis.html' };
+window.ALEA.freteGratis = { sul_sudeste_centro_oeste: 400, demais: 700, transportadora: 'Jadlog' };
 /* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
 window.ALEA.formatos = {
