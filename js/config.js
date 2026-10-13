@@ -296,12 +296,13 @@ window.ALEA = {
      25/09/2026: a LISTA REAL dele substituiu as de teste (ver o bloco `filamentos` abaixo). */
   filamentos: {
     /* LISTA REAL do Cassiano (25/09/2026, audios 1786-1815, tudo PLA; nomes do site trocados por ele na
-       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443; Transparente translucido audio 8459; + Azul com Glitter msg 9636). Gerado por 03_site/07_gerar_filamentos_config_v9_azul_galaxy_2026-10-13.py
+       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443; Transparente translucido audio 8459; + Azul com Glitter msg 9636, no Perolizado msg 9648, glitter da foto dele audio 9651). Gerado por 03_site/07_gerar_filamentos_config_v10_glitter_perolizado_2026-10-13.py
        a partir de 03_site/_LISTA_FILAMENTOS_DELE_2026-09-25.json + _TEXTURAS_FILAMENTO.json - nao editar a mao.
        hex = cor OFICIAL do fabricante; eSUN Silk Lime = aproximado (medido na foto oficial da eSUN).
        v4 (26/09/2026): `textura` = filamento com efeito (Marmore: foto IMG_0039 da Chica), `hex_oficial` =
        o do catalogo quando o hex veio da foto dele, `rugosidade`/`metal` = brilho proprio da cor.
-       v8 (10/10/2026): `translucido` = filamento que deixa ver atraves (Transparente: foto IMG_2984, msg 8460). */
+       v8 (10/10/2026): `translucido` = filamento que deixa ver atraves (Transparente: foto IMG_2984, msg 8460).
+       v10 (13/10/2026): `glitter` = particulas da foto da peca impressa dele (Azul com Glitter: IMG_3210, msg 9629). */
     basico: [
       { site: 'Laranja', hex: '#FF671F', original: 'Bambu Lab · PLA · Lite · Orange (16301)' },
       { site: 'Vermelho', hex: '#C6001A', original: 'Bambu Lab · PLA · Lite · Red (16200)' },
@@ -316,8 +317,7 @@ window.ALEA = {
       { site: 'Marrom', hex: '#5F3839', original: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' },
       { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
       { site: 'Transparente', hex: '#D9DEE2', original: 'Elegoo · PETG · PETG · Transparente', hex_oficial: '#EEF2F3', rugosidade: 0.25, metal: 0.15, translucido: { opacidade: 0.85 } },
-      { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
-      { site: 'Azul com Glitter', hex: '#153751', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' }
+      { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
     ],
     fosco: [
       { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White' },
@@ -348,7 +348,8 @@ window.ALEA = {
       { site: 'Verde Limão', hex: '#A3E810', original: 'eSUN · PLA · PLA-Silk · Lime' },
       { site: 'Verde', hex: '#129856', original: 'Voolt3D · PLA · V-Silk · Verde (PL-VD-SK-1)' },
       { site: 'Preto com Azul', hex: '#213D4E', original: 'Bambu Lab · PLA · Silk Dual Color · Phantom Blue' },
-      { site: 'Rosa Metalizado', hex: '#BA9594', original: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' }
+      { site: 'Rosa Metalizado', hex: '#BA9594', original: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' },
+      { site: 'Azul com Glitter', hex: '#283B51', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue', hex_oficial: '#153751', glitter: { img: 'img/texturas/glitter_azul_galaxy.png', mm: [25, 25], cor: '#CCCAC7', forca: 1 } }
     ]
   },
   /* O ESTOQUE — peça PRONTA, por produto (03/10/2026, áudios 5727/5729/5731 do Cassiano).
@@ -659,17 +660,21 @@ window.ALEA.modelos3d['pet-petra'] = {
    Defante (fonts/defante.otf, a letra da casa nos comedouros; limite medido de novo pelo medir_limite_nome_retis_v2_defante.py:
    68,6 mm na peça, letra a letra) e o 3D abre em Azul com Glitter (Elegoo PLA Galaxy Blue, a 42ª cor da lista, gerador de
    filamentos v9), com `capa` igual aos outros comedouros. Antes: Cousine + cor do arquivo #EC984C sem capa (v1, logo acima). */
+/* v3 13/10/2026 (msg 9648 do Cassiano: "Ele fica no perolizado viu!?" + áudio 9651: "tenta tirar a cor da peça que eu tirei
+   foto (...) não aparecem as partículas de glitter"): o Azul com Glitter passa ao PEROLIZADO, com a cor MEDIDA na peça impressa
+   dele (#283B51, foto IMG_3210, msg 9629) e as partículas da mesma foto (personalizar3d.js v22, gerador de filamentos v10,
+   03_site/07_textura_glitter_da_foto_v1_2026-10-13.py). Antes: Básico #153751 (foto da Elegoo), liso. */
 window.ALEA.modelos3d['pet-bowl-retis'] = {
   glb: 'modelos/retis.glb?v=2026-10-13',
   nome: 'modelos/retis_nome.json?v=2026-10-13',
   fonte: 'fonts/defante.otf',
   nomeInicial: 'Thor',
   profundidadeNome: 0.6,
-  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'basico', cor: 'Azul com Glitter' }] },
+  capa: { modo: 'monocromatico', escolhas: [{ acabamento: 'perolizado', cor: 'Azul com Glitter' }] },
   original: {
-    topo:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
-    principal: { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
-    base:      { site: 'Azul com Glitter', hex: '#153751', acabamento: 'basico', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' }
+    topo:      { site: 'Azul com Glitter', hex: '#283B51', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
+    principal: { site: 'Azul com Glitter', hex: '#283B51', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' },
+    base:      { site: 'Azul com Glitter', hex: '#283B51', acabamento: 'perolizado', oficial: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue' }
   }
 };
 /* LIMITE-NOME-RETIS (gerado por 64_onami_fechado_low_poly_2026-10-10/ferramentas/medir_limite_nome_retis_v2_defante.py — não editar à mão) */

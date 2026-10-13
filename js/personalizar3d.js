@@ -5,7 +5,7 @@
              pet GRAVADO ao vivo e as cores da peça e do nome trocando na hora, conforme o formulário.
    entrada: ALEA.modelos3d[slug] e ALEA.filamentos (config.js); o formulário [data-personalizar] da página
    saida: a janela (modal); o formulário de verdade MORA dentro dela enquanto está aberta
-   status: v21 (10/10/2026, filamento translúcido: `translucido` na cor deixa a peça ver-através, o Transparente deixa de ser branco chapado)
+   status: v22 (13/10/2026, GLITTER: `glitter` na cor desenha as partículas da foto dele, prateadas e acendendo com a luz)
    validado_em: 04/10/2026 (Playwright 1440 px e 390 px: 03_site/_testar_poop_bag_v1_2026-10-04.py)
 */
 /* =============================================================================
@@ -149,6 +149,13 @@
       de trás e o fundo através da peça, como no PETG impresso. Sem gravar profundidade (depthWrite desligado): com ela ligada
       a peça saía com faixas verticais de ordem de desenho (teste de 10/10, 390_prisma_*_v21 do 1º ensaio). A letra sem cor e a gravação da logo herdam a translucidez da
       parede (`copiarVidro`). Trocar pra uma cor sem o campo volta ao opaco de sempre. Cor sem `translucido` = exatamente como na v20.
+   v22 (13/10/2026, áudio 9651 do Cassiano: "tenta tirar a cor da peça que eu tirei foto, porque você pode ver que não aparecem
+      as partículas de glitter"; a v21 está em 03_site/_versoes_anteriores/glitter_antes_2026-10-13/js/): cor com
+      `glitter: { img, mm, cor, forca }` (ALEA.filamentos, gerador v10; a máscara sai da FOTO DA PEÇA IMPRESSA dele pelo
+      07_textura_glitter_da_foto_v1) ganha partículas: onde a máscara acende, o filamento vira a cor da partícula medida na foto,
+      mais lisa e um pouco metálica (0,35 / 0,2: com 0,85 de metal a partícula saía ESCURA, a janela não tem reflexo de ambiente), e cada partícula (célula de 1/3 mm) inclina a normal pra um lado — girando a peça, umas acendem e
+      outras apagam, como o glitter de verdade. De longe a máscara vira média (mipmap) e a face fica levemente prateada, como
+      na foto. Letra sem cor, relevo e gravação da logo herdam o glitter (é o mesmo filamento). Cor sem o campo = igual à v21.
    ============================================================================= */
 
 /* ⚠️ OS TEXTOS DO AVISO DE COR — trocar AQUI, e só aqui. Os dois são do Cassiano, palavra por palavra (26/09/2026).
@@ -564,6 +571,11 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     'uniform sampler2D uMapa;',
     'uniform vec2 uMapaMm;',
     'uniform float uContraste;',
+    'uniform float uUsaGlit;',
+    'uniform sampler2D uGlit;',
+    'uniform vec2 uGlitMm;',
+    'uniform vec3 uGlitCor;',
+    'uniform float uGlitForca;',
     /* ruído de gradiente 3D clássico (Perlin; Stefan Gustavson, domínio público) — o mesmo tipo do libnoise que o
        Bambu Studio usa no "billow" */
     'vec4 aP289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}',
@@ -623,6 +635,29 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     ' float tM = texture(uMapa, pM.zy * kM).r * wM.x + texture(uMapa, pM.xz * kM).r * wM.y + texture(uMapa, pM.xy * kM).r * wM.z;',
     /* a textura guarda 0,5 + (razão - 1) × 2  (07_textura_de_filamento_v1): razão = 1 + (t - 0,5) × 0,5 */
     ' diffuseColor.rgb *= max(0.0, 1.0 + (tM - 0.5) * 0.5 * uContraste);',
+    '}',
+    /* v22: GLITTER — a máscara das partículas (foto dele), em 3 eixos como a textura; aGlit vale até o fim do sombreador */
+    'float aGlit = 0.0;',
+    'if (uUsaGlit > 0.5) {',
+    ' vec3 pG = vPosW * 1000.0;',
+    ' vec3 nG = normalize(cross(dFdx(vPosW), dFdy(vPosW)));',
+    ' vec3 wG = pow(abs(nG), vec3(4.0)); wG /= (wG.x + wG.y + wG.z);',
+    ' vec2 kG = 1.0 / uGlitMm;',
+    ' aGlit = texture(uGlit, pG.zy * kG).r * wG.x + texture(uGlit, pG.xz * kG).r * wG.y + texture(uGlit, pG.xy * kG).r * wG.z;',
+    ' aGlit = clamp(aGlit * uGlitForca, 0.0, 1.0);',
+    ' diffuseColor.rgb = mix(diffuseColor.rgb, uGlitCor, aGlit);',
+    '}'
+  ].join('\n');
+  var GLSL_GLIT_BRILHO = [
+    '#include <metalnessmap_fragment>',
+    'roughnessFactor = mix(roughnessFactor, 0.35, aGlit);',
+    'metalnessFactor = mix(metalnessFactor, 0.2, aGlit);'
+  ].join('\n');
+  var GLSL_GLIT_NORMAL = [
+    'if (aGlit > 0.01) {',
+    ' vec3 cG = floor(vPosW * 3000.0);',
+    ' vec3 jG = fract(sin(vec3(dot(cG, vec3(127.1, 311.7, 74.7)), dot(cG, vec3(269.5, 183.3, 246.1)), dot(cG, vec3(113.5, 271.9, 124.6)))) * 43758.5453) - 0.5;',
+    ' normal = normalize(normal + jG * 1.1 * aGlit);',
     '}'
   ].join('\n');
   function vestir(m) {
@@ -631,7 +666,9 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
                            : new THREE.Vector4(0, 0, 1, 0.5) },
       uPeleOit: { value: PELE ? (PELE.oitavas || 4) : 0 },
       uUsaMapa: { value: 0 }, uMapa: { value: branco1px },
-      uMapaMm: { value: new THREE.Vector2(50, 50) }, uContraste: { value: 1 }
+      uMapaMm: { value: new THREE.Vector2(50, 50) }, uContraste: { value: 1 },
+      uUsaGlit: { value: 0 }, uGlit: { value: branco1px }, uGlitMm: { value: new THREE.Vector2(25, 25) },
+      uGlitCor: { value: new THREE.Color(0xcccccc) }, uGlitForca: { value: 1 }
     };
     m._alea = u;
     m.onBeforeCompile = function (s) {
@@ -640,9 +677,10 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
         '#include <project_vertex>\nvPosW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
       s.fragmentShader = GLSL_RUIDO + '\n' + s.fragmentShader
         .replace('#include <map_fragment>', GLSL_MAPA)
-        .replace('#include <normal_fragment_maps>', GLSL_PELE);
+        .replace('#include <metalnessmap_fragment>', GLSL_GLIT_BRILHO)
+        .replace('#include <normal_fragment_maps>', GLSL_PELE + '\n' + GLSL_GLIT_NORMAL);
     };
-    m.customProgramCacheKey = function () { return 'alea-v8'; };
+    m.customProgramCacheKey = function () { return 'alea-v22'; };
     return m;
   }
   function material(hex, acab, extra) {
@@ -667,6 +705,16 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     u.uUsaMapa.value = tx ? 1 : 0;
     u.uMapa.value = tx ? texturaDe(tx.img) : branco1px;
     if (tx) { u.uMapaMm.value.set(tx.mm[0], tx.mm[1]); u.uContraste.value = tx.contraste != null ? tx.contraste : 1; }
+    var gl = extra.glitter;                                           // v22
+    u.uUsaGlit.value = gl ? 1 : 0;
+    u.uGlit.value = gl ? texturaDe(gl.img) : branco1px;
+    if (gl) { u.uGlitMm.value.set(gl.mm[0], gl.mm[1]); u.uGlitCor.value.set(gl.cor || '#cccccc'); u.uGlitForca.value = gl.forca != null ? gl.forca : 1; }
+  }
+  /* v8 + v22: a letra sem cor, o relevo e a gravação da logo são o mesmo filamento da parede -> mesma textura e mesmo glitter */
+  function copiarMapa(dst, src) {
+    ['uUsaMapa', 'uMapa', 'uContraste', 'uUsaGlit', 'uGlit', 'uGlitForca'].forEach(function (k) { dst._alea[k].value = src._alea[k].value; });
+    dst._alea.uMapaMm.value.copy(src._alea.uMapaMm.value);
+    dst._alea.uGlitMm.value.copy(src._alea.uGlitMm.value); dst._alea.uGlitCor.value.copy(src._alea.uGlitCor.value);
   }
   /* v21: a letra sem cor e a gravação da logo são a mesma parede -> mesma translucidez */
   function copiarVidro(dst, src) {
@@ -922,8 +970,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       var mzR = mats[zonaNome];
       matLetra.color.copy(mzR.color); matLetra.roughness = mzR.roughness; matLetra.metalness = mzR.metalness;
       copiarVidro(matLetra, mzR);                                        // v21
-      ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mzR._alea[k].value; });
-      matLetra._alea.uMapaMm.value.copy(mzR._alea.uMapaMm.value);
+      copiarMapa(matLetra, mzR);                                     // v22 (era só a textura)
     } else {
       /* (6) a letra é a MESMA cor da peça; só a sombra de dentro muda de tom pra ler: peça escura -> um pouco mais
          clara; peça clara -> um pouco mais escura. Sem contorno, sem brilho (o cliente não pode achar que vem assim) */
@@ -934,8 +981,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
       matLetra.roughness = mz.roughness; matLetra.metalness = mz.metalness;
       copiarVidro(matLetra, mz);                                         // v21
       /* v8: a gravação é o mesmo filamento da parede -> mesma textura (as pintas do mármore seguem dentro da letra) */
-      ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { matLetra._alea[k].value = mz._alea[k].value; });
-      matLetra._alea.uMapaMm.value.copy(mz._alea.uMapaMm.value);
+      copiarMapa(matLetra, mz);                                     // v22 (era só a textura)
     }
     window.aleaCorNome = '#' + matLetra.color.getHexString();           // v19: o teste confere a cor da letra
     /* v15 (2): toque na peça — a janela de cor pinta SÓ a peça escolhida; as outras ficam como estavam */
@@ -964,8 +1010,7 @@ export async function abrirJanela3D(cfg, aoFechar, aoMontar, opcoes) {
     else dst.color.copy(src.color).multiplyScalar(0.72);
     dst.roughness = src.roughness; dst.metalness = src.metalness;
     copiarVidro(dst, src);                                               // v21
-    ['uUsaMapa', 'uMapa', 'uContraste'].forEach(function (k) { dst._alea[k].value = src._alea[k].value; });
-    dst._alea.uMapaMm.value.copy(src._alea.uMapaMm.value);
+    copiarMapa(dst, src);                                                // v22 (era só a textura)
   }
   /* ---------------- v15 (2): TOQUE NA PEÇA + TUTORIAL */
   var pecaEscolhida = null, corDaPeca = {}, sincronizando = false, tutorial = null, raioPecas = null;
