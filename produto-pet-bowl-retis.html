@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="previa-commit" content="2a1fc20">
+<meta name="previa-commit" content="4191ebe">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ālea &amp; Co.</title>
 <meta name="apple-mobile-web-app-title" content="ālea &amp; Co.">
@@ -103,7 +103,7 @@
     <div>
       <span class="linha">PET</span>
       <h1>ālea Pet Bowl Retis</h1>
-      <p class="valor-grande" data-valor data-preco-base=""><small>Em breve</small></p>
+      <p class="valor-grande" data-valor data-preco-base=""><small>Sob consulta</small></p>
       <div class="descricao-produto"><p>Da união entre geometria, tecnologia e design nasce o ālea Pet Bowl Retis, um comedouro que transforma a essência da impressão 3D em uma expressão de identidade e sofisticação.</p><p>Inspirado no latim rete, que significa rede ou malha, o Retis apresenta o Mesh autoral da ālea &amp; Co., uma trama de triângulos interligados que traduz nossa paixão pelas formas geométricas em uma estrutura contemporânea, elegante e cheia de personalidade.</p><p>Suas linhas suavemente curvas contrastam com a precisão dos vazados, enquanto o recipiente elevado em aço inoxidável complementa uma composição que une beleza, funcionalidade e praticidade.</p><p>Mais do que um comedouro, o ālea Pet Bowl Retis é uma peça de decoração que encontra seu lugar na sua casa. Com um design exclusivo e a possibilidade de receber o nome do seu pet, transforma o cantinho de quem você ama em um espaço cheio de estilo, personalidade e afeto.</p></div>
       <dl class="ficha"><div><dt>Material</dt><dd>PLA é um material utilizado na impressão 3D, produzido a partir de fontes renováveis, como milho e cana-de-açúcar. É leve, versátil e proporciona excelente acabamento.</dd></div><div><dt>Produção</dt><dd>Sob encomenda, 3 dias úteis após a confirmação de pagamento!</dd></div><div data-ficha-medidas><dt>Dimensões</dt><dd>17,6 × 16,7 × 19,0 cm (altura × largura × comprimento)</dd></div></dl>
 
@@ -113,12 +113,20 @@
       </section>
 
       <form class="personalizar" data-personalizar autocomplete="off">
-        <!-- v46 (12/10/2026): ālea Pet Bowl Retis EM BREVE — texto DELE (msg 9130), sem foto, sem preço, sem 3D ainda, SEM cores (ele ainda não respondeu). Gerada por 01_gerar_paginas_v46_pluvia_retis_aurea_e_sub_etc_2026-10-12.py. -->
+        <label>Nome do pet
+          <input type="text" name="nome_pet" maxlength="18" placeholder="Digite aqui.">
+        </label>
+        <label class="extra" data-extra data-extra-id="nome_colorido" data-extra-preco="30"><input type="checkbox" data-extra-caixa><span class="titulo-extra">Um detalhe que transforma + R$ 30<small class="detalhe-extra">Deixe o nome do seu pet ainda mais especial adicionando cores.</small></span></label>
+        <label>Cor do nome
+          <input type="text" name="cor_nome" maxlength="40" disabled
+                 placeholder="Ex.: Rosa, Verde Perolizado, Prata…">
+        </label>
+        <div class="cores-peca" data-cores-peca><span class="rotulo-grupo">Cores da peça</span><div class="cores-opcoes"><label><input type="radio" name="cores_peca" value="monocromatico" data-campos="1"> Monocromático</label></div><div class="cores-campos" data-cores-campos></div></div>
       </form>
 
       <label class="aceite" data-aceite>
         <input type="checkbox" data-aceite-caixa>
-        <span>Declaro que revisei cuidadosamente todas as informações da personalização. Declaro, ainda, estar ciente e de acordo com as condições acima aplicáveis a produtos personalizados, inclusive quanto a cancelamentos e devoluções.</span>
+        <span>Declaro que revisei cuidadosamente todas as informações da personalização, incluindo nome, grafia e cores. Declaro, ainda, estar ciente e de acordo com as condições acima aplicáveis a produtos personalizados, inclusive quanto a cancelamentos e devoluções.</span>
       </label>
 
       <p class="recado-aceite" data-recado-aceite hidden>
@@ -128,7 +136,7 @@
         <button class="botao" type="button" data-comprar-agora
                 data-slug="pet-bowl-retis" data-nome="ālea Pet Bowl Retis" data-preco=""
                 data-capa="retis_capa" data-material="PLA">
-          Em breve
+          Comprar agora
         </button>
         <button class="botao-sacola" type="button" data-add-carrinho
                 aria-label="Adicionar à sacola" title="Adicionar à sacola">

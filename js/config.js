@@ -642,6 +642,33 @@ window.ALEA.modelos3d['pet-petra'] = {
   }
 };
 
+/* 13/10/2026 — RETIS (áudio 9621 do Cassiano: "o Retis estava sem o personalizar, foi o último que você modelou" + "Isso" 9624:
+   é a peça 0001-0025 Onami fechado triângulos vazados v2). O .glb sai do 3MF
+   64_onami_fechado_low_poly_2026-10-10/"0001-0025 Onami fechado triangulos vazados v2 A Code.3mf" (objeto 7, placa 1) pelo
+   07_render_capa/exportar_glb_configurador_v7_pula_bloqueador_de_suporte.py ("1=principal", 80000, --deitar -y): o arquivo é
+   impresso DE COSTAS na mesa e aqui aparece em pé, como se usa (154,6 mm de altura x 176,0 x 166,5). O bloqueador de suporte
+   do arquivo não entra (ofício 3.1.3); o nome sai da malha e vira o retis_nome.json (gravado ao vivo, NEGATIVO, ofício 3.1.13).
+   NOME: no arquivo, Courier New na placa lisa das costas, 0,6 mm pra dentro (thickness 2 com o quadro achatado a 0,297 no
+   eixo da profundidade -> `profundidadeNome` 0,6, a medida do arquivo). A Courier New não pode ir pro site: vai a Cousine
+   (fonts/cousine.ttf, SIL OFL, mesmas larguras da Courier New). `limiteNome`: a placa tem 72,56 mm úteis na faixa do texto,
+   menos 2 mm de cada lado = 68,6 mm na peça -> 8 letras (fonte de largura fixa; 64_.../ferramentas/medir_limite_nome_retis_v1.py).
+   COR: o arquivo é Bambu PLA Silk #EC984C, que NÃO está na lista do site -> abre na cor do arquivo, SEM `capa` (igual ao
+   Prisma em 06/10) até ele dizer a cor da foto de capa (o "Thor" azul). nomeInicial = 'Thor' (o nome da capa). */
+window.ALEA.modelos3d['pet-bowl-retis'] = {
+  glb: 'modelos/retis.glb?v=2026-10-13',
+  nome: 'modelos/retis_nome.json?v=2026-10-13',
+  fonte: 'fonts/cousine.ttf',
+  nomeInicial: 'Thor',
+  profundidadeNome: 0.6,
+  original: {
+    topo:      { site: 'Cor do arquivo', hex: '#EC984C', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk · #EC984C (cor do arquivo 0001-0025)' },
+    principal: { site: 'Cor do arquivo', hex: '#EC984C', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk · #EC984C (cor do arquivo 0001-0025)' },
+    base:      { site: 'Cor do arquivo', hex: '#EC984C', acabamento: 'perolizado', oficial: 'Bambu Lab · PLA · Silk · #EC984C (cor do arquivo 0001-0025)' }
+  }
+};
+/* LIMITE-NOME-RETIS (gerado por 64_onami_fechado_low_poly_2026-10-10/ferramentas/medir_limite_nome_retis_v1.py — não editar à mão) */
+window.ALEA.modelos3d['pet-bowl-retis'].limiteNome = {"mm":45.2,"folgaMm":2.0,"larguras":{" ":[5.5,0,0],"!":[5.5,2.3,3.19],"\"":[5.5,1.24,4.25],"#":[5.5,0.24,5.2],"$":[5.5,0.3,5.14],"%":[5.5,0.0,5.5],"&":[5.5,0.19,5.3],"'":[5.5,2.24,3.25],"(":[5.5,1.53,3.98],")":[5.5,1.5,3.96],"*":[5.5,1.11,4.38],"+":[5.5,0.52,4.97],",":[5.5,1.16,3.1],"-":[5.5,1.49,4.0],".":[5.5,2.22,3.27],"/":[5.5,0.51,4.98],"0":[5.5,0.55,4.93],"1":[5.5,0.66,5.05],"2":[5.5,0.64,4.85],"3":[5.5,0.57,4.91],"4":[5.5,0.46,5.03],"5":[5.5,0.57,4.91],"6":[5.5,0.68,4.9],"7":[5.5,0.71,4.78],"8":[5.5,0.59,4.89],"9":[5.5,0.63,4.86],":":[5.5,2.22,3.27],";":[5.5,1.57,3.51],"<":[5.5,0.52,4.97],"=":[5.5,0.52,4.97],">":[5.5,0.52,4.97],"?":[5.5,0.42,4.8],"@":[5.5,0.2,5.32],"A":[5.5,0.0,5.49],"B":[5.5,0.72,5.15],"C":[5.5,0.51,5.11],"D":[5.5,0.72,5.03],"E":[5.5,0.72,5.02],"F":[5.5,0.87,4.85],"G":[5.5,0.51,4.93],"H":[5.5,0.72,4.77],"I":[5.5,0.9,4.58],"J":[5.5,0.79,4.41],"K":[5.5,0.72,5.49],"L":[5.5,1.06,4.92],"M":[5.5,0.58,4.91],"N":[5.5,0.72,4.77],"O":[5.5,0.46,5.04],"P":[5.5,0.72,5.0],"Q":[5.5,0.46,5.08],"R":[5.5,0.72,5.26],"S":[5.5,0.35,5.04],"T":[5.5,0.34,5.15],"U":[5.5,0.63,4.85],"V":[5.5,0.04,5.45],"W":[5.5,0.0,5.49],"X":[5.5,0.16,5.33],"Y":[5.5,0.16,5.33],"Z":[5.5,0.33,5.16],"[":[5.5,1.83,4.28],"\\":[5.5,0.51,4.98],"]":[5.5,1.21,3.65],"^":[5.5,0.59,4.89],"_":[5.5,-0.02,5.51],"`":[5.5,1.8,3.69],"a":[5.5,0.57,5.19],"b":[5.5,0.8,4.87],"c":[5.5,0.58,4.83],"d":[5.5,0.62,4.69],"e":[5.5,0.59,4.89],"f":[5.5,0.62,4.91],"g":[5.5,0.64,4.71],"h":[5.5,0.83,4.69],"i":[5.5,0.64,5.03],"j":[5.5,0.52,3.74],"k":[5.5,1.06,5.03],"l":[5.5,0.6,4.99],"m":[5.5,0.44,5.03],"n":[5.5,0.8,4.69],"o":[5.5,0.58,4.91],"p":[5.5,0.8,4.87],"q":[5.5,0.62,4.7],"r":[5.5,1.08,4.67],"s":[5.5,0.75,4.74],"t":[5.5,0.85,4.55],"u":[5.5,0.83,4.72],"v":[5.5,0.31,5.18],"w":[5.5,0.09,5.4],"x":[5.5,0.42,5.07],"y":[5.5,0.3,5.19],"z":[5.5,0.66,4.78],"{":[5.5,1.02,4.74],"|":[5.5,2.37,3.12],"}":[5.5,0.75,4.48],"~":[5.5,0.48,5.01]," ":[5.5,0,0],"¡":[5.5,2.3,3.19],"¢":[5.5,0.59,4.89],"£":[5.5,0.25,5.24],"¤":[5.5,0.71,4.79],"¥":[5.5,0.23,5.26],"¦":[5.5,2.37,3.12],"§":[5.5,0.71,4.78],"¨":[5.5,1.5,3.99],"©":[5.5,0.14,5.35],"ª":[5.5,0.92,4.57],"«":[5.5,0.57,5.01],"¬":[5.5,0.52,4.97],"­":[5.5,1.49,4.0],"®":[5.5,0.14,5.35],"¯":[5.5,-0.02,5.51],"°":[5.5,1.46,4.03],"±":[5.5,0.52,4.97],"²":[5.5,1.4,4.1],"³":[5.5,1.37,4.12],"´":[5.5,1.8,3.69],"µ":[5.5,0.64,4.85],"¶":[5.5,0.57,4.83],"·":[5.5,2.22,3.27],"¸":[5.5,0.53,2.16],"¹":[5.5,1.27,4.13],"º":[5.5,1.01,4.48],"»":[5.5,0.48,4.92],"¼":[5.5,0.12,5.5],"½":[5.5,0.08,5.37],"¾":[5.5,0.05,5.5],"¿":[5.5,0.68,5.06],"À":[5.5,0.0,5.49],"Á":[5.5,0.0,5.49],"Â":[5.5,0.0,5.49],"Ã":[5.5,0.0,5.49],"Ä":[5.5,0.0,5.49],"Å":[5.5,0.0,5.49],"Æ":[5.5,0.0,5.34],"Ç":[5.5,0.51,5.11],"È":[5.5,0.72,5.02],"É":[5.5,0.72,5.02],"Ê":[5.5,0.72,5.02],"Ë":[5.5,0.72,5.02],"Ì":[5.5,0.9,4.58],"Í":[5.5,0.9,4.58],"Î":[5.5,0.9,4.58],"Ï":[5.5,0.9,4.58],"Ð":[5.5,0.12,5.03],"Ñ":[5.5,0.72,4.77],"Ò":[5.5,0.46,5.04],"Ó":[5.5,0.46,5.04],"Ô":[5.5,0.46,5.04],"Õ":[5.5,0.46,5.04],"Ö":[5.5,0.46,5.04],"×":[5.5,0.7,4.78],"Ø":[5.5,0.25,5.23],"Ù":[5.5,0.63,4.85],"Ú":[5.5,0.63,4.85],"Û":[5.5,0.63,4.85],"Ü":[5.5,0.63,4.85],"Ý":[5.5,0.16,5.33],"Þ":[5.5,0.72,5.0],"ß":[5.5,0.63,5.22],"à":[5.5,0.57,5.19],"á":[5.5,0.57,5.19],"â":[5.5,0.57,5.19],"ã":[5.5,0.57,5.19],"ä":[5.5,0.57,5.19],"å":[5.5,0.57,5.19],"æ":[5.5,0.09,5.4],"ç":[5.5,0.58,4.83],"è":[5.5,0.59,4.89],"é":[5.5,0.59,4.89],"ê":[5.5,0.59,4.89],"ë":[5.5,0.59,4.89],"ì":[5.5,0.64,5.03],"í":[5.5,0.64,5.03],"î":[5.5,0.64,5.03],"ï":[5.5,0.64,5.03],"ð":[5.5,0.56,4.93],"ñ":[5.5,0.8,4.69],"ò":[5.5,0.58,4.91],"ó":[5.5,0.58,4.91],"ô":[5.5,0.58,4.91],"õ":[5.5,0.58,4.91],"ö":[5.5,0.58,4.91],"÷":[5.5,0.52,4.97],"ø":[5.5,0.49,5.0],"ù":[5.5,0.83,4.72],"ú":[5.5,0.83,4.72],"û":[5.5,0.83,4.72],"ü":[5.5,0.83,4.72],"ý":[5.5,0.3,5.19],"þ":[5.5,0.83,4.87],"ÿ":[5.5,0.3,5.19],"Ā":[5.5,0.0,5.49],"ā":[5.5,0.57,5.19],"Ă":[5.5,0.0,5.49],"ă":[5.5,0.57,5.19],"Ą":[5.5,0.0,5.58],"ą":[5.5,0.57,5.19],"Ć":[5.5,0.51,5.11],"ć":[5.5,0.58,4.83],"Ĉ":[5.5,0.51,5.11],"ĉ":[5.5,0.58,4.83],"Ċ":[5.5,0.51,5.11],"ċ":[5.5,0.58,4.83],"Č":[5.5,0.51,5.11],"č":[5.5,0.58,4.83],"Ď":[5.5,0.72,5.03],"ď":[5.5,0.14,5.5],"Đ":[5.5,0.12,5.03],"đ":[5.5,0.62,5.25],"Ē":[5.5,0.72,5.02],"ē":[5.5,0.59,4.89],"Ĕ":[5.5,0.72,5.02],"ĕ":[5.5,0.59,4.89],"Ė":[5.5,0.72,5.02],"ė":[5.5,0.59,4.89],"Ę":[5.5,0.72,5.02],"ę":[5.5,0.59,4.89],"Ě":[5.5,0.72,5.02],"ě":[5.5,0.59,4.89],"Ĝ":[5.5,0.51,4.93],"ĝ":[5.5,0.64,4.71],"Ğ":[5.5,0.51,4.93],"ğ":[5.5,0.64,4.71],"Ġ":[5.5,0.51,4.93],"ġ":[5.5,0.64,4.71],"Ģ":[5.5,0.51,4.93],"ģ":[5.5,0.64,4.71],"Ĥ":[5.5,0.72,4.77],"ĥ":[5.5,0.83,4.69],"Ħ":[5.5,0.01,5.48],"ħ":[5.5,0.24,4.69],"Ĩ":[5.5,0.9,4.58],"ĩ":[5.5,0.64,5.03],"Ī":[5.5,0.9,4.58],"ī":[5.5,0.64,5.03],"Ĭ":[5.5,0.9,4.58],"ĭ":[5.5,0.64,5.03],"Į":[5.5,0.9,4.58],"į":[5.5,0.64,5.03],"İ":[5.5,0.9,4.58],"ı":[5.5,0.64,5.03],"Ĳ":[5.5,0.44,5.17],"ĳ":[5.5,0.97,4.74],"Ĵ":[5.5,0.79,4.76],"ĵ":[5.5,0.52,4.69],"Ķ":[5.5,0.72,5.49],"ķ":[5.5,1.06,5.03],"ĸ":[5.5,1.06,5.03],"Ĺ":[5.5,1.06,4.92],"ĺ":[5.5,0.6,4.99],"Ļ":[5.5,1.06,4.92],"ļ":[5.5,0.6,4.99],"Ľ":[5.5,1.06,4.92],"ľ":[5.5,0.38,5.24],"Ŀ":[5.5,1.06,4.92],"ŀ":[5.5,0.6,5.06],"Ł":[5.5,0.24,4.92],"ł":[5.5,0.6,4.99],"Ń":[5.5,0.72,4.77],"ń":[5.5,0.8,4.69],"Ņ":[5.5,0.72,4.77],"ņ":[5.5,0.8,4.69],"Ň":[5.5,0.72,4.77],"ň":[5.5,0.8,4.69],"ŉ":[5.5,0.02,5.16],"Ŋ":[5.5,0.8,4.96],"ŋ":[5.5,0.8,4.69],"Ō":[5.5,0.46,5.04],"ō":[5.5,0.58,4.91],"Ŏ":[5.5,0.46,5.04],"ŏ":[5.5,0.58,4.91],"Ő":[5.5,0.46,5.04],"ő":[5.5,0.58,4.95],"Œ":[5.5,0.09,5.46],"œ":[5.5,0.13,5.38],"Ŕ":[5.5,0.72,5.26],"ŕ":[5.5,1.08,4.67],"Ŗ":[5.5,0.72,5.26],"ŗ":[5.5,0.91,4.67],"Ř":[5.5,0.72,5.26],"ř":[5.5,1.08,4.67],"Ś":[5.5,0.35,5.04],"ś":[5.5,0.75,4.74],"Ŝ":[5.5,0.35,5.04],"ŝ":[5.5,0.75,4.74],"Ş":[5.5,0.35,5.04],"ş":[5.5,0.75,4.74],"Š":[5.5,0.35,5.04],"š":[5.5,0.75,4.74],"Ţ":[5.5,0.34,5.15],"ţ":[5.5,0.85,4.55],"Ť":[5.5,0.34,5.15],"ť":[5.5,0.45,5.46],"Ŧ":[5.5,0.34,5.15],"ŧ":[5.5,0.89,4.59],"Ũ":[5.5,0.63,4.85],"ũ":[5.5,0.83,4.72],"Ū":[5.5,0.63,4.85],"ū":[5.5,0.83,4.72],"Ŭ":[5.5,0.63,4.85],"ŭ":[5.5,0.83,4.72],"Ů":[5.5,0.63,4.85],"ů":[5.5,0.83,4.72],"Ű":[5.5,0.63,4.91],"ű":[5.5,0.83,4.94],"Ų":[5.5,0.63,4.85],"ų":[5.5,0.83,4.83],"Ŵ":[5.5,0.0,5.49],"ŵ":[5.5,0.09,5.4],"Ŷ":[5.5,0.16,5.33],"ŷ":[5.5,0.3,5.19],"Ÿ":[5.5,0.16,5.33],"Ź":[5.5,0.33,5.16],"ź":[5.5,0.66,4.78],"Ż":[5.5,0.33,5.16],"ż":[5.5,0.66,4.78],"Ž":[5.5,0.33,5.16],"ž":[5.5,0.66,4.78],"ſ":[5.5,1.79,4.91]}};
+
 /* TAMANHOS À VENDA (28/09/2026, áudios do Cassiano ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho (...)
    arrumar uma opção lá no site"). A página ganha o grupo "Tamanho" (produto.js v36) logo acima do "Personalize aqui";
    escolher é OBRIGATÓRIO e o tamanho vai no item da sacola, no Resumo do Pedido e na mensagem do pedido ("Tamanho: M").
@@ -708,7 +735,9 @@ window.ALEA.precoPorEscolha = {
 /* PARCELAMENTO (04/10/2026, áudio 6237: "10 vezes de tanto, o valor da parcela" embaixo do preço). Regra DELE, perguntada
    na msg 6245: { vezes: 10, minimo: 30 } = "ou até 10x de R$ X sem juros", com a parcela nunca abaixo de R$ 30 (o número de
    vezes cai até caber). null = a linha não aparece. */
-window.ALEA.parcelamento = null;
+/* 13/10/2026 (áudios 9616-9618 do Cassiano: "vai colocar o valor e embaixo em até seis vezes sem juros (…) não vai colocar o
+   valor na frente (…) eu não quero que tenha centavos"): `texto` fixo, sem a conta da parcela (produto.js v50). Antes: null. */
+window.ALEA.parcelamento = { vezes: 6, texto: 'em até 6x sem juros' };
 /* PAGAMENTO (12/10/2026, áudio 9448 do Cassiano: "5% de desconto no Pix e parcelamento só em 6 vezes sem juros").
    O SERVIDOR LÊ ESTA LINHA (pagamento_infinitepay_v2): o desconto do Pix sai da mesma conta no site e na cobrança,
    só nas peças (o frete não tem desconto). No site do ar o checkout só mostra o desconto quando o servidor confirma
@@ -717,7 +746,9 @@ window.ALEA.parcelamento = null;
 window.ALEA.pagamento = { pix_desconto: 0.05, parcelas_max: 6 };
 /* FRETE GRÁTIS (12/10/2026, áudio 9449): a faixa no topo de toda página e a página que explica (frete-gratis.html).
    Os valores aqui são o TEXTO público; quem decide o frete de verdade é o servidor (regras_loja_alea, mesmos números). */
-window.ALEA.faixaTopo = { texto: 'Frete grátis para todo o Brasil*', link: 'frete-gratis.html' };
+/* 13/10/2026 (áudio 9604 do Cassiano): sem o asterisco; embaixo, bem pequeno, a linha `sub`; nada sublinhado; a faixa inteira
+   leva ao frete-gratis.html. Antes: { texto: 'Frete grátis para todo o Brasil*', link: 'frete-gratis.html' }. */
+window.ALEA.faixaTopo = { texto: 'Frete grátis para todo o Brasil', sub: 'clique aqui para consultar condições', link: 'frete-gratis.html' };
 window.ALEA.freteGratis = { sul_sudeste_centro_oeste: 400, demais: 700, transportadora: 'Jadlog' };
 /* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
@@ -734,10 +765,7 @@ window.ALEA.formatos = {
    organizar questão de foto, imprimir"). Produto listado aqui: card e página dizem "Em breve" no lugar do preço, o botão de compra
    fica desligado e a sacola não aceita (produto.js v49, feed.js v41, carrinho.js); o "Personalize agora" com o 3D funciona.
    Pra pôr à venda: tirar o slug daqui e dar o preço (VITRINE/PRODUTOS em produtos.js ou precoPorEscolha). */
-window.ALEA.emBreve = ['laptop-stand', 'pen-holder', 'make', 'makeup-layer-organizer', 'lamel',
-  'unda-organizer', 'vitta', 'orbis', 'travel-kit',  // v45 (12/10/2026): os 4 do texto antes da impressão (msg 9039)
-  'pluvia', 'pet-bowl-retis', 'aurea',  // v46 (12/10/2026): Pluvia, Retis, Aurea (áudio 9145)
-  'una'];  // v47 (12/10/2026): Una (msg 9214)
+window.ALEA.emBreve = ['unda-organizer', 'vitta'];  // v49 (13/10/2026, audio 9594): os outros 11 sairam - preco DELE na regua v2 (precoPorEscolha). Antes: laptop-stand, pen-holder, make, makeup-layer-organizer, lamel, unda-organizer, vitta, orbis, travel-kit, pluvia, pet-bowl-retis, aurea, una
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,

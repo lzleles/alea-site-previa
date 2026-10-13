@@ -900,6 +900,15 @@ body.sem-transicao-feed .feed { transition: none !important; }
   font-family: var(--fonte-titulo); font-weight: 500;
   font-size: clamp(1.2rem, 2.8vw, 1.7rem); color: var(--branco); white-space: nowrap;
 }
+.feed .valor { text-align: right; }
+/* 13/10/2026 (áudio 9620 do Cassiano): "em até 6x sem juros" embaixo do preço em todo card (site.js aleaParcelaCard),
+   pequeno, no corpo do texto, sem disputar com o preço. */
+small.parcela-card {
+  display: block; margin-top: 3px; white-space: nowrap;
+  font-family: var(--fonte-corpo, 'Hanken Grotesk', sans-serif); font-size: 11px; font-weight: 400;
+  letter-spacing: .02em; line-height: 1.25; text-transform: none; opacity: .8;
+}
+.loja-desejos small.parcela-card, .busca-res small.parcela-card { font-size: 10.5px; color: #6B5F57; opacity: 1; margin-top: 1px; }
 .feed .ver { display: inline-block; font-size: 12px; line-height: 1.3; letter-spacing: .08em; opacity: .7; color: var(--dourado); text-decoration: none; margin-top: 2px; }
 .feed .ver:hover { opacity: 1; text-decoration: underline; }
 
@@ -2768,7 +2777,16 @@ html.idioma-carregando body { opacity: 0; }
   font-family: var(--fonte-corpo, 'Hanken Grotesk', sans-serif); font-size: 12px; font-weight: 600;
   letter-spacing: .08em; text-transform: uppercase; text-decoration: none; line-height: 1.4;
 }
-.faixa-topo:hover, .faixa-topo:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.faixa-topo:hover, .faixa-topo:focus-visible { color: #fff; text-decoration: none; }
+/* 13/10/2026 (áudio 9604 do Cassiano): nada sublinhado (antes o hover sublinhava); a linha pequena "clique aqui para consultar
+   condições" embaixo do texto, dentro da faixa escura, centralizada; a faixa inteira é o link. */
+.faixa-topo, .faixa-topo * { text-decoration: none; }
+.faixa-topo { padding-top: 6px; padding-bottom: 5px; }
+.faixa-topo-texto { display: block; }
+.faixa-topo-sub {
+  display: block; margin-top: 1px;
+  font-size: 9px; font-weight: 400; letter-spacing: .04em; text-transform: none; line-height: 1.3; opacity: .85;
+}
 /* 12/10/2026 — páginas de texto (trocas, privacidade, frete grátis): o `.texto` (padding-block 26px, mais abaixo no arquivo)
    vencia o `.pagina` (que desconta o cabeçalho fixo + a faixa) e o título ficava embaixo do cabeçalho (medido 390 px:
    h1 em 26 px, cabeçalho até 95 px). Já acontecia antes da faixa; a faixa piorava 31 px. */

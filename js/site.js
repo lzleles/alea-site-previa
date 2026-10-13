@@ -97,6 +97,15 @@ window.aleaCorDoTopo = (function () {
     return '<span class="preco-alea"><span class="moeda">R$</span> ' + Number(v) + '</span>';
   };
 
+  /* v61 (13/10/2026, áudios 9616-9620 do Cassiano: "onde aparecer o preço tem que ter isso aí embaixo"): a linha
+     "em até 6x sem juros" (ALEA.parcelamento.texto) embaixo do preço nos cards da vitrine, da busca e da lista de desejos.
+     Sem o valor da parcela (sem centavos). Só com preço de verdade (nunca em "Em breve" / "Sob consulta"). */
+  window.aleaParcelaCard = function (v) {
+    var pc = (window.ALEA || {}).parcelamento;
+    if (!pc || !pc.texto || !(Number(v) > 0)) return '';
+    return '<small class="parcela-card">' + pc.texto + '</small>';
+  };
+
   /* ------------------------------------------------------------------ WhatsApp */
   function linkZap(assunto) {
     var texto = (C.mensagem || 'Oi! Vim pelo site.').replace('{produto}', assunto);
@@ -634,7 +643,18 @@ window.aleaCorDoTopo = (function () {
     var a = document.createElement('a');
     a.className = 'faixa-topo';
     a.href = F.link || 'frete-gratis.html';
-    a.textContent = F.texto;
+    /* 13/10/2026 (áudio 9604): duas linhas dentro do MESMO link (clicar em qualquer ponto da faixa leva à página) —
+       o texto e, embaixo, bem pequena, a linha F.sub. Antes: a.textContent = F.texto. */
+    var l1 = document.createElement('span');
+    l1.className = 'faixa-topo-texto';
+    l1.textContent = F.texto;
+    a.appendChild(l1);
+    if (F.sub) {
+      var l2 = document.createElement('span');
+      l2.className = 'faixa-topo-sub';
+      l2.textContent = F.sub;
+      a.appendChild(l2);
+    }
     document.body.insertBefore(a, document.body.firstChild);
     if (document.body.classList.contains('loja')) return;
     document.documentElement.classList.add('com-faixa-topo');

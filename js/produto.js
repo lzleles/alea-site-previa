@@ -1211,6 +1211,9 @@
   function textoParcela(t) {
     var pc = (window.ALEA || {}).parcelamento;
     if (!pc || !(pc.vezes > 1) || t === null || !(t > 0)) return '';
+    /* v50 (13/10/2026, áudios 9616-9618 do Cassiano): `texto` fixo = a linha sai sem o valor da parcela ("eu não quero que
+       tenha centavos"). Sem `texto`, a conta de antes ("ou até Nx de R$ X sem juros"). */
+    if (pc.texto) return pc.texto;
     var n = Math.min(pc.vezes, pc.minimo > 0 ? Math.floor(t / pc.minimo) : pc.vezes);
     if (n < 2) return '';
     return 'ou até ' + n + 'x de ' + window.aleaDinheiro(t / n) + ' sem juros';

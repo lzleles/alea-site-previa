@@ -118,11 +118,13 @@
   /* v39 (áudio 6234): o preço do card. Com preço por variante, "a partir de" + o menor preço preenchido. */
   function valorDoCard(c) {
     if ((((window.ALEA || {}).emBreve) || []).indexOf(c.pagina) >= 0) return '<small class="em-breve">Em breve</small>';   // v41
-    if (c.preco !== null && c.preco !== undefined) return moeda(c.preco);
+    /* 13/10/2026 (áudio 9620): + a linha da parcela embaixo (site.js aleaParcelaCard). */
+    if (c.preco !== null && c.preco !== undefined) return moeda(c.preco) + ((window.aleaParcelaCard && window.aleaParcelaCard(c.preco)) || '');
     var tab = ((window.ALEA || {}).precoPorEscolha || {})[c.pagina];
     var vs = tab ? Object.keys(tab).map(function (k) { return tab[k]; }).filter(function (v) { return typeof v === 'number'; }) : [];
     if (!vs.length) return 'Sob consulta';
-    return '<small class="a-partir">a partir de</small> ' + moeda(Math.min.apply(null, vs));
+    var menor = Math.min.apply(null, vs);
+    return '<small class="a-partir">a partir de</small> ' + moeda(menor) + ((window.aleaParcelaCard && window.aleaParcelaCard(menor)) || '');
   }
 
   /* ⚠️ ETAPA 10 (22/09/2026): o nome "ālea" tem que sair IGUAL À LOGO — em Defante, MINÚSCULO, com

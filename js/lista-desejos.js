@@ -40,7 +40,7 @@
       ? '<div class="loja-desejos">' + l.map(function (p) {
           return '<div><a href="produto-' + esc(p.slug) + '.html"><img src="img/produtos/' + esc(p.capa) + '_obj_m.webp" alt="" loading="lazy" ' +
             'onerror="this.onerror=null;this.src=&quot;img/produtos/' + esc(p.capa) + '_m.jpg&quot;">' + esc(p.nome) + '<br>' +
-            (p.preco ? dinheiroTela(p.preco) : 'Sob consulta') + '</a><br>' +
+            (p.preco ? dinheiroTela(p.preco) + ((window.aleaParcelaCard && window.aleaParcelaCard(p.preco)) || '') : 'Sob consulta') + '</a><br>' +
             '<button type="button" class="tirar" data-tirar-desejo="' + esc(p.slug) + '">remover</button></div>';
         }).join('') + '</div>'
       : '<p class="loja-vazio">Sua lista está vazia. Toque no coração na página de uma peça para guardá-la aqui.</p>' +

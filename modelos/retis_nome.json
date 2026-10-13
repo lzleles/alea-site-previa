@@ -1,0 +1,62 @@
+{
+ "matriz_mundo_zup": [
+  [
+   0.0015173755818977952,
+   -7.842352149466221e-18,
+   -4.4891569628280337e-11,
+   0.00025560706853866577
+  ],
+  [
+   -2.291173362145571e-10,
+   -5.1937551481806565e-11,
+   -0.0002973034279420972,
+   -0.08802063763141632
+  ],
+  [
+   0.0,
+   0.0015173755818977952,
+   -1.0176262610350761e-11,
+   0.07672805339097977
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "bbox_local_texto": [
+  [
+   -17.861328125,
+   -3.4765625,
+   -1.9850000143051147
+  ],
+  [
+   17.5244140625,
+   2.7392578125,
+   0.014999985694885254
+  ]
+ ],
+ "text_info": {
+  "text": "RASHID",
+  "font_name": "Courier New",
+  "font_version": "2.5",
+  "style_name": "Recomendado",
+  "boldness": "0",
+  "skew": "0",
+  "font_index": "-1",
+  "font_size": "10",
+  "thickness": "2",
+  "embeded_depth": "0",
+  "rotate_angle": "0",
+  "text_gap": "0",
+  "bold": "0",
+  "italic": "0",
+  "surface_type": "1",
+  "hit_mesh": "1",
+  "hit_position": "0 0 0",
+  "hit_normal": "0 0 0"
+ },
+ "altura_peca_m": 0.15459666401147842,
+ "origem": "64_onami_fechado_low_poly_2026-10-10/_trabalho_glb_site_2026-10-13 objeto 7 (exportar_glb_configurador_v3)"
+}
