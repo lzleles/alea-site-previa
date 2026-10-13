@@ -138,11 +138,11 @@ window.VITRINE = [
   { produto: 'ālea Pet Bowl Caesar',                      nome: 'Caesar',  categoria: 'pet', preco: null, pagina: 'pet-bowl-caesar',   recorte: true, so_recorte: true, fotos: ['caesar_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   { produto: 'ālea Pet Bowl Prisma',                      nome: 'Prisma',  categoria: 'pet', preco: null, pagina: 'pet-bowl-prisma',   recorte: true, so_recorte: true, fotos: ['prisma_capaq'] },   // audio 8438: sem faixa bege, fundo degrade em volta
   /* 12/10/2026 (v46): Retis, texto dele msg 9130, nome 9140. Em breve, SEM FOTO, sem preço. */
-  { produto: 'ālea Pet Bowl Retis', nome: 'Retis', categoria: 'pet', preco: 230, pagina: 'pet-bowl-retis', recorte: false, fotos: [] },
+  { produto: 'ālea Pet Bowl Retis', nome: 'Retis', categoria: 'pet', preco: 230, pagina: 'pet-bowl-retis', recorte: false, fotos: ['retis_capaq'] },
   { produto: 'ālea Pet Petra',                            nome: 'Petra',   categoria: 'pet', preco: 180, pagina: 'pet-petra',         recorte: false, fotos: ['petra_capaq'] },
   /* 04/10/2026 (msgs 6315-6363 do Cassiano): o Poop Bag VOLTA, logo depois do último comedouro (Cláudia), R$ 79. Estava
      fora desde a msg 6258. Capa = recorte quadrado da foto do Luke (poopbag_capaq, 33_produtos_novos_2026-10-04/poop_bag_extra). */
-  { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 100, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag_capaq'] },
+  { produto: 'ālea Poop Bag Holder',                      nome: 'três cores', categoria: 'pet', preco: 100, pagina: 'poop-bag-holder', recorte: false, fotos: ['poopbag2_capaq'] },
   /* 03/10/2026: 1º produto da HOME (Cassiano, msgs 5722-5788). `nome` aqui só entra no alt das fotos do feed (não há nome de pet). */
   { produto: 'ālea Soap Dish',                            nome: 'três cores', categoria: 'home', sub: 'aura', preco: 100, pagina: 'soap-dish',       recorte: false, fotos: ['soapdish_capaq'] },
   /* 04/10/2026: 2º produto da HOME (Cassiano, msgs 6008-6030). Capa = a foto da lâmpada (msg 6027). */
@@ -164,7 +164,7 @@ window.VITRINE = [
   { produto: 'ālea Unda Organizer', nome: 'Unda Organizer', categoria: 'home', sub: 'desk', preco: null, pagina: 'unda-organizer', recorte: false, fotos: [] },
   { produto: 'ālea Vitta', nome: 'Vitta', categoria: 'home', sub: 'decor', preco: null, pagina: 'vitta', recorte: false, fotos: [] },
   { produto: 'ālea Orbis', nome: 'Orbis', categoria: 'home', sub: 'decor', preco: 190, pagina: 'orbis', recorte: false, fotos: [] },
-  { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: 200, pagina: 'travel-kit', recorte: false, fotos: [] },
+  { produto: 'ālea Travel Kit', nome: 'Travel Kit', categoria: 'home', sub: 'aura', preco: 200, pagina: 'travel-kit', recorte: false, fotos: ['travel_capaq'] },
   /* 12/10/2026 (v46): Pluvia (ETC.) e Aurea (Decor), texto dele msgs 9075/9072. Em breve, SEM FOTO, sem preço. */
   { produto: 'ālea Pluvia', nome: 'Pluvia', categoria: 'home', sub: 'etc', preco: 200, pagina: 'pluvia', recorte: false, fotos: [] },
   { produto: 'ālea Aurea', nome: 'Aurea', categoria: 'home', sub: 'decor', preco: 200, pagina: 'aurea', recorte: false, fotos: [] },
@@ -499,13 +499,13 @@ window.PRODUTOS = [
       'ālea Orbis. A natureza em uma nova perspectiva.'
     ], galeria: [] },
   { slug: 'travel-kit', nome: 'ālea Travel Kit', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    capa: 'travel_capa', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
     paragrafos: [   // msg 9025, texto DELE (nome do site: regra 3.1.16)
       'Seu cuidado pessoal merece acompanhar você aonde for.',
       'Criado para tornar a organização durante as viagens mais prática e elegante, o ālea Travel Kit reúne quatro recipientes de diferentes tamanhos, pensados para acomodar pequenos itens essenciais da rotina.',
       'Com um design inspirado nas formas geométricas low poly, característica da identidade da ālea & Co., cada peça combina personalidade e funcionalidade em uma composição compacta e versátil.',
       'De escovas de dentes e cotonetes a acessórios de beleza e pequenos objetos pessoais, o conjunto permite que cada detalhe encontre seu próprio lugar, mantendo tudo organizado na sua mala.'
-    ], galeria: [] },
+    ], galeria: ['travel_1', 'travel_2', 'travel_3', 'travel_4', 'travel_5'] },
   { slug: 'pluvia', nome: 'ālea Pluvia', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
     paragrafos: [   // msg 9075, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
@@ -515,13 +515,13 @@ window.PRODUTOS = [
       'Porque cultivar também é uma forma de cuidar.'
     ], galeria: [] },
   { slug: 'pet-bowl-retis', nome: 'ālea Pet Bowl Retis', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: [], sem_nome: true, resumo: '',
+    capa: 'retis_capa', cores_peca: [], sem_nome: true, resumo: '',
     paragrafos: [   // msg 9130, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
       'Da união entre geometria, tecnologia e design nasce o ālea Pet Bowl Retis, um comedouro que transforma a essência da impressão 3D em uma expressão de identidade e sofisticação.',
       'Inspirado no latim rete, que significa rede ou malha, o Retis apresenta o Mesh autoral da ālea & Co., uma trama de triângulos interligados que traduz nossa paixão pelas formas geométricas em uma estrutura contemporânea, elegante e cheia de personalidade.',
       'Suas linhas suavemente curvas contrastam com a precisão dos vazados, enquanto o recipiente elevado em aço inoxidável complementa uma composição que une beleza, funcionalidade e praticidade.',
       'Mais do que um comedouro, o ālea Pet Bowl Retis é uma peça de decoração que encontra seu lugar na sua casa. Com um design exclusivo e a possibilidade de receber o nome do seu pet, transforma o cantinho de quem você ama em um espaço cheio de estilo, personalidade e afeto.'
-    ], galeria: [] },
+    ], galeria: ['retis_1', 'retis_2', 'retis_3', 'retis_4', 'retis_5'] },
   { slug: 'aurea', nome: 'ālea Aurea', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
     capa: 'em_breve', cores_peca: [], sem_nome: true, resumo: '',
     paragrafos: [   // msg 9072, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
@@ -606,7 +606,7 @@ window.PRODUTOS = [
       'Suas facetas cuidadosamente desenhadas criam um jogo de luz e sombra que valoriza cada ângulo, enquanto sua silhueta escultural equilibra elegância, modernidade e funcionalidade.',
       'Sua estrutura elevada proporciona uma posição mais confortável durante a alimentação, unindo praticidade e bem-estar a um design que valoriza cada detalhe.',
       'Mais do que um comedouro, o Prisma é um elemento de design que integra o universo pet à decoração, trazendo sofisticação e originalidade aos espaços compartilhados com nossos filhos de quatro patas!'
-    ], galeria: ['prisma_1', 'prisma_2', 'prisma_3', 'prisma_4'] },
+    ], galeria: ['prisma_1', 'prisma_2', 'prisma_3', 'prisma_4', 'prisma_5'] },
   { slug: 'pet-petra', nome: 'ālea Pet Petra', linha: 'Comedouro', categoria: 'pet', preco: null, material: 'PLA',
     capa: 'petra_capa', cores_peca: ['monocromatico'], resumo: '', 
     paragrafos: [   // msg 8414, texto DELE (nome do site: audio 8407, oficio 3.1.16)
@@ -614,7 +614,7 @@ window.PRODUTOS = [
       'Inspirado na essência das rochas e na maneira como o tempo esculpe a matéria, o ālea Pet Petra nasce do encontro entre a força da natureza e a delicadeza do nosso design low poly, uma das expressões mais marcantes da identidade da ālea & Co.',
       'Suas formas geométricas reinterpretam a beleza das pedras sob um olhar contemporâneo, transformando a inspiração natural em uma criação autoral, onde cada ângulo revela personalidade, equilíbrio e originalidade.',
       'Criado para quem acredita que o cuidado com nossos companheiros também faz parte da maneira como escolhemos viver e decorar, o Petra leva ao universo pet uma estética singular, que traduz nossa paixão por transformar formas simples em peças extraordinárias.'
-    ], galeria: ['petra_1', 'petra_2', 'petra_3'] },
+    ], galeria: ['petra_1', 'petra_2', 'petra_3', 'petra_4'] },
 
   /* ===================================================================================================
      OS PRODUTOS ANTIGOS — fora da vitrine desde 25/09/2026 (msg 1884). As páginas continuam no disco e
@@ -677,12 +677,12 @@ window.PRODUTOS = [
      =================================================================================================== */
   {
     slug: 'poop-bag-holder',
-    medidas: { peso_g: 74, altura_cm: 8.2, largura_cm: 4.5, comprimento_cm: 4.5 },
+    medidas: { peso_g: 43, altura_cm: 8.3, largura_cm: 5.3, comprimento_cm: 5.3 },   // v48 (12/10/2026): do arquivo novo (Testar Code C Code, placa 6) montado 83,3 x 52,5 x 52,6 mm; peso = placa 4 fatiada (uma cor)
     nome: 'ālea Poop Bag Holder',
     linha: 'Passeio',
     categoria: 'pet',
     preco: 100,
-    capa: 'poopbag_1',
+    capa: 'poopbag2_capa',
     material: 'PLA',
     cores_peca: ['tricolor', 'bicolor', 'monocromatico'],
     resumo: '',
@@ -690,7 +690,7 @@ window.PRODUTOS = [
       'Criado para levar os saquinhos higiênicos de forma prática e discreta, este porta-saquinhos combina funcionalidade com um desenho low poly e cheio de personalidade. Seu corpo facetado traz a estética geométrica característica da ālea & Co., enquanto a abertura lateral permite retirar os saquinhos com facilidade durante o passeio.',
       'Compacto e leve, pode ser preso à guia, mochila ou bolsa pela alça superior, ficando sempre à mão quando você precisar.'
     ],
-    galeria: ['poopbag_2', 'poopbag_3', 'poopbag_4', 'poopbag_5']
+    galeria: ['poopbag2_1', 'poopbag2_2', 'poopbag2_3', 'poopbag2_4', 'poopbag2_5']
   },
   /* A VERSÃO DE 24/09 (fora do ar), guardada:
   { slug: 'poop-bag-holder', medidas_exemplo: { peso_g: 45, altura_cm: 10, largura_cm: 6, comprimento_cm: 7 },

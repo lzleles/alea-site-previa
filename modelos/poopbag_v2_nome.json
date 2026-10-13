@@ -1,0 +1,73 @@
+{
+ "matriz_mundo_zup": [
+  [
+   -4.371430301075563e-11,
+   0.000999999581836164,
+   9.807990863919258e-07,
+   -0.0004995167255401611
+  ],
+  [
+   2.9446601407245865e-12,
+   9.807990863919258e-07,
+   -0.0009999936446547508,
+   -0.021506428718566895
+  ],
+  [
+   -0.0010000000474974513,
+   -4.371138867531599e-11,
+   -2.9875156168368555e-12,
+   0.040505003184080124
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "bbox_local_texto": [
+  [
+   -12.934999465942383,
+   -3.0,
+   -0.9850080013275146
+  ],
+  [
+   11.945000648498535,
+   4.000002384185791,
+   0.015009776689112186
+  ]
+ ],
+ "text_info": {
+  "text": "Cacau",
+  "font_name": "Defante",
+  "font_version": "2.5",
+  "style_name": "Recomendado",
+  "boldness": "0",
+  "skew": "0",
+  "font_index": "-1",
+  "font_size": "10",
+  "thickness": "1",
+  "embeded_depth": "0",
+  "rotate_angle": "-90",
+  "text_gap": "0",
+  "bold": "0",
+  "italic": "0",
+  "surface_type": "0",
+  "hit_mesh": "0",
+  "hit_position": "0 0 0",
+  "hit_normal": "0 0 0"
+ },
+ "altura_peca_m": 0.08326250314712524,
+ "tipo_nome": "gravado",
+ "subtype_no_arquivo": "negative_part",
+ "extrusora_nome": 1,
+ "cor_no_arquivo": "#161616",
+ "profundidade_mm": 1.0,
+ "medida_volume_texto_x_parede": {
+  "vertices_fora": 663,
+  "vertices_dentro": 663,
+  "dist_min_mm": -0.72,
+  "dist_max_mm": 0.01
+ },
+ "origem": "entrada_3mf objeto 25 + tampa 18 (exportar_glb_configurador_v6_poopbag_v2_tampa_pelas_facetas)"
+}
