@@ -530,7 +530,7 @@ window.PRODUTOS = [
       'Com suas proporções marcantes e um design que equilibra delicadeza e personalidade, o Aurea transforma qualquer ambiente com sua presença singular.'
     ], galeria: [] },
   { slug: 'una', nome: 'ālea Una', linha: 'Home', categoria: 'home', preco: null, material: 'PLA',
-    capa: 'em_breve', cores_peca: ['monocromatico'], sem_nome: true, resumo: '',
+    capa: 'em_breve', cores_peca: ['bicolor'], sem_nome: true, resumo: '',   // 13/10/2026 (10093/10103): sempre com aro -> Corpo + Aro (antes: monocromatico)
     paragrafos: [   // msg 9214, texto DELE lido de _textos_produtos (nome do site: regra 3.1.16)
       'Uma única flor. Toda a beleza que ela merece.',
       'Há uma elegância especial na simplicidade. O ālea Una nasce desse conceito: valorizar a delicadeza de uma única flor e transformar sua presença em um detalhe capaz de encantar qualquer ambiente.',

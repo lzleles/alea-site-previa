@@ -730,6 +730,14 @@ window.ALEA.tamanhos = {
   /* v60 (12/10/2026, audio 9487): o Una tem dois precos -> escolha obrigatoria (v61, 13/10: 15 cm R$ 100, 22 cm R$ 120) */
   'una':               ['15 cm', '22 cm']
 };
+/* v62 (13/10/2026, áudio 10093 + texto 10103 do Cassiano): NOME DAS CAIXAS DE COR em produto SEM janela 3D (o partesCor
+   do modelos3d só vale pra quem tem .glb; produto.js v53 lê este quando não há modelos3d). O ālea Una é sempre com aro
+   dourado: a pessoa escolhe 2 cores, CORPO e ARO, e pode escolher as duas iguais — o preço é o mesmo (o do colorido,
+   precoPorEscolha). Antes: Una Monocromático, 1 caixa "Cor principal". Versão anterior: 03_site/_versoes_anteriores/
+   una_duas_cores_antes_2026-10-13/js/. */
+window.ALEA.partesCor = {
+  'una': { 2: ['Corpo', 'Aro'] }
+};
 /* PREÇO POR ESCOLHA (04/10/2026, áudio 6234 do Cassiano): produto com variantes de preço diferente. A chave é
    'Formato|Tamanho' (a mesma do glbPorEscolha). Antes da escolha, a página e o feed mostram "a partir de" + o MENOR preço
    preenchido; escolhido, a página mostra o preço daquela escolha (em cima e logo acima de "Encomendar agora", 6237).

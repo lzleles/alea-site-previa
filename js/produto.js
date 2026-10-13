@@ -4,7 +4,10 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v52 (13/10/2026, ālea Urubu Mascote Flamengo: caixa "Chuteira", parte dourada e parte branca, áudio 9891)
+   status: ativo — v53 (13/10/2026, ālea Una: caixas de cor "Corpo" e "Aro" sem janela 3D, áudio 10093 + texto 10103)
+   v53 (13/10/2026): partesCorDoProduto() também lê `ALEA.partesCor[slug]` (config.js v62) quando o produto não tem
+     modelos3d — o Una (sem .glb) ganha as caixas Corpo/Aro, as frases de falta e o `partes` na sacola. Só isso mudou;
+     a v52 está em 03_site/_versoes_anteriores/una_duas_cores_antes_2026-10-13/js/.
    v52 (13/10/2026, áudio 9891 do Cassiano: "o nosso urubu também pode deixar personalizar a chuteira"; a v51 está em
      03_site/_versoes_anteriores/urubu_chuteira_antes_2026-10-13/js/): produto com `ALEA.modelos3d[slug].chuteira` (config.js v60)
      ganha a caixa "Chuteira" (uma janela de acabamento + cor por parte, já marcada na cor do arquivo); na sacola e no pedido sai
@@ -1634,7 +1637,8 @@
   /* v42: os nomes das caixas de cor que o produto dá (config.js modelos3d[slug].partesCor), ou null */
   function partesCorDoProduto() {
     var s = botaoComprar && botaoComprar.getAttribute('data-slug');
-    return (((window.ALEA || {}).modelos3d || {})[s] || {}).partesCor || null;
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).partesCor ||
+      ((window.ALEA || {}).partesCor || {})[s] || null;   // v53: produto sem 3D (Una: Corpo, Aro)
   }
 
   function desenharCamposDeCor(radio) {
