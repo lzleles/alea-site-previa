@@ -924,9 +924,10 @@ window.ALEA.modelos3d['poop-bag-holder'].limiteNome = {"mm":27.0,"folgaMm":2.0,"
    quem fotografa a miniatura: personalizar3d.js v14 (fotoDoPoopBag). Preço DELE (áudios 6281-6290), nunca mexer sem ele. */
 /* v60 (12/10/2026, audio 9493 do Cassiano, ok 9495): + R$ 70 e em TODO comedouro (Caesar, Prisma, Petra, Retis entram;
    a Ayla fica fora). Avulso continua na pagina do Poop Bag (R$ 100). Antes: slugs luke/matteo/claudia, preco 50. */
+/* v62 (13/10/2026, audio 9824 do Cassiano): adicional + R$ 60 (era 70); avulso agora R$ 80. Antes: preco 70. */
 window.ALEA.extraPoopBag = {
   slugs: ['luke-bowl', 'matteo-texturized', 'claudia-wave', 'pet-bowl-caesar', 'pet-bowl-prisma', 'pet-petra', 'pet-bowl-retis'],
-  preco: 70,
+  preco: 60,
   rotulo: 'Poop Bag Holder',
   texto: 'Adicionar Poop Bag Holder',
   pagina: 'produto-poop-bag-holder.html'   // v50 (áudio 6402): miniatura e texto levam pra cá; só o quadradinho marca
