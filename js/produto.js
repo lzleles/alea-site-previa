@@ -4,7 +4,12 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v51 (06/10/2026, ālea Urubu Mascote Flamengo: caixa "Filamento" de cor fixa e frase de falta do nome por produto)
+   status: ativo — v52 (13/10/2026, ālea Urubu Mascote Flamengo: caixa "Chuteira", parte dourada e parte branca, áudio 9891)
+   v52 (13/10/2026, áudio 9891 do Cassiano: "o nosso urubu também pode deixar personalizar a chuteira"; a v51 está em
+     03_site/_versoes_anteriores/urubu_chuteira_antes_2026-10-13/js/): produto com `ALEA.modelos3d[slug].chuteira` (config.js v60)
+     ganha a caixa "Chuteira" (uma janela de acabamento + cor por parte, já marcada na cor do arquivo); na sacola e no pedido sai
+     "Parte dourada da chuteira: Dourado Perolizado, Parte branca da chuteira: Branco Perolizado" + o filamento exato; o
+     "editar" remonta. Produto sem o campo = igual à v51.
    v51 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6897-6904 do Cassiano: "abaixo de pequeno, médio e gigante, só duas opções de
      filamento (...) clássico e perolizado, sem escolher cor"; só o vermelho muda): produto com `ALEA.modelos3d[slug].filamentoFixo`
      ({ titulo, cor, acabamentos }, config.js v56) — a caixa de cor mostra SÓ as bolinhas daqueles acabamentos (Clássico/Perolizado)
@@ -1527,6 +1532,75 @@
     var s = botaoComprar && botaoComprar.getAttribute('data-slug');
     if (caixaCores && (((window.ALEA || {}).modelos3d || {})[s] || {}).soUmModo) caixaCores.classList.add('so-um-modo');
   })();
+  /* v52 (13/10/2026, áudio 9891 do Cassiano, Urubu: "abre duas opções de cor (...) onde fica dourado na chuteira e onde fica
+     branco na chuteira. Só lá."): produto com `ALEA.modelos3d[slug].chuteira` ganha a caixa "Chuteira", logo abaixo das cores
+     da peça, com uma janela por parte (acabamento + cor, a mesma de sempre), JÁ MARCADA na cor do arquivo dele. Ela NÃO entra
+     em camposCores: o modo, a capa e o estoque continuam olhando só o Filamento. Vai pro pedido somada às cores (coresEscolhidas). */
+  function chuteiraDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).chuteira || null;
+  }
+  var caixaChuteira = null;
+  (function montarChuteira() {
+    var CH = chuteiraDoProduto();
+    if (!CH || !caixaCores) return;
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    caixaChuteira = document.createElement('div');
+    caixaChuteira.className = 'cores-peca chuteira-peca';
+    caixaChuteira.setAttribute('data-chuteira', '');
+    caixaChuteira.innerHTML = '<span class="rotulo-grupo">' + CH.titulo + '</span><div class="cores-campos">' +
+      CH.partes.map(function (pt, k) {
+        return '<div class="campo-cor campo-chuteira" data-malha="' + pt.malha + '" data-titulo="' + pt.titulo + '">' +
+          '<span class="titulo-chuteira">' + pt.titulo + '</span>' +
+          '<div class="acabamentos">' + ACAB.map(function (ac) {
+            return '<label class="acabamento"><input type="radio" name="chut_acab_' + k + '" value="' + ac.id + '"> ' + ac.rotulo + '</label>';
+          }).join('') + '</div>' +
+          '<select name="chut_cor_' + k + '" aria-label="' + pt.titulo + '"><option value="">Escolha a cor</option></select></div>';
+      }).join('') + '</div>';
+    caixaCores.insertAdjacentElement('afterend', caixaChuteira);
+    function encherLista(c, acab, cor) {
+      var sel = c.querySelector('select');
+      var lista = FIL[acab] || [];
+      sel.innerHTML = '<option value="">Escolha a cor</option>' +
+        lista.map(function (f) { return '<option value="' + f.site + '">' + f.site + '</option>'; }).join('');
+      /* trocou só o acabamento: a mesma cor fica, se existir nele; se não, a lista pede a cor (nada escolhido por ele) */
+      sel.value = lista.some(function (f) { return f.site === cor; }) ? cor : '';
+    }
+    caixaChuteira.addEventListener('change', function (ev) {
+      var rad = ev.target.closest && ev.target.closest('.acabamento input');
+      if (!rad) return;
+      var c = rad.closest('.campo-chuteira');
+      encherLista(c, rad.value, c.querySelector('select').value);
+      c.classList.remove('faltou');
+    });
+    /* marca as partes (lista = [{ acabamento, cor }] na ordem do config; sem lista = a cor do arquivo) — o "editar" usa */
+    window.aleaMarcarChuteira = function (lista) {
+      Array.prototype.forEach.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c, k) {
+        var e = (lista && lista[k]) || CH.partes[k];
+        var rad = c.querySelector('.acabamento input[value="' + e.acabamento + '"]');
+        if (!rad) return;
+        rad.checked = true;
+        encherLista(c, e.acabamento, e.cor);
+      });
+    };
+    window.aleaMarcarChuteira();
+  })();
+  /* v52: o que a caixa Chuteira tem marcado — [{ titulo, pedido, acabamento, cor, texto, original }] ou null */
+  function chuteiraEscolhida() {
+    var CH = chuteiraDoProduto();
+    if (!CH || !caixaChuteira) return null;
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    return Array.prototype.map.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c, k) {
+      var ac = c.querySelector('.acabamento input:checked'), sel = c.querySelector('select');
+      if (!ac || !sel || !sel.value) return null;
+      var def = ACAB.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
+      var fil = (FIL[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
+      return { titulo: CH.partes[k].titulo, pedido: CH.partes[k].pedido || CH.partes[k].titulo, acabamento: ac.value, cor: sel.value,
+               texto: sel.value + def.sufixo, original: fil ? fil.original : sel.value + def.sufixo };
+    });
+  }
   /* v31 (msg 2268 do Cassiano, 27/09/2026): a frase pequena entre o título "Cores da peça" e as opções. O texto mora
      no config.js (`ALEA.fraseCoresDaPeca`); sem ele, nada entra. */
   (function fraseDasCores() {
@@ -1681,7 +1755,20 @@
       else lista.push(sel.value + def.sufixo);
       originais.push(fil ? fil.original : sel.value + def.sufixo);
     });
+    /* v52: a chuteira entra DEPOIS do Filamento, com o nome dela ("Parte dourada da chuteira: Dourado Perolizado") e o
+       filamento exato no pedido; `chuteira` guarda acabamento + cor pro "editar" (escolhas continua só do Filamento) */
+    var chut = chuteiraEscolhida(), chuteira;
+    if (chut) {
+      if (FFc || partesCorDoProduto()) {
+        chut.forEach(function (x) {
+          if (!x) return;
+          partesNomes.push(x.pedido); lista.push(x.texto); originais.push(x.original);
+        });
+      }
+      chuteira = chut.map(function (x) { return x ? { acabamento: x.acabamento, cor: x.cor } : null; });
+    }
     return {
+      chuteira: chuteira,
       modo: r.parentNode.textContent.trim(),
       cores: lista,
       originais: originais,
@@ -1803,6 +1890,14 @@
           }
         });
       }
+    }
+    /* v52: a chuteira abre marcada; só cobra se o cliente trocou o acabamento e a cor não existe nele */
+    if (caixaChuteira) {
+      Array.prototype.forEach.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c) {
+        if (!c.querySelector('.acabamento input:checked') || !c.querySelector('select').value) {
+          faltas.push({ el: c, texto: 'Por favor, escolha a cor da ' + (c.getAttribute('data-titulo') || '').toLowerCase() + ' da chuteira.' });
+        }
+      });
     }
     /* v36: o tamanho (na página, acima do Personalize). Vem DEPOIS das faltas do formulário de propósito: faltando algo lá
        dentro, a janela abre e mostra aquela falta primeiro; resolvido, a página treme no Tamanho. */
@@ -1986,6 +2081,7 @@
         if (p.cores.da_capa) caixaCores.setAttribute('data-cores-da-capa', '');   // v37: continua "da capa" ao editar
       }
     }
+    if (p.cores && p.cores.chuteira && window.aleaMarcarChuteira) window.aleaMarcarChuteira(p.cores.chuteira);   // v52
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     repintarPreco();
     /* ETAPA 47 (22:51): "o cliente não quer saber do topo, ele só quer editar — tem que cair direto no

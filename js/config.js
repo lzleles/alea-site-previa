@@ -84,6 +84,9 @@
       arredondado PRA CIMA): `precoPorEscolha` e `extraPoopBag.preco` viram o próximo múltiplo de 10 (149->150, 179->180,
       49->50...). Os valores nos comentários abaixo são o histórico do que ele mandou. Gerador 01_gerar_paginas_v39.
       A versão anterior está em 03_site/_versoes_anteriores/precos_redondos_antes_2026-10-09/js/.
+   v60-produto (13/10/2026, áudio 9891 do Cassiano): `modelos3d['urubu-mascote-flamengo'].chuteira` — o cliente escolhe a cor
+      da parte dourada e da parte branca da chuteira (ver o bloco do Urubu). A versão anterior está em
+      03_site/_versoes_anteriores/urubu_chuteira_antes_2026-10-13/js/.
 */
 /* =============================================================================
    config.js — os valores que mudam. Mexe aqui, não no resto do site.
@@ -1101,6 +1104,19 @@ window.ALEA.modelos3d['urubu-mascote-flamengo'] = {
   nomeRente: true,
   corNomeFixa: { hex: '#F6F6F6', rugosidade: 0.95, acabamento: 'fosco', fonte: '3MF dele, modificador do nome = extrusora 1 (ELEGOO PLA Matte White)' },
   nomeAtras: true,
+  /* v60 (13/10/2026, áudio 9891 do Cassiano: "o nosso urubu também pode deixar personalizar a chuteira (...) fica piscando a
+     chuteira e abre duas opções de cor (...) onde fica dourado na chuteira e onde fica branco na chuteira. Só lá."): o passo
+     "Chuteira" da janela 3D (personalizar3d.js v23, produto.js v52, carrinho sem mudança: vai em cores.partes/cores/originais).
+     `malha` = a malha do urubu_fixas.glb (MEDIDO: as duas só existem na altura das chuteiras, y 0-25 mm do boneco de 258 mm).
+     Abre marcada na cor do ARQUIVO dele: f6 "Multfila PLA Silk" (#FFC107) = Dourado Perolizado do site (o único Multfila Silk
+     dourado da lista: Mult Silk Ouro Envelhecido) e f7 "ELEGOO PLA Silk" branco = Branco Perolizado (Elegoo Silk White). */
+  chuteira: {
+    titulo: 'Chuteira',
+    partes: [
+      { malha: 'dourado', titulo: 'Parte dourada', pedido: 'Parte dourada da chuteira', acabamento: 'perolizado', cor: 'Dourado' },
+      { malha: 'branco_silk', titulo: 'Parte branca', pedido: 'Parte branca da chuteira', acabamento: 'perolizado', cor: 'Branco' }
+    ]
+  },
   textoFaltaNome: 'Por favor, digite o nome.',
   soUmModo: true,
   filamentoFixo: { titulo: 'Filamento', cor: 'Vermelho', acabamentos: ['basico', 'perolizado'] },

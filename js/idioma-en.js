@@ -541,6 +541,11 @@ window.ALEA_EN = {
 "Filamento": "Filament",
 "Filamento: Clássico": "Filament: Classic",
 "Filamento: Perolizado": "Filament: Pearl",
+"Chuteira": "Boots",
+"Parte dourada": "Gold part",
+"Parte branca": "White part",
+"Por favor, escolha a cor da parte dourada da chuteira.": "Please choose the color of the gold part of the boots.",
+"Por favor, escolha a cor da parte branca da chuteira.": "Please choose the color of the white part of the boots.",
 "Por favor, digite o nome.": "Please type the name.",
 "Por favor, escolha o filamento.": "Please choose the filament.",
 "Pequeno": "Small",
@@ -688,5 +693,22 @@ window.ALEA_EN_RE = [
     [/^(.+): escolha a cor$/, function (_, k) { return (D[k] || k) + ': choose the color'; }],
     /* o carrinho monta a linha com o rotulo ja traduzido na pagina + a cor em portugues: "Monochrome: Branco Perolizado" */
     [/^(Monochrome|Two-tone|Three-tone|Exterior|Interior|Base color|Top color|Main color|Name color): (.+)$/, function (_, k, c) { return D[c] ? k + ': ' + D[c] : null; }]
+  );
+})();
+
+
+/* 13/10/2026 (áudio 9891 do Cassiano, Urubu: a chuteira personalizável, produto.js v52): a linha da sacola do Urubu vira
+   "Filamento: Perolizado, Parte dourada da chuteira: Dourado Perolizado, Parte branca da chuteira: Branco Perolizado" */
+(function () {
+  var D = window.ALEA_EN;
+  var ACAB = { ' Perolizado': 'Pearl ', ' Fosco': 'Matte ' };
+  function cor(c) {
+    if (D[c]) return D[c];
+    for (var k in ACAB) if (c.slice(-k.length) === k && D[c.slice(0, -k.length)]) return ACAB[k] + D[c.slice(0, -k.length)];
+    return c;
+  }
+  window.ALEA_EN_RE.unshift(
+    [/^Filamento: (.+?), Parte dourada da chuteira: (.+), Parte branca da chuteira: (.+)$/,
+      function (_, f, a, b) { return 'Filament: ' + cor(f) + ', Boots gold part: ' + cor(a) + ', Boots white part: ' + cor(b); }]
   );
 })();
