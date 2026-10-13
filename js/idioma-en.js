@@ -164,6 +164,7 @@ window.ALEA_EN = {
 "Disponível em diferentes formatos e cores, foi criado para se adaptar a diversos ambientes sem perder sua identidade.": "Available in different shapes and colors, it was designed to fit all kinds of spaces without losing its identity.",
 "Dourado": "Gold",
 "Dourado com Glitter": "Glitter Gold",
+"Azul com Glitter": "Glitter Blue",
 "Dá para fazer em low poly!? 😜": "Can it be done in low poly!? 😜",
 "E a vontade de trazer ideias para o mundo real!": "And the urge to bring ideas into the real world!",
 "E acredito que Deus teve muito a ver com isso, colocando um novo caminho diante de mim justamente quando eu mais precisava encontrá-lo.": "And I believe God had a lot to do with it, putting a new path in front of me right when I needed to find one the most.",
