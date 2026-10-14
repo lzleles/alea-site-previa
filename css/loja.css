@@ -267,3 +267,50 @@ body.loja .rodape .frase { margin-bottom: 96px; }
 /* ETAPA 66: a tela treme quando falta algo (a mesma @keyframes tremer do estilo.css) */
 .loja-tremendo { animation: tremer .45s ease-in-out 1; }
 @media (prefers-reduced-motion: reduce) { .loja-tremendo { animation: none; } }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   14/10/2026 — A SACOLA NO JEITO DA TIFFANY (foto 10825 + áudios 10826/10827/10828/10830 do Cassiano)
+   (1) a caixa do total ganha "Entrega · Ver Opções de Entrega" e "Adicionar cupom", fechados: só o clique abre o campo,
+   no mesmo lugar; (2) no COMPUTADOR a sacola é a tabela larga (Produto / Preço / Quantidade / Total) com a mensagem para
+   presente à esquerda e a caixa do total à direita, os 2 botões dentro dela; o celular segue a lista de antes.
+   Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/css/loja.css
+   --------------------------------------------------------------------------------------------------------------- */
+.loja-caixa-sacola { background: var(--lj-caixa); padding: 4px 16px; margin: 18px 0; }
+.loja-caixa-sacola .loja-totais { background: none; padding: 0; margin: 0; }
+.loja-caixa-sacola .loja-totais > div:first-child { border-top: 1px solid var(--lj-linha); }
+.loja-caixa-sacola .cx-linha { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0 4px; font-size: 12.5px; }
+.loja-caixa-sacola .cx-linha + .cx-linha { padding-top: 4px; }
+.loja-caixa-sacola .cx-linha:last-of-type { padding-bottom: 12px; }
+.loja-caixa-sacola .cx-link { background: none; border: 0; padding: 0; font: inherit; font-size: 11.5px; letter-spacing: .06em; color: var(--tinta);
+  cursor: pointer; text-decoration: underline; text-underline-offset: 4px; margin-left: auto; }
+.loja-caixa-sacola .cx-link:hover { color: var(--terracota); }
+.loja-caixa-sacola .cx-abre { padding: 4px 0 14px; }
+.loja-caixa-sacola .cx-abre .loja-rotulo { margin: 14px 0 8px; }
+.loja-caixa-sacola .cx-abre .loja-radio { background: rgba(255, 255, 255, .35); }
+.cx-botoes { display: flex; flex-direction: column; }
+
+@media (hover: hover) and (pointer: fine) and (min-width: 761px) {
+  .loja main.sacola-larga { max-width: 1040px; }
+  .sacola-tabela { margin: 0 0 8px; }
+  .sacola-tabela .cab, .sacola-tabela .lin { display: grid; grid-template-columns: 1fr 150px 150px 150px 32px; align-items: center; column-gap: 12px; }
+  .sacola-tabela .cab { padding: 6px 0 14px; font-size: 11.5px; letter-spacing: .08em; color: var(--tinta); }
+  .sacola-tabela .cab span:first-child { padding-left: 28px; }
+  .sacola-tabela .cab span:not(:first-child) { text-align: center; }
+  .sacola-tabela .lin { padding: 18px 0; border-bottom: 1px solid var(--lj-linha); }
+  .sacola-tabela .prod { display: flex; align-items: center; gap: 28px; padding-left: 28px; }
+  .sacola-tabela .prod img { width: 84px; height: 84px; object-fit: contain; background: var(--off); flex: none; }
+  .sacola-tabela .nome { font-size: 12px; letter-spacing: .06em; line-height: 1.6; max-width: 300px; }
+  .sacola-tabela .nome small { display: block; letter-spacing: 0; color: var(--lj-cinza); font-size: 11px; margin-top: 2px; }
+  .sacola-tabela .preco, .sacola-tabela .tot { text-align: center; font-size: 12.5px; letter-spacing: .04em; }
+  .sacola-tabela .qtd { text-align: center; }
+  .sacola-tabela .tirar { background: none; border: 0; padding: 0; font-size: 18px; line-height: 1; color: var(--lj-cinza); cursor: pointer; }
+  .sacola-tabela .tirar:hover { color: var(--terracota); }
+  .sacola-base { display: grid; grid-template-columns: 1fr 440px; gap: 48px; align-items: start; margin-top: 18px; }
+  .sacola-base .loja-presente { margin-top: 4px; }
+  .sacola-base .sacola-dir { background: var(--lj-caixa); padding: 6px 24px 24px; }
+  .sacola-base .loja-caixa-sacola { background: none; padding: 0; margin: 0; }
+  .sacola-base .loja-totais .total { padding-top: 16px; }
+  .sacola-base .cx-botoes { flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
+  .sacola-base .cx-botoes .loja-bt.largo { width: auto; flex: 0 0 auto; min-width: 180px; }
+  .sacola-base .cx-botoes .loja-mais-produtos { margin: 0; white-space: nowrap; }
+}

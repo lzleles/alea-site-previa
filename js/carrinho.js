@@ -393,8 +393,100 @@
     });
   }
 
+  /* ------------------------------------------------- a ABA DA SACOLA no ícone do topo
+     14/10/2026 (áudio 10832 do Cassiano + vídeo OBS 18-29-19, a aba da Tiffany): "no site, se a gente só para o mouse em
+     cima da sacola, ela abre aquela aba (...) no celular, se a gente clicar na sacola uma vez só, vai abrir um pouco da
+     página mostrando o que tem no carrinho; aí se a gente clicar de novo, vai para a sacola".
+     ⚠️ Não é a gaveta antiga (ETAPA 65: escondida fora da tela, deixava o Safari arrastar a página pros lados). A aba
+     desce logo abaixo do topo, só existe enquanto está aberta (fechada = display:none) e deixa o ícone à mostra pro
+     2º toque. Computador: abre ao parar o mouse no ícone e fecha quando o mouse sai do ícone e da aba; o clique no
+     ícone continua levando à Sacola de Compras. */
+  var MQ_PC = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)') : null;
+  function ehPC() { return !!(MQ_PC && MQ_PC.matches); }
+  var aba = null, abaTimer = null;
+  function abaAberta() { return !!(aba && !aba.hidden); }
+  function pintarAba() {
+    if (!aba) return;
+    var html = '<p class="aba-titulo">Sua Sacola de Compras</p>';
+    if (!itens.length) {
+      html += '<p class="aba-vazia">Sua sacola está vazia.</p>';
+    } else {
+      html += '<div class="aba-itens">' + itens.map(function (i) {
+        var d = descreverItem(i);
+        return '<div class="aba-linha"><img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
+          'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
+          '<div class="aba-lado"><div class="aba-nome">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
+          (d ? '<div class="aba-detalhe">' + d + '</div>' : '') +
+          '<div class="aba-qtd"><span>Quantidade</span><span>' + qtd(i) + '</span></div>' +
+          '<div class="aba-valor">' + (i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta') + '</div></div></div>';
+      }).join('') + '</div>' +
+      '<div class="aba-rodape"><div class="aba-subtotal"><span>Subtotal</span><span>' + htmlTotal() + '</span></div>' +
+      '<a class="botao aba-ir" href="finalizar-compra.html">Finalizar Compra</a></div>';
+    }
+    aba.innerHTML = html;
+  }
+  function posicionarAba() {
+    var topo = document.querySelector('.topo');
+    var baixo = topo ? Math.max(0, topo.getBoundingClientRect().bottom) : 0;
+    aba.style.top = baixo + 'px';
+    aba.style.maxHeight = 'calc(' + (ehPC() ? '100vh' : '70vh') + ' - ' + baixo + 'px)';
+  }
+  function abrirAba() {
+    clearTimeout(abaTimer);
+    if (!aba) {
+      aba = document.createElement('div');
+      aba.className = 'aba-sacola';
+      aba.setAttribute('role', 'dialog');
+      aba.setAttribute('aria-label', 'Sua Sacola de Compras');
+      aba.hidden = true;
+      aba.addEventListener('mouseenter', function () { clearTimeout(abaTimer); });
+      aba.addEventListener('mouseleave', function () { if (ehPC()) fecharAbaLogo(); });
+      document.body.appendChild(aba);
+    }
+    pintarAba();
+    aba.classList.toggle('pc', ehPC());
+    posicionarAba();
+    aba.hidden = false;
+    document.querySelectorAll('[data-abrir="carrinho"]').forEach(function (b) { b.setAttribute('aria-expanded', 'true'); });
+  }
+  function fecharAba() {
+    clearTimeout(abaTimer);
+    if (aba) aba.hidden = true;
+    document.querySelectorAll('[data-abrir="carrinho"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+  }
+  function fecharAbaLogo() { clearTimeout(abaTimer); abaTimer = setTimeout(fecharAba, 280); }
+  /* o site.js pergunta antes de levar à página: true = o toque abriu a aba (fica aqui); false = segue pra Sacola */
+  window.aleaAbaSacola = {
+    toque: function () {
+      if (ehPC() || abaAberta()) { fecharAba(); return false; }
+      abrirAba(); return true;
+    },
+    abrir: abrirAba, fechar: fecharAba
+  };
+  function ligarAba() {
+    document.addEventListener('mouseover', function (e) {
+      if (!ehPC()) return;
+      var b = e.target.closest && e.target.closest('[data-abrir="carrinho"]');
+      if (b) abrirAba();
+    });
+    document.addEventListener('mouseout', function (e) {
+      if (!ehPC() || !abaAberta()) return;
+      var b = e.target.closest && e.target.closest('[data-abrir="carrinho"]');
+      if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) fecharAbaLogo();
+    });
+    /* celular: tocar fora da aba (e fora do ícone) fecha; rolar a página também */
+    document.addEventListener('click', function (e) {
+      if (!abaAberta()) return;
+      if (e.target.closest('.aba-sacola') || e.target.closest('[data-abrir="carrinho"]')) return;
+      fecharAba();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharAba(); });
+    window.addEventListener('resize', function () { if (abaAberta()) posicionarAba(); });
+  }
+
   /* ---------------------------------------------------------------- ligações */
   function ligar() {
+    ligarAba();
     pintarContador();
     pintarGaveta();
 
@@ -423,6 +515,7 @@
 
     document.addEventListener('alea:carrinho', function () {
       pintarContador();
+      if (abaAberta()) pintarAba();
       if (soALinha !== null) atualizarLinha(soALinha); else pintarGaveta();
     });
     document.addEventListener('alea:gaveta', function (e) {

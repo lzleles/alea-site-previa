@@ -2799,3 +2799,27 @@ body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; 
 .chuteira-peca { margin-top: 14px; }
 .chuteira-peca .titulo-chuteira { font-size: 15.5px; color: var(--tinta); font-weight: 600; }
 .chuteira-peca .campo-cor.faltou .titulo-chuteira { color: var(--terracota); }
+
+/* 14/10/2026 (áudio 10832 do Cassiano + a aba da Tiffany no vídeo OBS 18-29-19): A ABA DA SACOLA do ícone do topo
+   (carrinho.js, aleaAbaSacola). Desce logo abaixo do topo; fechada é display:none (nada fora da tela pro Safari arrastar,
+   a lição da ETAPA 65). Computador: painel de 420 px encostado à direita; celular: a largura toda, até 70% da tela.
+   Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/css/estilo.css */
+.aba-sacola { position: fixed; right: 0; left: 0; z-index: 59; overflow: auto; overscroll-behavior: contain;
+  background: var(--papel); color: var(--tinta); box-shadow: 0 14px 30px rgba(20, 16, 13, .18); padding: 16px 20px 18px;
+  animation: aba-desce .22s ease-out; }
+.aba-sacola[hidden] { display: none; }
+.aba-sacola.pc { left: auto; width: 420px; padding: 20px 24px 22px; }
+@keyframes aba-desce { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.aba-sacola .aba-titulo { font-family: var(--fonte-titulo); font-size: 17px; text-align: center; margin: 0 0 12px; }
+.aba-sacola .aba-vazia { text-align: center; color: var(--tinta-fraca); font-size: 14px; margin: 12px 0 6px; }
+.aba-sacola .aba-linha { display: grid; grid-template-columns: 72px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda); }
+.aba-sacola .aba-linha img { width: 72px; height: 72px; object-fit: contain; background: var(--off); }
+.aba-sacola .aba-nome { font-size: 12.5px; letter-spacing: .04em; line-height: 1.5; }
+.aba-sacola .aba-detalhe { font-size: 11px; color: var(--tinta-fraca); line-height: 1.45; margin-top: 2px; }
+.aba-sacola .aba-qtd { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--borda); }
+.aba-sacola .aba-valor { font-size: 12.5px; margin-top: 8px; }
+.aba-sacola .aba-valor .preco-alea { font-size: 2em; line-height: 1; }
+.aba-sacola .aba-rodape { display: grid; gap: 12px; padding-top: 14px; }
+.aba-sacola .aba-subtotal { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.aba-sacola .aba-subtotal .preco-alea { font-size: 2em; line-height: 1; }
+.aba-sacola .aba-ir { width: 100%; text-align: center; text-decoration: none; }

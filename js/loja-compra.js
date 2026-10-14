@@ -22,6 +22,11 @@
       com o cupom (o frete grátis é decidido pelo que a pessoa paga nas peças). Total R$ 0 = o servidor aprova sem
       pagamento e a página vai direto pra "pedido confirmado". Na PRÉVIA (sem servidor) o cupom de teste é "TESTE",
       com a mesma regra, simulada no aparelho. Antes: 03_site/_versoes_anteriores/cupom_antes_2026-10-14/js/loja-compra.js
+   14/10/2026 (foto 10825 + áudios 10826/10827/10828/10830 do Cassiano, a sacola da Tiffany): na caixa do total,
+      "Entrega · Ver Opções de Entrega" FECHADO (o clique abre o CEP no mesmo lugar; o cupom SAI da Sacola, áudio 10833); a linha
+      Frete só aparece com valor; no COMPUTADOR a sacola vira a tabela larga (Produto/Preço/Quantidade/Total) com a caixa
+      do total à direita e os 2 botões dentro dela. Celular: a lista de antes. A aba do ícone do topo mora no carrinho.js.
+      Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/js/loja-compra.js
 */
 /* =============================================================================
    loja-compra.js — "some o fechar pedido pelo WhatsApp, aparece concluir compra" (Cassiano, 23/09/2026 20:44)
@@ -310,17 +315,69 @@
   /* 14/10/2026 (áudio 10812 do Cassiano): "nessa página aqui já tem que ter frete e cupom (...) senão muita gente nem
      finaliza a compra com medo de ficar caro e tem que fazer um cadastro à toa" — volta o CEP com o frete calculado
      (desfaz a ETAPA 62 de 22:08, "deixar essa página mais clean") e entra o cupom, ANTES do cadastro. */
-  function htmlFreteSacola() {
+  /* 14/10/2026 (foto 10825 + áudio 10826 do Cassiano): o frete entra NA CAIXA DO TOTAL, fechado. "Entrega" à esquerda e
+     "Ver Opções de Entrega" sublinhado à direita: "só se a pessoa clicar lá é que vai abrir o campo de entrega (...) de
+     CEP, no mesmo local". O "Adicionar cupom" dos áudios 10827/10828 SAIU no 10833 ("site de luxo não tem cupom"): o
+     cupom da Sacola some e fica só no Resumo do Pedido.
+     Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/js/loja-compra.js */
+  var abreEntrega = false;
+  function htmlEntregaSacola() {
     if (sobConsulta()) return '';
     var e = st.entrega || {}, ok = e.cep && String(e.cep).length === 8;
-    return '<div class="loja-frete-sacola" style="margin:18px 0 0"><p class="loja-rotulo" style="margin:0 0 6px">Calcular frete</p>' +
+    var h = '<div class="cx-linha"><span>Entrega</span><button type="button" class="cx-link" data-ver-entrega-sacola aria-expanded="' +
+      abreEntrega + '">Ver Opções de Entrega</button></div>';
+    if (!abreEntrega) return h;
+    return h + '<div class="cx-abre loja-frete-sacola">' +
       '<div class="loja-cep"><label class="loja-campo' + (ok && e.cidade ? ' ok' : '') + '"><span>CEP</span>' +
         '<input data-cep-sacola inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="' +
         esc(ok ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '') + '"></label>' +
         '<a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></div>' +
       '<p class="loja-miudo" data-cep-resposta style="margin:6px 0 0">' +
         (ok && e.cidade && e.cidade.trim() ? 'Entrega para ' + esc(e.cidade) + ' - ' + esc(e.uf || '') + '.' : '') + '</p>' +
-      (ok ? '<div style="margin:10px 0 0">' + htmlOpcoesFrete() + '</div>' : '') + '</div>';
+      (ok ? htmlOpcoesFrete() : '') + '</div>';
+  }
+  /* a caixa do total (Entrega, cupom, subtotal, total) e os dois botões; no computador os botões ficam DENTRO da caixa,
+     lado a lado como na Tiffany ("Escolher mais Produtos" + "Finalizar Compra"); no celular, embaixo, como já estava */
+  function htmlCaixaSacola() {
+    /* a linha "Frete" só aparece quando há valor (ou está calculando): sem CEP, a caixa fica limpa como a da Tiffany */
+    var semFrete = freteValor() === null && !(st.frete && st.frete.estado === 'carregando');
+    /* 14/10/2026 18:49 (áudio 10833): "esquece só a parte do cupom (...) site de luxo não tem cupom (...) nessa primeira
+       aba vai ser só o frete" — a Sacola NÃO mostra cupom; ele fica só no Resumo do Pedido (htmlCupom, Finalizar Compra) */
+    return '<div class="sacola-dir"><div class="loja-caixa-sacola">' + htmlEntregaSacola() + htmlTotais(semFrete, true) + '</div>' +
+      '<div class="cx-botoes"><button type="button" class="loja-bt largo" data-ir-compra>Finalizar Compra</button>' +
+      '<a class="loja-mais-produtos" href="index.html">Escolher mais Produtos</a></div></div>';
+  }
+  function htmlPresente() {
+    return '<div class="loja-presente">' +
+      '<label class="loja-marca"><input type="checkbox" data-presente' + (st.presente ? ' checked' : '') + '>' +
+        '<span><strong style="font-weight:600">Mensagem para Presente</strong><br>' +
+        '<span class="loja-miudo">Adicione uma mensagem personalizada que será impressa e enviada com seu presente.</span></span></label>' +
+      '<textarea data-presente-texto maxlength="240" placeholder="Sua mensagem"' + (st.presente ? '' : ' hidden') + '>' +
+        esc(st.presente_texto || '') + '</textarea></div>';
+  }
+  /* 14/10/2026 (áudio 10830 do Cassiano): "na versão web eu quero igual o Tiffany (...) grandona, ocupando a tela inteira
+     pra ficar bonito"; "no celular tá perfeito". Só no COMPUTADOR (a mesma régua do site.js: mouse e tela > 760 px) a
+     sacola vira a tabela larga da Tiffany: Produto / Preço / Quantidade / Total, a mensagem para presente à esquerda e
+     a caixa do total à direita. O celular segue a lista de antes. */
+  var MQ_LARGO = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)') : null;
+  function largo() { return !!(MQ_LARGO && MQ_LARGO.matches); }
+  function htmlSacolaLarga(l) {
+    return '<div class="sacola-tabela" role="table" aria-label="Peças da sacola">' +
+      '<div class="cab" role="row"><span role="columnheader">Produto</span><span role="columnheader">Preço</span>' +
+      '<span role="columnheader">Quantidade</span><span role="columnheader">Total</span><span></span></div>' +
+      l.map(function (i, n) {
+        var det = descrever(i);
+        return '<div class="lin" role="row" data-linha="' + n + '">' +
+          '<div class="prod" role="cell"><img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
+            '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
+          '<div class="preco" role="cell">' + (i.preco ? dinheiroTela(i.preco) : 'Sob consulta') + '</div>' +
+          '<div class="qtd" role="cell"><span class="loja-passos">' +
+            '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
+            '<button type="button" data-passo="1" data-item="' + n + '" aria-label="Aumentar">+</button></span></div>' +
+          '<div class="tot" role="cell">' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</div>' +
+          '<button type="button" class="tirar" data-tirar-item="' + n + '" aria-label="Tirar ' + esc(i.nome) + ' da sacola">&times;</button></div>';
+      }).join('') + '</div>' +
+      '<div class="sacola-base"><div class="sacola-esq">' + htmlPresente() + '</div>' + htmlCaixaSacola() + '</div>';
   }
   function htmlSacola() {
     var l = itens();
@@ -329,6 +386,7 @@
       return h + '<p class="loja-vazio" style="margin:26px 0">Sua sacola está vazia.</p>' +
         '<a class="loja-bt largo" href="index.html">Escolher Produtos</a>';
     }
+    if (largo()) return h + htmlSacolaLarga(l);
     h += l.map(function (i, n) {
       var det = descrever(i);
       return '<div class="loja-item" data-linha="' + n + '">' +
@@ -340,15 +398,7 @@
           '<button type="button" data-passo="1" data-item="' + n + '" aria-label="Aumentar">+</button></span>' +
           '<span class="valor">' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</span></div></div>';
     }).join('');
-    h += '<div class="loja-presente">' +
-      '<label class="loja-marca"><input type="checkbox" data-presente' + (st.presente ? ' checked' : '') + '>' +
-        '<span><strong style="font-weight:600">Mensagem para Presente</strong><br>' +
-        '<span class="loja-miudo">Adicione uma mensagem personalizada que será impressa e enviada com seu presente.</span></span></label>' +
-      '<textarea data-presente-texto maxlength="240" placeholder="Sua mensagem"' + (st.presente ? '' : ' hidden') + '>' +
-        esc(st.presente_texto || '') + '</textarea></div>' +
-      htmlFreteSacola() + htmlCupom() + htmlTotais(false, true) +
-      '<button type="button" class="loja-bt largo" data-ir-compra>Finalizar Compra</button>' +
-      '<a class="loja-mais-produtos" href="index.html">Escolher mais Produtos</a>';
+    h += htmlPresente() + htmlCaixaSacola();
     return h;
   }
 
@@ -561,8 +611,13 @@
   /* ================================================================ desenhar */
   function pintar() {
     /* 12/10/2026: frete pelo CEP · 14/10/2026 (áudio 10812): cota também na SACOLA */
-    if (!retorno && !concluido && (tela() !== 'compra' || st.etapa !== 'dados')) cotar();
+    /* 14/10/2026 (áudio 10833: o cupom fica só no Resumo): com o CEP já dado na Sacola, cota também na etapa Dados
+       Pessoais — senão o cupom aplicado ali (que recota o frete) deixava "a calcular" até a Entrega */
+    var cepPronto = st.entrega && String(st.entrega.cep || '').length === 8;
+    if (!retorno && !concluido && (tela() !== 'compra' || st.etapa !== 'dados' || cepPronto)) cotar();
     raiz.innerHTML = FAIXA + (retorno ? htmlRetorno() : concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
+    /* 14/10/2026 (áudio 10830): a sacola larga do computador precisa da página larga */
+    raiz.classList.toggle('sacola-larga', !retorno && !concluido && tela() !== 'compra' && itens().length > 0 && largo());
     ligar();
     erro = '';
   }
@@ -773,6 +828,12 @@
       raiz.querySelector('[data-endereco-campos]').hidden = false; raiz.querySelector('[data-endereco-caixa]').hidden = true; return;
     }
     if (ev.target.closest('[data-sair]')) { L.sair().then(function () { eu = { logado: false }; st.dados = {}; st.etapa = 'dados'; guardar(); pintar(); }); return; }
+    /* 14/10/2026 (áudio 10826): "Ver Opções de Entrega" abre o CEP no mesmo lugar */
+    if (ev.target.closest('[data-ver-entrega-sacola]')) {
+      abreEntrega = !abreEntrega; pintar();
+      var cepS = raiz.querySelector('[data-cep-sacola]'); if (cepS && !cepS.value) cepS.focus();
+      return;
+    }
     if (ev.target.closest('[data-aplicar-cupom]')) { var ci = raiz.querySelector('[name="cupom"]'); aplicarCupom(ci && ci.value); return; }
     if (ev.target.closest('[data-tirar-cupom]')) { tirarCupom(); return; }
     if (ev.target.closest('[data-concluir]')) { concluir(); }
@@ -796,6 +857,10 @@
 
   document.addEventListener('alea:carrinho', function () { if (!concluido) pintar(); });
   window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+  if (MQ_LARGO) {                                            // mudou de computador pra tela estreita (ou o contrário)
+    var mudouTela = function () { if (!concluido && !retorno && tela() !== 'compra') pintar(); };
+    if (MQ_LARGO.addEventListener) MQ_LARGO.addEventListener('change', mudouTela); else if (MQ_LARGO.addListener) MQ_LARGO.addListener(mudouTela);
+  }
 
   function comecar() {
     var q = new URLSearchParams(location.search);
