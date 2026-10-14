@@ -4,7 +4,11 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v55 (14/10/2026, Branco no Clássico: a legenda da foto ignora a cor cópia, áudio 10632 do Cassiano)
+   status: ativo — v56 (14/10/2026, "Personalize agora" só abre depois de Formato/Tamanho, em todos os produtos)
+   v56 (14/10/2026, vídeo 10646 + áudios 10647/10648 do Cassiano, ofício 3.1.32): "Personalize agora" só abre com TODAS as
+     escolhas da página marcadas (faltasDeEscolha: Formato e Tamanho). Até a v55 isso só valia no produto com um 3D por
+     escolha (glbPorEscolha: Stria, Una); os outros (Bowl, Luke, Caesar, Prisma...) abriam sem tamanho. A v55 está em
+     03_site/_versoes_anteriores/personalize_depois_das_escolhas_antes_2026-10-14/js/.
    v55 (14/10/2026): nomeDoCliente() pula a cor com `copiaDe` (config.js: Branco do Clássico = o mesmo filamento do Branco
      Fosco), senão a legenda do filamento na foto passaria de "Branco Fosco" pra "Branco". Só isso mudou; a v54 está em
      03_site/_versoes_anteriores/cores_alfabetica_antes_2026-10-14/js/.
@@ -457,6 +461,8 @@
     }
     function abrir(depoisDeMontar, opcoes) {
       if (aberto) { if (depoisDeMontar) depoisDeMontar(); return; }
+      var faltam = faltasDeEscolha();   // v56: Formato/Tamanho primeiro, em todo produto (ofício 3.1.32)
+      if (faltam.length) { reclamarDoQueFalta(faltam); return; }
       var cfgAgora = cfgDaEscolha();
       if (!cfgAgora) { reclamarDoQueFalta(faltasDeEscolha()); return; }
       aberto = true;
@@ -472,7 +478,8 @@
     /* v38 (print 5275 + áudio 5277, 02/10/2026 — substitui o "começa vazio" da v31, áudio 2263): cada toque em
        "Personalize aqui" começa com as Cores da peça MARCADAS nas cores da capa (ver aleaAbrirNasCoresDaCapa) */
     b.addEventListener('click', function () {
-      if (!cfgDaEscolha()) { reclamarDoQueFalta(faltasDeEscolha()); return; }   // v42: antes de limpar as cores
+      var faltam = faltasDeEscolha();   // v56: vale em todo produto, não só no que tem um 3D por escolha
+      if (faltam.length || !cfgDaEscolha()) { reclamarDoQueFalta(faltam); return; }   // v42: antes de limpar as cores
       if (!aberto && window.aleaAbrirNasCoresDaCapa) window.aleaAbrirNasCoresDaCapa(); abrir();
     });
     window.aleaAbrirPersonalizar = abrir;
