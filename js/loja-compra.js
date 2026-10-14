@@ -15,6 +15,13 @@
       (3) CARTÃO "em até 6x sem juros" (parcelas do servidor/ALEA.pagamento). (4) a volta 'pago_a_menor' (escolheu Pix
       e pagou no cartão com o valor do Pix): a tela explica que a loja vai entrar em contato.
       Antes: 03_site/_versoes_anteriores/frete_pix_antes_2026-10-12/js/loja-compra.js
+   14/10/2026 (cupom da Maria; L-0191 do Lázaro "controi o cupom da maria e valida"; espec v2 do Cassiano, msgs
+      10661/10662/10671): CAMPO DE CUPOM no Resumo do Pedido (o site não tinha). O desconto quem diz é o servidor
+      (/api/cupom, só quando o /api/config diz "cupom": true); quem valida e QUEIMA (uso único) é o servidor, no link de
+      pagamento. A conta da tela: peças − cupom + frete − Pix (o Pix incide no que sobra das peças); o frete é cotado
+      com o cupom (o frete grátis é decidido pelo que a pessoa paga nas peças). Total R$ 0 = o servidor aprova sem
+      pagamento e a página vai direto pra "pedido confirmado". Na PRÉVIA (sem servidor) o cupom de teste é "TESTE",
+      com a mesma regra, simulada no aparelho. Antes: 03_site/_versoes_anteriores/cupom_antes_2026-10-14/js/loja-compra.js
 */
 /* =============================================================================
    loja-compra.js — "some o fechar pedido pelo WhatsApp, aparece concluir compra" (Cassiano, 23/09/2026 20:44)
@@ -127,14 +134,83 @@
     var bp = Math.round(pagCfg().pix * 10000);
     return bp ? Math.floor((centavos(sub) * bp + 5000) / 10000) / 100 : 0;
   }
-  function descontoPix() { return (st.pagamento === 'pix' && !sobConsulta()) ? descontoPixDe(subtotal()) : 0; }
+  function descontoPix() { return (st.pagamento === 'pix' && !sobConsulta()) ? descontoPixDe(pecasPagas()) : 0; }
   function opcaoFrete() {
     var f = st.frete;
     if (!f || f.estado !== 'ok') return null;
     return (f.opcoes || []).filter(function (o) { return o.servico === f.escolhido; })[0] || null;
   }
   function freteValor() { var o = opcaoFrete(); return o ? Number(o.valor) : null; }
-  function totalFinal() { return (centavos(subtotal()) + centavos(freteValor() || 0) - centavos(descontoPix())) / 100; }
+  function totalFinal() {
+    return (centavos(subtotal()) - centavos(descontoCupom()) + centavos(freteValor() || 0) - centavos(descontoPix())) / 100;
+  }
+
+  /* ------------------------------------------------- 14/10/2026: o CUPOM (cupom da Maria) */
+  var CUPOM_SERVIDOR = false;                  // o /api/config diz "cupom": true quando o servidor sabe validar
+  var K_CUPOM_PREVIA = 'alea_previa_cupom_usado_v1';
+  var cupomMsg = '';
+  function cupomLigado() { return L.previa ? true : !!(CUPOM_SERVIDOR && L.verCupom); }
+  function chaveSacola() {
+    return JSON.stringify(itens().map(function (i) {
+      return [i.slug, qtd(i), i.personalizacao || null, (i.extras || []).map(function (x) { return x && x.id; })];
+    }));
+  }
+  /* o cupom vale para ESTA sacola: mexeu nas peças, a tela pergunta de novo ao servidor */
+  function cupomAtual() { var c = st.cupom; return c && c.sacola === chaveSacola() ? c : null; }
+  function descontoCupom() { var c = cupomAtual(); return c && !sobConsulta() ? Number(c.desconto) || 0 : 0; }
+  function pecasPagas() { return Math.max(0, (centavos(subtotal()) - centavos(descontoCupom())) / 100); }
+  /* PRÉVIA: a mesma regra do servidor (regras_loja_v2_cupom_maria), simulada no aparelho, com o cupom de TESTE.
+     O código de verdade NÃO mora no site (o site é público): só no servidor. */
+  var PREVIA_CUPOM = { codigo: 'TESTE', poopProduto: 'poop-bag-holder', poopAdicional: 'poop_bag', conjuntos: ['ayla-pompom'],
+    comedouros: ['luke-bowl', 'matteo-texturized', 'claudia-wave', 'pet-bowl-caesar', 'pet-bowl-prisma', 'pet-bowl-retis',
+                 'pet-petra', 'bowl-wave'] };
+  function normalizarCupom(s) {
+    return String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').toUpperCase();
+  }
+  function cupomNaPrevia(codigo) {
+    var P = PREVIA_CUPOM;
+    if (normalizarCupom(codigo) !== P.codigo) return Promise.reject(new Error('Cupom inválido.'));
+    try { if (localStorage.getItem(K_CUPOM_PREVIA)) return Promise.reject(new Error('Este cupom já foi usado.')); } catch (e) { /* aba anônima */ }
+    var com = 0, poop = 0, par = 0;
+    itens().forEach(function (i) {
+      var pb = 0;
+      (i.extras || []).forEach(function (x) { if (x && x.id === P.poopAdicional) pb = centavos(x.preco); });
+      for (var n = 0; n < qtd(i); n++) {
+        if (P.conjuntos.indexOf(i.slug) >= 0) par = Math.max(par, centavos(i.preco));
+        else if (P.comedouros.indexOf(i.slug) >= 0) { com = Math.max(com, centavos(i.preco) - pb); poop = Math.max(poop, pb); }
+        else if (i.slug === P.poopProduto) poop = Math.max(poop, centavos(i.preco));
+      }
+    });
+    var v = Math.max(par, com + poop);
+    if (!v) return Promise.reject(new Error('Este cupom vale para um comedouro e um Poop Bag Holder: coloque um deles na sacola.'));
+    return Promise.resolve({ ok: true, codigo: P.codigo, rotulo: 'Cupom de teste', desconto: v / 100 });
+  }
+  function aplicarCupom(codigo) {
+    codigo = String(codigo || '').trim();
+    if (!codigo) { cupomMsg = 'Digite o cupom.'; pintar(); return; }
+    cupomMsg = 'Conferindo…'; pintar();
+    var pedir = L.previa ? cupomNaPrevia(codigo) : L.verCupom({ codigo: codigo, itens: itensServidor() });
+    pedir.then(function (j) {
+      st.cupom = { codigo: j.codigo, rotulo: j.rotulo, desconto: Number(j.desconto) || 0, sacola: chaveSacola() };
+      cupomMsg = ''; st.frete = null; guardar(); pintar();          // o frete é cotado de novo, com o cupom
+    }).catch(function (x) {
+      st.cupom = null; cupomMsg = (x && x.message) || 'Não deu para conferir o cupom agora.'; guardar(); pintar();
+    });
+  }
+  function tirarCupom() { st.cupom = null; cupomMsg = ''; st.frete = null; guardar(); pintar(); }
+  function htmlCupom() {
+    if (!cupomLigado() || sobConsulta()) return '';
+    var c = cupomAtual();
+    if (c) {
+      return '<div class="loja-cupom" data-cupom style="margin:14px 0 0;font-size:12.5px">Cupom <strong>' + esc(c.codigo) +
+        '</strong> aplicado. <button type="button" class="loja-link sublinha loja-miudo" data-tirar-cupom>Tirar</button></div>';
+    }
+    return '<div class="loja-cupom" data-cupom style="margin:14px 0 0"><p class="loja-rotulo" style="margin:0 0 6px">Cupom de desconto</p>' +
+      '<div style="display:flex;gap:8px;align-items:stretch"><input name="cupom" autocomplete="off" autocapitalize="characters" maxlength="40" ' +
+      'aria-label="Cupom de desconto" style="flex:1;min-width:0;padding:10px 12px;border:1px solid var(--lj-linha, #d8d2c8);font:inherit;text-transform:uppercase">' +
+      '<button type="button" class="loja-bt contorno" data-aplicar-cupom style="white-space:nowrap">Aplicar</button></div>' +
+      (cupomMsg ? '<p class="loja-miudo" data-cupom-msg role="status" style="margin:6px 0 0">' + esc(cupomMsg) + '</p>' : '') + '</div>';
+  }
   function itensServidor() {                  // as miniaturas (imagem) ficam no aparelho: o servidor só precisa da escolha
     return itens().map(function (i) {
       var c = JSON.parse(JSON.stringify(i)); delete c.miniatura;
@@ -143,7 +219,8 @@
     });
   }
   function chaveFrete() {
-    return (st.entrega.cep || '') + '|' + JSON.stringify(itens().map(function (i) {
+    var c = cupomAtual();                       // 14/10/2026: com cupom, o frete grátis muda: cota de novo
+    return (st.entrega.cep || '') + '|' + (c ? c.codigo : '') + '|' + JSON.stringify(itens().map(function (i) {
       return [i.slug, qtd(i), i.personalizacao || null, (i.extras || []).map(function (x) { return x && x.id; })];
     }));
   }
@@ -154,7 +231,7 @@
   }
   /* PRÉVIA: sem servidor, a tela mostra valores de EXEMPLO (marcados) e só a regra PÚBLICA do frete grátis */
   function freteDeExemplo(chave) {
-    var g = C.freteGratis || {}, sub = subtotal();
+    var g = C.freteGratis || {}, sub = pecasPagas();     // 14/10/2026: o grátis é decidido pelo que a pessoa paga
     var lim = regiaoDoCep(st.entrega.cep) === 'sseco' ? g.sul_sudeste_centro_oeste : g.demais;
     var gratis = !!lim && sub >= lim;
     /* áudio 9759 (13/10/2026): SEMPRE só duas opções, Jadlog + SEDEX com o valor normal; o PAC some sempre, não só no grátis */
@@ -173,7 +250,9 @@
     if (!FRETE || !L.cotarFrete) return;
     var antes = f && f.escolhido;
     st.frete = { chave: chave, estado: 'carregando' };
-    L.cotarFrete({ cep: e.cep, itens: itensServidor() }).then(function (j) {
+    var corpoFrete = { cep: e.cep, itens: itensServidor() };
+    if (cupomAtual()) corpoFrete.cupom = cupomAtual().codigo;
+    L.cotarFrete(corpoFrete).then(function (j) {
       if (!st.frete || st.frete.chave !== chave) return;
       if (!j || !j.disponivel || !(j.opcoes || []).length) {
         st.frete = { chave: chave, estado: 'indisponivel', motivo: (j && j.motivo) || '' };
@@ -217,10 +296,11 @@
     /* 12/10/2026: o frete escolhido e o desconto do Pix entram aqui (a mesma conta que o servidor cobra) */
     var fv = semFrete ? null : freteValor(), dp = semFrete ? 0 : descontoPix();
     var carregando = st.frete && st.frete.estado === 'carregando';
-    var total = semFrete ? subtotal() : totalFinal();
+    var total = semFrete ? pecasPagas() : totalFinal();
     return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal())) + '</span></div>' +
       (semFrete ? '' : '<div><span>Frete</span><span' + (fv === 0 ? ' class="gratis"' : '') + '>' +
         (fv === null ? (carregando ? 'calculando…' : 'a calcular') : textoFrete(fv)) + '</span></div>') +
+      (descontoCupom() ? '<div class="desconto-cupom"><span>Cupom ' + esc(cupomAtual().codigo) + '</span><span>− ' + dinheiroTela(descontoCupom()) + '</span></div>' : '') +
       (dp ? '<div class="desconto-pix"><span>Desconto Pix (' + pctPix() + '%)</span><span>− ' + dinheiroTela(dp) + '</span></div>' : '') +
       '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(total) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
   }
@@ -345,8 +425,8 @@
     var caixa = '';
     var pct = pctPix(), parc = pagCfg().parcelas;
     /* 12/10/2026: o desconto do Pix em reais, na caixa (o "5%" sozinho obriga a pessoa a fazer conta) */
-    var linhaPix = pct && !sobConsulta() ? '<p class="pix-desconto"><strong>' + pct + '% de desconto no Pix</strong>: ' +
-      dinheiro(descontoPixDe(subtotal())) + ' a menos nas peças.</p>' : '';
+    var linhaPix = pct && !sobConsulta() && descontoPixDe(pecasPagas()) > 0 ? '<p class="pix-desconto"><strong>' + pct + '% de desconto no Pix</strong>: ' +
+      dinheiro(descontoPixDe(pecasPagas())) + ' a menos nas peças.</p>' : '';
     if (usaLink() && p === 'pix') {
       caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div>' + linhaPix + '<p>Ao finalizar, você vai para a página segura ' +
         'de pagamento, paga o Pix e volta para cá. A aprovação é na hora.</p></div>';
@@ -375,7 +455,7 @@
       return '<div class="linha"><img src="' + esc(foto(i)) + '" alt="" onerror="' + fotoReserva(i) + '">' +
         '<div>' + (qtd(i) > 1 ? qtd(i) + '× ' : '') + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
         '<div>' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</div></div>';
-    }).join('') + '<a class="voltar-sacola" href="#/sacola">Voltar para a Sacola de Compras</a>' + htmlTotais() + '</div>';
+    }).join('') + '<a class="voltar-sacola" href="#/sacola">Voltar para a Sacola de Compras</a>' + htmlCupom() + htmlTotais() + '</div>';
   }
 
   function htmlCompra() {
@@ -393,8 +473,9 @@
   function htmlRetorno() {
     var r = retorno;
     if (r.estado === 'aprovado') {
-      return '<div class="loja-concluido"><h1>Pagamento aprovado</h1><p class="numero">' + esc(r.numero) + '</p>' +
-        '<p>Obrigado' + (r.nome ? ', ' + esc(r.nome) : '') + '! Seu pagamento foi confirmado e a confirmação chega no seu e-mail. ' +
+      return '<div class="loja-concluido"><h1>' + (r.semPagamento ? 'Pedido confirmado' : 'Pagamento aprovado') + '</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Obrigado' + (r.nome ? ', ' + esc(r.nome) : '') + '! ' + (r.semPagamento ? 'Seu pedido saiu por R$ 0,00 com o cupom' : 'Seu pagamento foi confirmado') +
+        ' e a confirmação chega no seu e-mail. ' +
         (r.comFrete ? 'O frete já foi pago junto: agora sua peça entra na produção.</p>' : 'Agora é só combinar o frete com a ālea & Co. pelo WhatsApp.</p>') +
         (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">' + (r.comFrete ? 'Falar com a ālea & Co. no WhatsApp' : 'Combinar o frete no WhatsApp') + '</a></p>' : '') +
         '<p><a class="loja-mais-produtos" href="index.html">Continuar comprando</a></p></div>';
@@ -438,6 +519,7 @@
         if (s.estado === 'pago_a_menor') { retorno.estado = 'pago_a_menor'; gravarPag(null); pintar(); return; }
         if (s.estado === 'aprovado') {
           retorno.estado = 'aprovado';
+          retorno.semPagamento = Number(s.total) === 0 && s.forma === 'cupom';     // 14/10/2026: R$ 0 com o cupom
           gravarPag(null); L.compra.limpar(); if (CAR()) CAR().limpar();
           st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
           pintar(); return;
@@ -598,14 +680,17 @@
     ];
     if (opcaoFrete()) linhas.push('Frete: ' + opcaoFrete().empresa + (opcaoFrete().nome ? ' ' + opcaoFrete().nome : '') + ' — ' +
       (freteValor() === 0 ? 'Grátis' : dinheiro(freteValor())));
+    if (descontoCupom()) linhas.push('Cupom ' + cupomAtual().codigo + ': − ' + dinheiro(descontoCupom()));
     if (descontoPix()) linhas.push('Desconto Pix (' + pctPix() + '%): − ' + dinheiro(descontoPix()) + ' · Total: ' + dinheiro(totalFinal()));
     if (st.presente && st.presente_texto) linhas.push('Mensagem para presente: "' + st.presente_texto + '"');
-    var pedido = { itens: car.itens(), total: car.total(), dados: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, telefone: d.telefone, cpf: d.cpf },
+    var pedido = { itens: car.itens(), total: car.total(), cupom: cupomAtual() ? cupomAtual().codigo : null, dados: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, telefone: d.telefone, cpf: d.cpf },
                    entrega: e, pagamento: st.pagamento, presente: st.presente ? (st.presente_texto || '') : null,
                    consent_marketing: !!d.consent_marketing, visitante: window.aleaRastro ? window.aleaRastro.visitante() : null };
     var botao = raiz.querySelector('[data-concluir]'); if (botao) botao.disabled = true;
     if (usaLink()) { pagarNaInfinitePay(pedido, linhas, botao); return; }
     var zap = null;
+    /* 14/10/2026: na PRÉVIA, finalizar com o cupom de teste o "queima" no aparelho (o uso único simulado) */
+    if (L.previa && cupomAtual()) { try { localStorage.setItem(K_CUPOM_PREVIA, '1'); } catch (x) { /* aba anônima */ } }
     /* 21:46: "deixa [o WhatsApp] até você confirmar com ele" — vale na prévia também */
     zap = car.abrirWhatsApp(linhas);                         // abre JÁ, no mesmo toque (senão o navegador bloqueia)
     L.registrarPedido(pedido).catch(function () { return {}; }).then(function (r) {
@@ -631,14 +716,17 @@
     };
     var of = opcaoFrete();
     if (of && st.frete.id_cotacao) corpo.frete = { id_cotacao: st.frete.id_cotacao, servico: of.servico };
-    if (botao) botao.textContent = 'Indo para o pagamento…';
+    if (cupomAtual()) corpo.cupom = cupomAtual().codigo;           // 14/10/2026: o servidor refaz e queima
+    if (botao) botao.textContent = totalFinal() > 0 ? 'Indo para o pagamento…' : 'Confirmando o pedido…';
     L.pagarLink(corpo).then(function (r) {
       var extras = linhas.concat(['', 'PAGO pelo site: pedido ' + r.numero + ' (' + dinheiro(r.total) + ').' + (corpo.frete ? '' : ' Falta combinar o frete.')]);
       gravarPag({ numero: r.numero, chave: r.chave, nome: d.nome, comFrete: !!corpo.frete, zap: car.linkWhatsApp ? car.linkWhatsApp(extras) : null });
-      location.href = r.url;
+      /* 14/10/2026: total R$ 0 com o cupom = o servidor já aprovou, sem página de pagamento */
+      location.href = r.aprovado && !r.url ? 'finalizar-compra.html?pedido=' + encodeURIComponent(r.numero) : r.url;
     }).catch(function (x) {
       erro = (x && x.message) || 'O pagamento não respondeu agora. Nada foi cobrado. Tente de novo em instantes.';
       if (/frete/i.test(erro)) st.frete = null;              // frete vencido ou sacola mudou: cota de novo
+      if (/cupom/i.test(erro)) { st.cupom = null; st.frete = null; cupomMsg = erro; }   // 14/10/2026: usado/inválido
       pintar(); rolarPara('.loja-etapa:nth-of-type(3)');
     });
   }
@@ -666,6 +754,8 @@
       raiz.querySelector('[data-endereco-campos]').hidden = false; raiz.querySelector('[data-endereco-caixa]').hidden = true; return;
     }
     if (ev.target.closest('[data-sair]')) { L.sair().then(function () { eu = { logado: false }; st.dados = {}; st.etapa = 'dados'; guardar(); pintar(); }); return; }
+    if (ev.target.closest('[data-aplicar-cupom]')) { var ci = raiz.querySelector('[name="cupom"]'); aplicarCupom(ci && ci.value); return; }
+    if (ev.target.closest('[data-tirar-cupom]')) { tirarCupom(); return; }
     if (ev.target.closest('[data-concluir]')) { concluir(); }
   });
   raiz.addEventListener('change', function (ev) {
@@ -677,6 +767,9 @@
     }
     if (t.matches('[name="pagamento"]')) { st.pagamento = t.value; guardar(); pintar(); }
     if (t.matches('[name="frete"]') && st.frete) { st.frete.escolhido = t.value; guardar(); pintar(); }
+  });
+  raiz.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.matches('[name="cupom"]')) { ev.preventDefault(); aplicarCupom(ev.target.value); }
   });
   raiz.addEventListener('input', function (ev) {
     if (ev.target.matches('[data-presente-texto]')) { st.presente_texto = ev.target.value; guardar(); }
@@ -692,6 +785,7 @@
       var pg = c && c.pagamento;
       PAG = (pg && pg.provedor === 'infinitepay') ? pg : null;
       FRETE = !!(c && c.frete);
+      CUPOM_SERVIDOR = !!(pg && pg.cupom);           // 14/10/2026
       if (PAG && (q.get('pedido') || q.get('order_nsu'))) conferirRetorno(q);   // a volta da InfinitePay
       else if (PAG || FRETE) pintar();
     });

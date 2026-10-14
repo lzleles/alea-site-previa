@@ -14,6 +14,8 @@
       (o texto, com background-clip: text); o SVG antigo fica dentro, como reserva de navegador sem suporte (loja.css v2
       decide qual aparece). A lista em si (alea_desejos_v1 no aparelho) não mudou. Antes:
       03_site/_versoes_anteriores/lista_desejos_antes_2026-09-27/js/loja-dados.js
+   14/10/2026 (cupom da Maria; L-0191 do Lázaro, espec v2 do Cassiano): + verCupom (POST /api/cupom) no motor SERVIDOR.
+      Na prévia é null (o loja-compra.js simula). Antes: 03_site/_versoes_anteriores/cupom_antes_2026-10-14/js/loja-dados.js
 */
 /* =============================================================================
    loja-dados.js — de onde vêm e pra onde vão os dados da conta e da compra
@@ -283,6 +285,9 @@
     /* FRETE NO CEP (12/10/2026, áudio 9451 do Cassiano): o servidor cota (SuperFrete) e já devolve o valor final de cada
        opção, com as regras da loja (frete grátis, etc.). O navegador só mostra; o pagamento cobra pelo id da cotação. */
     cotarFrete: function (p) { return api('POST', '/api/frete', p); },
+    /* CUPOM (14/10/2026, cupom da Maria - L-0191 do Lázaro, espec v2 do Cassiano): o servidor diz quanto o cupom desconta
+       NESTA sacola; quem valida e queima (uso único) é o servidor, no /api/pagamento/link. */
+    verCupom: function (p) { return api('POST', '/api/cupom', p); },
     statusLink: function (numero, q) {
       var s = Object.keys(q).filter(function (k) { return q[k]; }).map(function (k) {
         return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]);
@@ -346,6 +351,7 @@
     registrarPedido: motor.registrarPedido, sair: motor.sair, exportar: motor.exportar, excluir: motor.excluir,
     pagarLink: PREVIA ? null : servidor.pagarLink, statusLink: PREVIA ? null : servidor.statusLink,   // 05/10/2026
     cotarFrete: PREVIA ? null : servidor.cotarFrete,   // 12/10/2026
+    verCupom: PREVIA ? null : servidor.verCupom,       // 14/10/2026 (na prévia o loja-compra simula)
     config: PREVIA ? function () { return Promise.resolve({ metodos: ['google', 'codigo', 'senha'] }); } : servidor.config,
     /* ETAPA 69 (condição da casa, 23/09/2026): quais jeitos de entrar o servidor JÁ faz. Sem "metodos" no /api/config
        = só Google. Código e senha aparecem sozinhos quando a casa ligar ("metodos": ["google","codigo","senha"]). */
