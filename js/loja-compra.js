@@ -289,14 +289,15 @@
 
   /* ETAPA 62 (22:08, Cassiano): "ninguém mais fica preocupado com quanto vai pagar de frete nessa página (...)
      vamos deixar essa página mais clean" — na SACOLA sai o bloco Entrega e a linha do frete; ele volta no fim. */
-  function htmlTotais(semFrete) {
+  function htmlTotais(semFrete, semPix) {
     /* 25/09/2026 (msg 1885, produtos "sob consulta"): sacola só com peça sem preço mostrava "R$ 0,00" no subtotal e
        no total. Agora diz "Sob consulta" (a regra mora no carrinho.js, textoTotal). O WhatsApp segue igual. */
     var soConsulta = sobConsulta() && !subtotal();
-    /* 12/10/2026: o frete escolhido e o desconto do Pix entram aqui (a mesma conta que o servidor cobra) */
-    var fv = semFrete ? null : freteValor(), dp = semFrete ? 0 : descontoPix();
+    /* 12/10/2026: o frete escolhido e o desconto do Pix entram aqui (a mesma conta que o servidor cobra)
+       14/10/2026 (áudio 10812): na SACOLA entra o frete, mas não o Pix (a forma de pagar só se escolhe no fim) */
+    var fv = semFrete ? null : freteValor(), dp = (semFrete || semPix) ? 0 : descontoPix();
     var carregando = st.frete && st.frete.estado === 'carregando';
-    var total = semFrete ? pecasPagas() : totalFinal();
+    var total = semFrete ? pecasPagas() : (centavos(subtotal()) - centavos(descontoCupom()) + centavos(fv || 0) - centavos(dp)) / 100;
     return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal())) + '</span></div>' +
       (semFrete ? '' : '<div><span>Frete</span><span' + (fv === 0 ? ' class="gratis"' : '') + '>' +
         (fv === null ? (carregando ? 'calculando…' : 'a calcular') : textoFrete(fv)) + '</span></div>') +
@@ -306,6 +307,21 @@
   }
 
   /* ======================================================= SACOLA DE COMPRAS */
+  /* 14/10/2026 (áudio 10812 do Cassiano): "nessa página aqui já tem que ter frete e cupom (...) senão muita gente nem
+     finaliza a compra com medo de ficar caro e tem que fazer um cadastro à toa" — volta o CEP com o frete calculado
+     (desfaz a ETAPA 62 de 22:08, "deixar essa página mais clean") e entra o cupom, ANTES do cadastro. */
+  function htmlFreteSacola() {
+    if (sobConsulta()) return '';
+    var e = st.entrega || {}, ok = e.cep && String(e.cep).length === 8;
+    return '<div class="loja-frete-sacola" style="margin:18px 0 0"><p class="loja-rotulo" style="margin:0 0 6px">Calcular frete</p>' +
+      '<div class="loja-cep"><label class="loja-campo' + (ok && e.cidade ? ' ok' : '') + '"><span>CEP</span>' +
+        '<input data-cep-sacola inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="' +
+        esc(ok ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '') + '"></label>' +
+        '<a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></div>' +
+      '<p class="loja-miudo" data-cep-resposta style="margin:6px 0 0">' +
+        (ok && e.cidade && e.cidade.trim() ? 'Entrega para ' + esc(e.cidade) + ' - ' + esc(e.uf || '') + '.' : '') + '</p>' +
+      (ok ? '<div style="margin:10px 0 0">' + htmlOpcoesFrete() + '</div>' : '') + '</div>';
+  }
   function htmlSacola() {
     var l = itens();
     var h = '<h1 class="loja-titulo grande">Sacola de Compras</h1>';
@@ -330,7 +346,7 @@
         '<span class="loja-miudo">Adicione uma mensagem personalizada que será impressa e enviada com seu presente.</span></span></label>' +
       '<textarea data-presente-texto maxlength="240" placeholder="Sua mensagem"' + (st.presente ? '' : ' hidden') + '>' +
         esc(st.presente_texto || '') + '</textarea></div>' +
-      htmlTotais(true) +
+      htmlFreteSacola() + htmlCupom() + htmlTotais(false, true) +
       '<button type="button" class="loja-bt largo" data-ir-compra>Finalizar Compra</button>' +
       '<a class="loja-mais-produtos" href="index.html">Escolher mais Produtos</a>';
     return h;
@@ -544,7 +560,8 @@
 
   /* ================================================================ desenhar */
   function pintar() {
-    if (!retorno && !concluido && tela() === 'compra' && st.etapa !== 'dados') cotar();   // 12/10/2026: frete pelo CEP
+    /* 12/10/2026: frete pelo CEP · 14/10/2026 (áudio 10812): cota também na SACOLA */
+    if (!retorno && !concluido && (tela() !== 'compra' || st.etapa !== 'dados')) cotar();
     raiz.innerHTML = FAIXA + (retorno ? htmlRetorno() : concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
     ligar();
     erro = '';
@@ -576,10 +593,12 @@
       cs.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
       var resp = raiz.querySelector('[data-cep-resposta]');
       if (d.length !== 8) { resp.textContent = ''; return; }
+      if (d === st.entrega.cep && st.entrega.cidade) return;
       resp.textContent = 'Procurando…';
       L.buscarCep(d).then(function (j) {
-        st.entrega = { cep: d, logradouro: j.logradouro, bairro: j.bairro, cidade: j.cidade, uf: j.uf }; guardar();
-        resp.textContent = 'Entrega para ' + j.cidade + ' - ' + j.uf + '. Prazo e frete confirmados com o pedido.';
+        /* 14/10/2026 (áudio 10812): achou o CEP → cota o frete aqui mesmo, na sacola */
+        st.entrega = { cep: d, logradouro: j.logradouro, bairro: j.bairro, cidade: j.cidade, uf: j.uf }; st.frete = null;
+        guardar(); pintar();
       }).catch(function () { resp.textContent = 'Não achamos esse CEP. Confira os números.'; });
     });
   }
