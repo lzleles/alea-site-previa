@@ -372,6 +372,10 @@
     if (document.querySelector('.gaveta.aberta') || document.documentElement.classList.contains('janela3d-aberta')) return true; // sacola, conta ou personalizar aberta (o body.travado do feed NÃO conta)
     return !!document.querySelector('.telacheia.aberta, .janela3d-fundo.aberta, [role="dialog"].aberta:not(.busca-tela)');
   }
+  /* 14/10/2026 (vídeo 10838 + áudio 10839 do Cassiano): "somente na sacola de compra o busca não vai aparecer se a gente
+     apertar pra baixo" — na tela Sacola de Compras (finalizar-compra.html sem #/compra) o puxar não abre a busca nem
+     mostra o aviso; o Finalizar Compra e as outras páginas seguem iguais. */
+  function naSacola() { return !!document.querySelector('[data-loja-compra]') && (location.hash || '').indexOf('compra') < 0; }
   function ligarPuxar() {
     var y0 = null, dy = 0;
     function pintarPuxao(p) {                                        // v4: o dedo só diz ATÉ ONDE; o motor diz a velocidade
@@ -383,7 +387,7 @@
     }
     document.addEventListener('touchstart', function (e) {
       y0 = null; dy = 0;
-      if (aberta || e.touches.length !== 1 || travada()) return;
+      if (aberta || e.touches.length !== 1 || travada() || naSacola()) return;
       var sc = ondeRola(e.target);
       if (!sc || sc.scrollTop > 0) return;                            // só no topo, sem ter mais pra onde subir
       y0 = e.touches[0].clientY;
@@ -402,7 +406,7 @@
     }
     document.addEventListener('touchend', soltar, { passive: true });
     document.addEventListener('touchcancel', function () { y0 = null; desmontar(); }, { passive: true });
-    mostrarDica();
+    if (!naSacola()) mostrarDica();
   }
 
   /* ---------- o aviso da primeira visita (só celular) ---------- */

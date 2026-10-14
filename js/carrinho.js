@@ -455,10 +455,12 @@
     document.querySelectorAll('[data-abrir="carrinho"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
   }
   function fecharAbaLogo() { clearTimeout(abaTimer); abaTimer = setTimeout(fecharAba, 280); }
-  /* o site.js pergunta antes de levar à página: true = o toque abriu a aba (fica aqui); false = segue pra Sacola */
+  /* o site.js pergunta antes de levar à página: true = o toque ficou aqui (abriu ou fechou a aba); false = segue pra Sacola.
+     14/10/2026 18:55 (áudio 10837): no celular o 2º toque FECHA a aba; pra Sacola só pelo "Finalizar Compra" de dentro dela */
   window.aleaAbaSacola = {
     toque: function () {
-      if (ehPC() || abaAberta()) { fecharAba(); return false; }
+      if (ehPC()) { fecharAba(); return false; }
+      if (abaAberta()) { fecharAba(); return true; }
       abrirAba(); return true;
     },
     abrir: abrirAba, fechar: fecharAba

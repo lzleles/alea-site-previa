@@ -420,7 +420,7 @@ window.aleaCorDoTopo = (function () {
       /* ETAPA 61 (23/09/2026): a CONTA virou PÁGINA (conta.html), como na Tiffany — "clicar lá em cima,
          do lado da sacola, em meu perfil, para aparecer essa página". O carrinho continua gaveta. */
       if (b && b.getAttribute('data-abrir') === 'conta') { e.preventDefault(); location.href = 'conta.html'; return; }
-      /* 14/10/2026 (áudio 10832 do Cassiano): no celular o 1º toque abre a aba da sacola (carrinho.js) e o 2º leva à página */
+      /* 14/10/2026 (áudios 10832/10837 do Cassiano): no celular o 1º toque abre a aba da sacola (carrinho.js) e o 2º a fecha */
       if (b && b.getAttribute('data-abrir') === 'carrinho') {
         e.preventDefault();
         if (window.aleaAbaSacola && window.aleaAbaSacola.toque()) return;
