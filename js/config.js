@@ -809,7 +809,7 @@ window.ALEA.formatos = {
    organizar questão de foto, imprimir"). Produto listado aqui: card e página dizem "Em breve" no lugar do preço, o botão de compra
    fica desligado e a sacola não aceita (produto.js v49, feed.js v41, carrinho.js); o "Personalize agora" com o 3D funciona.
    Pra pôr à venda: tirar o slug daqui e dar o preço (VITRINE/PRODUTOS em produtos.js ou precoPorEscolha). */
-window.ALEA.emBreve = ['unda-organizer', 'vitta'];  // v49 (13/10/2026, audio 9594): os outros 11 sairam - preco DELE na regua v2 (precoPorEscolha). Antes: laptop-stand, pen-holder, make, makeup-layer-organizer, lamel, unda-organizer, vitta, orbis, travel-kit, pluvia, pet-bowl-retis, aurea, una
+window.ALEA.emBreve = ['unda-organizer', 'vitta', 'ayla-pompom'];  // v50 (14/10/2026, audio 10921: Ayla Pompom Em breve ate ele resolver o valor; preco 440 fica so no dado). v49 (13/10/2026, audio 9594): os outros 11 sairam - preco DELE na regua v2 (precoPorEscolha). Antes: laptop-stand, pen-holder, make, makeup-layer-organizer, lamel, unda-organizer, vitta, orbis, travel-kit, pluvia, pet-bowl-retis, aurea, una
 /* v46 — ÍCONE DO FORMATO (ajuste 2, áudio 6228: mostrar que o Orbis é redondo e o Quadrum é quadrado). `modo` 'miniatura'
    (opção A: a foto pequenininha do vaso, img/stria_formato_*.png, render do .glb pelo
    33_produtos_novos_2026-10-04/stria_planter/icone_formato/miniatura_formato_v1_blender.py) ou 'simbolo' (opção B: só a forma,

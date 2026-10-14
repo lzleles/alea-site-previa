@@ -1668,6 +1668,33 @@ a.continuar-comprando { display: inline-block; text-align: center; }  /* ETAPA 4
 .aviso-sacola p { margin: 0; padding: 14px 4px 14px 14px; font-size: 14.5px; line-height: 1.45; color: var(--tinta); align-self: center; }
 .aviso-sacola .fechar-aviso { background: transparent; border: 0; cursor: pointer; font-size: 24px; font-weight: 300; line-height: 1; color: var(--tinta-fraca); padding: 10px 12px; align-self: start; }
 @media (prefers-reduced-motion: reduce) { .aviso-sacola { transition: none; } }
+/* 14/10/2026 (fotos 10852/10853 + áudio 10856 do Cassiano): o "adicionou" pequeno e discreto, no canto de BAIXO à
+   esquerda como o da Tiffany, mas com a miniatura do comedouro ainda legível. Entra subindo, não descendo. */
+.aviso-sacola.adicionou {
+  top: auto; right: auto; left: 24px; bottom: 24px; width: 350px; max-width: calc(100vw - 24px);
+  grid-template-columns: 80px 1fr auto; border-radius: 10px; transform: translateY(8px);
+  box-shadow: 0 6px 20px -10px rgba(0, 0, 0, .35);
+}
+.aviso-sacola.adicionou.visivel { transform: none; }
+.aviso-sacola.adicionou .miniatura { padding: 6px; }
+.aviso-sacola.adicionou .miniatura img { height: 68px; }
+.aviso-sacola.adicionou p { padding: 10px 2px 10px 12px; font-size: 13px; line-height: 1.4; }
+.aviso-sacola.adicionou .fechar-aviso { font-size: 20px; padding: 6px 10px; }
+/* 14/10/2026 (áudio 10881): o aviso fica PRETO — rolando até o fim, ele se mistura com o rodapé preto, "como se virasse
+   tudo uma página só". Texto e × claros; a miniatura no mesmo preto. */
+.aviso-sacola.adicionou { background: var(--preto); }
+.aviso-sacola.adicionou .miniatura { background: var(--preto); }
+.aviso-sacola.adicionou p { color: var(--branco); }
+.aviso-sacola.adicionou .fechar-aviso { color: rgba(255, 255, 255, .75); }
+@media (max-width: 640px) {
+  /* áudio 10864 + vídeo 10863: no celular, "naquele mesmo lugar, ocupando aquele mesmo espaço de tela" — a faixa da Tiffany,
+     de ponta a ponta, colada embaixo; a miniatura fica, pequena, pra ver o comedouro (áudio 10856) */
+  .aviso-sacola.adicionou { left: 0; right: 0; width: auto; max-width: none; bottom: 0; border-radius: 0;
+    grid-template-columns: 56px 1fr auto; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: none; }
+  .aviso-sacola.adicionou .miniatura { padding: 4px; }
+  .aviso-sacola.adicionou .miniatura img { height: 46px; }
+  .aviso-sacola.adicionou .fechar-aviso { align-self: center; }
+}
 .linha-carrinho .editar-item { justify-self: start; font-size: 13.5px; color: var(--tinta); text-decoration: underline; text-underline-offset: 3px; }  /* ETAPA 45 */
 
 /* ⚠️ ETAPA 46 (22/09/2026, 22:43, vídeo no iPhone): dois defeitos da página de produto.
@@ -2823,3 +2850,65 @@ body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; 
 .aba-sacola .aba-subtotal { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
 .aba-sacola .aba-subtotal .preco-alea { font-size: 2em; line-height: 1; }
 .aba-sacola .aba-ir { width: 100%; text-align: center; text-decoration: none; }
+/* 14/10/2026 19:31 (vídeo 10860 da Tiffany + áudio 10859): NO CELULAR a aba é uma JANELA DE TELA INTEIRA, por cima do topo,
+   que entra da esquerda pra direita; com ela aberta a página de trás fica PRESA (body.janela-sacola) e só a sacola rola.
+   Topo fixo (título + ×), peças no meio rolando, rodapé fixo (Subtotal, Finalizar Compra, Continue Comprando). */
+.aba-sacola.janela { inset: 0; top: 0; max-height: none; z-index: 92; /* acima da faixa do frete (90); a confirmacao de remover e 95 */ padding: 0; box-shadow: none; display: flex; flex-direction: column;
+  overflow: hidden; animation: jan-entra .32s cubic-bezier(.2, .7, .2, 1); }
+.aba-sacola.janela[hidden] { display: none; }
+/* 14/10/2026 (vídeo 10886): a janela do celular é SEMPRE a tela inteira, em qualquer ponto da página (o top/max-height
+   escrito pelo posicionamento do PC não vale pra ela) */
+.aba-sacola.janela { top: 0 !important; bottom: 0 !important; max-height: none !important; }
+.aba-sacola.janela.saindo { animation: jan-sai .26s ease-in forwards; }
+@keyframes jan-entra { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes jan-sai { from { transform: none; } to { transform: translateX(-100%); } }
+.aba-sacola.janela .jan-topo { position: relative; padding: calc(16px + env(safe-area-inset-top, 0px)) 52px 14px; border-bottom: 1px solid var(--borda); flex: none; }
+.aba-sacola.janela .jan-topo .aba-titulo { margin: 0; }
+.aba-sacola.janela .jan-fechar { position: absolute; right: 8px; bottom: 6px; background: transparent; border: 0; font-size: 28px; font-weight: 300;
+  line-height: 1; color: var(--tinta); padding: 6px 10px; cursor: pointer; }
+.aba-sacola.janela .jan-corpo { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 4px 20px; }
+.aba-sacola.janela .jan-cabeca { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+.aba-sacola.janela .tirar-x { background: transparent; border: 0; font-size: 18px; line-height: 1; color: var(--tinta-fraca); padding: 0 2px; cursor: pointer; }
+.aba-sacola.janela .aba-qtd { align-items: center; }
+.aba-sacola.janela .passos { display: inline-flex; align-items: center; gap: 14px; }
+.aba-sacola.janela .passos button { background: transparent; border: 0; font-size: 16px; line-height: 1; color: var(--tinta); padding: 2px 6px; cursor: pointer; }
+.aba-sacola.janela .jan-rodape { flex: none; display: grid; gap: 12px; padding: 14px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--borda); background: var(--papel); }
+.aba-sacola.janela .aba-subtotal { justify-content: center; gap: 8px; }
+.aba-sacola.janela .jan-continuar { background: transparent; border: 0; font: inherit; font-size: 12.5px; color: var(--tinta);
+  text-decoration: underline; text-underline-offset: 4px; cursor: pointer; padding: 2px; }
+body.janela-sacola { position: fixed; left: 0; right: 0; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .aba-sacola.janela, .aba-sacola.janela.saindo { animation: none; } }
+/* 14/10/2026 (rodada 2, áudio 10859): com a janela da sacola aberta, a dica "Arraste a tela para baixo…" não aparece por cima */
+body.janela-sacola .busca-dica { display: none; }
+/* 14/10/2026 19:58 (foto 10889 da Tiffany + áudio 10891): na aba/janela da sacola, a peça RECORTADA direto na página (sem o
+   quadrado de fundo) e o nome igual ao da página da peça — "ālea Pet Bowl" na fonte de título e o "× Luke" em degradê
+   na linha de baixo (o mesmo degradê do h1, menor). A descrição saiu no carrinho.js. */
+.aba-sacola .aba-linha img { background: transparent; }
+.aba-sacola .aba-nome { font-family: var(--fonte-titulo); font-weight: 500; font-size: 17px; letter-spacing: 0; line-height: 1.15; color: var(--terracota); }
+.aba-sacola .aba-nome .collab { display: block; margin-top: 4px; font-size: .8em; font-weight: 400; letter-spacing: .02em; line-height: 1.2;
+  color: var(--collab-liso); width: -webkit-fit-content; width: fit-content; }
+.aba-sacola .aba-nome .collab .x { font-family: var(--fonte-corpo); font-weight: 300; font-size: 1.25em; line-height: 1; letter-spacing: 0;
+  vertical-align: -.06em; color: var(--collab-x-liso); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .aba-sacola .aba-nome .collab { -webkit-text-fill-color: transparent; -webkit-text-stroke: .35px var(--collab-contorno); filter: var(--collab-halo); }
+  .aba-sacola .aba-nome .collab .x, .aba-sacola .aba-nome .collab .nome { -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .aba-sacola .aba-nome .collab .x { background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-x); font-weight: 500; }
+  .aba-sacola .aba-nome .collab .nome { display: inline-block; background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-cores); }
+}
+/* 14/10/2026 19:58 (foto 10893 + áudio 10894): a faixa do título "Sua Sacola de Compras" no NOSSO degradê com textura — o
+   SUAVE da abertura/feed (3 manchas de cor + papel, estampa off por cima), não o metálico — "só pra mudar um pouco a cor" */
+.aba-sacola.janela .jan-topo { isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(70% 220% at 12% 10%, rgba(108, 150, 167, .38), transparent 62%),
+    radial-gradient(60% 200% at 88% 20%, rgba(175, 149, 89, .36), transparent 60%),
+    radial-gradient(70% 240% at 52% 120%, rgba(157, 62, 32, .26), transparent 64%),
+    linear-gradient(162deg, #F8F5F0 0%, #EAE4DB 54%, #E2D6C6 100%); }
+.aba-sacola.janela .jan-topo::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url(../img/marca/estampa_off_ladrilho.svg) left top / 900px auto repeat; opacity: .5; filter: brightness(.86); }
+/* 14/10/2026 20:2x (vídeo 10907 + áudio 10908): a janela da sacola no celular "não pode mexer pro lado" — só rola na
+   vertical, nada passa da largura, e a página de trás fica parada (sem quique) enquanto ela está aberta */
+.aba-sacola.janela, .aba-sacola.janela .jan-corpo { overflow-x: hidden; touch-action: pan-y; }
+.aba-sacola.janela .jan-corpo { overscroll-behavior: none; }
+.aba-sacola.janela .aba-linha, .aba-sacola.janela .aba-lado { min-width: 0; }
+html:has(body.janela-sacola) { overflow: hidden; overscroll-behavior: none; }

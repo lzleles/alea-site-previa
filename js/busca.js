@@ -370,6 +370,7 @@
     var b = document.body, home = b.classList.contains('home');
     if (home && !b.classList.contains('site-revelado') && !b.classList.contains('sem-abertura')) return true; // abertura rodando
     if (document.querySelector('.gaveta.aberta') || document.documentElement.classList.contains('janela3d-aberta')) return true; // sacola, conta ou personalizar aberta (o body.travado do feed NÃO conta)
+    if (document.body.classList.contains('janela-sacola')) return true; // 14/10/2026 (áudio 10859): a janela da sacola no celular
     return !!document.querySelector('.telacheia.aberta, .janela3d-fundo.aberta, [role="dialog"].aberta:not(.busca-tela)');
   }
   /* 14/10/2026 (vídeo 10838 + áudio 10839 do Cassiano): "somente na sacola de compra o busca não vai aparecer se a gente

@@ -288,6 +288,42 @@ body.loja .rodape .frase { margin-bottom: 96px; }
 .loja-caixa-sacola .cx-abre .loja-rotulo { margin: 14px 0 8px; }
 .loja-caixa-sacola .cx-abre .loja-radio { background: rgba(255, 255, 255, .35); }
 .cx-botoes { display: flex; flex-direction: column; }
+/* 14/10/2026 19:33 (vídeo 10860 da Tiffany + áudio 10862): o bloco ENTREGA acima da caixa do total — título, frase e a caixa
+   "Ver Opções de Entrega"; clicou, o CEP aparece no mesmo lugar (com a mesma entrada suave); cotado, "Receber N itens em CEP"
+   e uma caixa com a opção escolhida (seta pra ver as outras). */
+.sacola-entrega { margin: 22px 0 0; }
+.sacola-entrega.entra > :not(.ent-titulo) { animation: ent-entra .3s ease-out; }
+@keyframes ent-entra { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.sacola-entrega .ent-titulo { font-family: var(--fonte-titulo); font-weight: 400; font-size: 17px; letter-spacing: .04em; margin: 0 0 8px; }
+.sacola-entrega .ent-frase { font-size: 11.5px; line-height: 1.5; color: var(--tinta); margin: 0 0 12px; max-width: 34ch; }
+.sacola-entrega .ent-botao { background: transparent; border: 1px solid var(--tinta); color: var(--tinta); font: inherit; font-size: 11px;
+  font-weight: 600; letter-spacing: .12em; padding: 13px 22px; cursor: pointer; }
+.sacola-entrega .ent-botao:hover { border-color: var(--terracota); color: var(--terracota); }
+.sacola-entrega .ent-botao.pequeno { font-size: 10px; letter-spacing: .06em; padding: 10px 10px; white-space: nowrap; flex: none; }
+.sacola-entrega .ent-linha-cep { display: flex; align-items: flex-end; gap: 14px; }
+.sacola-entrega .ent-campo { flex: 1; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--terracota); padding: 0 4px 8px; }
+.sacola-entrega .ent-campo span { font-size: 13px; color: var(--tinta-fraca); }
+.sacola-entrega .ent-campo input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 15px; color: var(--tinta); padding: 0; }
+.sacola-entrega .ent-nao-sei { display: inline-block; margin-top: 8px; font-size: 10.5px; color: var(--terracota); text-decoration: none; }
+.sacola-entrega .ent-receber { font-size: 12.5px; margin: 0 0 12px; }
+.sacola-entrega .ent-receber strong { font-weight: 600; margin-right: 8px; }
+.sacola-entrega .ent-cep { background: none; border: 0; padding: 0; margin-left: 6px; font: inherit; color: var(--tinta); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--borda); }
+.sacola-entrega .ent-escolha { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: transparent;
+  border: 1px solid var(--lj-linha); padding: 12px 14px; font: inherit; font-size: 12.5px; color: var(--tinta); cursor: pointer; }
+.sacola-entrega .ent-escolha .txt { flex: 1; }
+.sacola-entrega .ent-escolha .txt small { display: block; font-size: 10.5px; color: var(--lj-cinza); margin-top: 2px; }
+.sacola-entrega .ent-escolha .preco { font-size: 12px; }
+.sacola-entrega .ent-escolha .seta { width: 7px; height: 7px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor;
+  transform: rotate(45deg) translateY(-3px); transition: transform .2s ease; flex: none; }
+.sacola-entrega .ent-escolha[aria-expanded="true"] .seta { transform: rotate(-135deg) translateY(-1px); }
+.sacola-entrega .ent-lista { animation: ent-entra .2s ease-out; }
+.sacola-entrega .ent-lista .loja-radio { border-top: 0; }
+.sacola-entrega .ent-carregando { display: grid; gap: 10px; }
+.sacola-entrega .ent-carregando i { display: block; height: 14px; width: 40%; background: var(--lj-caixa); animation: ent-pisca 1s ease-in-out infinite alternate; }
+.sacola-entrega .ent-carregando i + i { height: 40px; width: 100%; }
+@keyframes ent-pisca { from { opacity: .5; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sacola-entrega.entra > *, .sacola-entrega .ent-lista { animation: none; } }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 761px) {
   .loja main.sacola-larga { max-width: 1040px; }
@@ -313,4 +349,43 @@ body.loja .rodape .frase { margin-bottom: 96px; }
   .sacola-base .cx-botoes { flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
   .sacola-base .cx-botoes .loja-bt.largo { width: auto; flex: 0 0 auto; min-width: 180px; }
   .sacola-base .cx-botoes .loja-mais-produtos { margin: 0; white-space: nowrap; }
+}
+/* 14/10/2026 20:0x (foto 10895 + áudios 10891/10896/10897) — PÁGINA SACOLA DE COMPRAS, igual à janela da sacola:
+   · a peça RECORTADA direto na página (sem o quadrado de fundo);
+   · o nome igual ao da página da peça ("ālea Pet Bowl" na fonte de título, o "× Luke" em degradê na linha de baixo);
+   · embaixo só tamanho, nome e o adicional curto (o carrinho.js descreverCurto);
+   · a faixa da logo ālea & Co. no degradê SUAVE com textura (o da abertura/feed), não o metálico. */
+.loja-item img, .sacola-tabela .prod img { background: transparent; }
+.loja-item .nome, .sacola-tabela .nome { font-family: var(--fonte-titulo); font-weight: 500; font-size: 17px; letter-spacing: 0; line-height: 1.15; color: var(--terracota); }
+.loja-item .nome small, .sacola-tabela .nome small { font-family: var(--fonte-corpo); font-weight: 400; line-height: 1.5; margin-top: 6px; }
+.loja-item .nome .collab, .sacola-tabela .nome .collab { display: block; margin-top: 4px; font-size: .8em; font-weight: 400; letter-spacing: .02em; line-height: 1.2;
+  color: var(--collab-liso); width: -webkit-fit-content; width: fit-content; }
+.loja-item .nome .collab .x, .sacola-tabela .nome .collab .x { font-family: var(--fonte-corpo); font-weight: 300; font-size: 1.25em; line-height: 1; letter-spacing: 0;
+  vertical-align: -.06em; color: var(--collab-x-liso); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .loja-item .nome .collab, .sacola-tabela .nome .collab { -webkit-text-fill-color: transparent; -webkit-text-stroke: .35px var(--collab-contorno); filter: var(--collab-halo); }
+  .loja-item .nome .collab .x, .loja-item .nome .collab .nome,
+  .sacola-tabela .nome .collab .x, .sacola-tabela .nome .collab .nome { -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .loja-item .nome .collab .x, .sacola-tabela .nome .collab .x { background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-x); font-weight: 500; }
+  .loja-item .nome .collab .nome, .sacola-tabela .nome .collab .nome { display: inline-block; font: inherit; letter-spacing: inherit; color: inherit;
+    background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-cores); }
+}
+.loja-topo-compra { position: relative; isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(60% 260% at 12% 10%, rgba(108, 150, 167, .38), transparent 62%),
+    radial-gradient(55% 240% at 88% 20%, rgba(175, 149, 89, .36), transparent 60%),
+    radial-gradient(60% 280% at 52% 130%, rgba(157, 62, 32, .26), transparent 64%),
+    linear-gradient(162deg, #F8F5F0 0%, #EAE4DB 54%, #E2D6C6 100%); }
+.loja-topo-compra::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url(../img/marca/estampa_off_ladrilho.svg) left top / 900px auto repeat; opacity: .5; filter: brightness(.86); }
+/* o <span class="nome"> do "× Luke" mora DENTRO do .nome da linha: herda o tamanho do .collab, não o da linha */
+.loja-item .nome .collab .nome, .sacola-tabela .nome .collab .nome { font-family: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit;
+  line-height: inherit; max-width: none; }
+/* 14/10/2026 20:2x (vídeos 10909/10911 + áudios 10910/10912 do Cassiano): no iPhone, puxando a página Sacola pra baixo
+   aparecia um "espação" embaixo que depois voltava, e a página andava pro lado. A página termina no último item e fica
+   sempre no mesmo alinhamento: no celular quem rola é o BODY (caixa de rolagem própria), sem quique e só na vertical —
+   o Safari respeita o overscroll-behavior numa caixa de rolagem, não na página. O loja-compra.js rola o body. */
+@media (hover: none) and (pointer: coarse) {
+  html:has(body.pagina-compra) { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body.loja.pagina-compra { height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 }

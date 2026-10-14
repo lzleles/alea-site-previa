@@ -121,6 +121,10 @@
   function foto(i) { return i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp'); }
   function fotoReserva(i) { return 'this.onerror=null;this.src=&quot;img/produtos/' + esc(i.capa) + '_m.jpg&quot;'; }
   function descrever(i) { return CAR() && CAR().descrever ? CAR().descrever(i) : ''; }
+  /* 14/10/2026 (foto 10895 + áudios 10891/10896): a página Sacola de Compras mostra o nome igual ao da página da peça e só
+     tamanho, nome e o adicional curto; o Resumo do Pedido e o pedido continuam com a descrição inteira */
+  function descreverCurto(i) { return CAR() && CAR().descreverCurto ? CAR().descreverCurto(i) : descrever(i); }
+  function nomeHTML(nome) { return CAR() && CAR().nomeHTML ? CAR().nomeHTML(nome) : esc(nome); }
   function subtotal() { return CAR() ? CAR().total() : 0; }
   function sobConsulta() { return itens().some(function (i) { return !i.preco; }); }
 
@@ -262,9 +266,13 @@
       if (!j || !j.disponivel || !(j.opcoes || []).length) {
         st.frete = { chave: chave, estado: 'indisponivel', motivo: (j && j.motivo) || '' };
       } else {
-        var manter = j.opcoes.some(function (o) { return o.servico === antes; });
-        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: j.opcoes,
-                     escolhido: manter ? antes : j.opcoes[0].servico };
+        /* 14/10/2026 (áudio 10900): a JADLOG é SEMPRE a 1ª opção e já vem escolhida, mesmo quando outra sai mais barata
+           (Jataí: SEDEX 11,64 x Jadlog 18,29, msg 10849); quem quiser outra abre a lista e escolhe */
+        var ops = j.opcoes.filter(function (o) { return /jadlog/i.test(o.empresa || ''); })
+          .concat(j.opcoes.filter(function (o) { return !/jadlog/i.test(o.empresa || ''); }));
+        var manter = ops.some(function (o) { return o.servico === antes; });
+        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: ops,
+                     escolhido: manter ? antes : ops[0].servico };
       }
       guardar(); pintar();
     }).catch(function () {
@@ -320,21 +328,52 @@
      CEP, no mesmo local". O "Adicionar cupom" dos áudios 10827/10828 SAIU no 10833 ("site de luxo não tem cupom"): o
      cupom da Sacola some e fica só no Resumo do Pedido.
      Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/js/loja-compra.js */
-  var abreEntrega = false;
+  /* 14/10/2026 19:33 (vídeo 10860 da Tiffany + áudio 10862): "a mesma frase, a mesma caixa, o mesmo lugar, igual". O bloco
+     Entrega sai de DENTRO da caixa do total e fica ACIMA dela: título "Entrega", a frase e a caixa "Ver Opções de Entrega".
+     Clicou → no mesmo lugar, o campo CEP com a caixa ao lado e "Não sei meu CEP"; 8 números → cota sozinho. Cotado →
+     "Receber N itens em CEP" e UMA caixa com a 1ª opção já escolhida ("sempre vai aparecer o primeiro"); a seta abre as outras.
+     Antes: 03_site/_versoes_anteriores/sacola_rodada2_antes_2026-10-14/js/loja-compra.js */
+  var abreEntrega = false, trocaCep = false, listaFrete = false, entrou = false;
+  function htmlEscolhaFrete() {
+    var f = st.frete;
+    if (f && f.estado === 'carregando') return '<div class="ent-carregando" data-frete-calculando aria-label="Calculando o frete"><i></i><i></i></div>';
+    if (!(f && f.estado === 'ok')) return htmlOpcoesFrete();
+    var nomeDe = function (o) { return o.valor === 0 ? 'Entrega Padrão' : esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : ''); };
+    var prazoDe = function (o) { return o.prazo_dias ? 'Em até ' + o.prazo_dias + ' dias úteis depois de pronta' : 'Prazo confirmado com o pedido'; };
+    var o = opcaoFrete() || f.opcoes[0];
+    var h = '<button type="button" class="ent-escolha" data-lista-frete aria-expanded="' + listaFrete + '">' +
+      '<span class="txt">' + nomeDe(o) + '<small>' + prazoDe(o) + '</small></span>' +
+      '<span class="preco' + (o.valor === 0 ? ' gratis' : '') + '">' + textoFrete(o.valor) + '</span><span class="seta" aria-hidden="true"></span></button>';
+    if (listaFrete) h += '<div class="ent-lista">' + f.opcoes.map(function (x) {
+      var sel = x.servico === o.servico;
+      return '<label class="loja-radio' + (sel ? ' escolhido' : '') + '"><input type="radio" name="frete" value="' + esc(x.servico) + '"' +
+        (sel ? ' checked' : '') + '><span class="txt">' + nomeDe(x) + '<small>' + prazoDe(x) + '</small></span>' +
+        '<span class="preco' + (x.valor === 0 ? ' gratis' : '') + '">' + textoFrete(x.valor) + '</span></label>';
+    }).join('') + '</div>';
+    if (f.exemplo) h += '<p class="loja-miudo" style="margin-top:6px">Prévia: valores de frete de EXEMPLO. No site, o valor vem da transportadora pelo CEP.</p>';
+    return h;
+  }
   function htmlEntregaSacola() {
     if (sobConsulta()) return '';
-    var e = st.entrega || {}, ok = e.cep && String(e.cep).length === 8;
-    var h = '<div class="cx-linha"><span>Entrega</span><button type="button" class="cx-link" data-ver-entrega-sacola aria-expanded="' +
-      abreEntrega + '">Ver Opções de Entrega</button></div>';
-    if (!abreEntrega) return h;
-    return h + '<div class="cx-abre loja-frete-sacola">' +
-      '<div class="loja-cep"><label class="loja-campo' + (ok && e.cidade ? ' ok' : '') + '"><span>CEP</span>' +
-        '<input data-cep-sacola inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="' +
-        esc(ok ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '') + '"></label>' +
-        '<a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></div>' +
-      '<p class="loja-miudo" data-cep-resposta style="margin:6px 0 0">' +
-        (ok && e.cidade && e.cidade.trim() ? 'Entrega para ' + esc(e.cidade) + ' - ' + esc(e.uf || '') + '.' : '') + '</p>' +
-      (ok ? htmlOpcoesFrete() : '') + '</div>';
+    var e = st.entrega || {}, ok = e.cep && String(e.cep).length === 8 && e.cidade;
+    var cepTela = ok ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '';
+    var h = '<div class="sacola-entrega' + (entrou ? ' entra' : '') + '"><h3 class="ent-titulo">Entrega</h3>';
+    entrou = false;
+    if (!abreEntrega) {
+      return h + '<p class="ent-frase">Veja as opções de entrega para seus itens, com todos os prazos e valores.</p>' +
+        '<button type="button" class="ent-botao" data-ver-entrega-sacola aria-expanded="false">Ver Opções de Entrega</button></div>';
+    }
+    if (ok && !trocaCep) {
+      var n = itens().reduce(function (s, i) { return s + qtd(i); }, 0);
+      return h + '<p class="ent-receber"><strong>Receber</strong> ' + n + (n === 1 ? ' item' : ' itens') + ' em ' +
+        '<button type="button" class="ent-cep" data-trocar-cep aria-label="Trocar o CEP">' + esc(cepTela) + '</button></p>' +
+        htmlEscolhaFrete() + '</div>';
+    }
+    return h + '<div class="ent-linha-cep"><label class="ent-campo"><span>CEP</span>' +
+        '<input data-cep-sacola inputmode="numeric" autocomplete="postal-code" maxlength="9" value="' + esc(cepTela) + '"></label>' +
+        '<button type="button" class="ent-botao pequeno" data-cotar-cep>Ver Opções de Entrega</button></div>' +
+      '<a class="ent-nao-sei" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a>' +
+      '<p class="loja-miudo" data-cep-resposta style="margin:6px 0 0"></p></div>';
   }
   /* a caixa do total (Entrega, cupom, subtotal, total) e os dois botões; no computador os botões ficam DENTRO da caixa,
      lado a lado como na Tiffany ("Escolher mais Produtos" + "Finalizar Compra"); no celular, embaixo, como já estava */
@@ -343,7 +382,9 @@
     var semFrete = freteValor() === null && !(st.frete && st.frete.estado === 'carregando');
     /* 14/10/2026 18:49 (áudio 10833): "esquece só a parte do cupom (...) site de luxo não tem cupom (...) nessa primeira
        aba vai ser só o frete" — a Sacola NÃO mostra cupom; ele fica só no Resumo do Pedido (htmlCupom, Finalizar Compra) */
-    return '<div class="sacola-dir"><div class="loja-caixa-sacola">' + htmlEntregaSacola() + htmlTotais(semFrete, true) + '</div>' +
+    /* 19:33 (vídeo 10860): o bloco Entrega fica ACIMA da caixa; dentro dela a linha do frete se chama "Entrega", como na Tiffany */
+    return '<div class="sacola-dir">' + htmlEntregaSacola() + '<div class="loja-caixa-sacola">' +
+      htmlTotais(semFrete, true).replace('<span>Frete</span>', '<span>Entrega</span>') + '</div>' +
       '<div class="cx-botoes"><button type="button" class="loja-bt largo" data-ir-compra>Finalizar Compra</button>' +
       '<a class="loja-mais-produtos" href="index.html">Escolher mais Produtos</a></div></div>';
   }
@@ -366,10 +407,10 @@
       '<div class="cab" role="row"><span role="columnheader">Produto</span><span role="columnheader">Preço</span>' +
       '<span role="columnheader">Quantidade</span><span role="columnheader">Total</span><span></span></div>' +
       l.map(function (i, n) {
-        var det = descrever(i);
+        var det = descreverCurto(i);
         return '<div class="lin" role="row" data-linha="' + n + '">' +
           '<div class="prod" role="cell"><img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
-            '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
+            '<div class="nome">' + nomeHTML(i.nome) + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
           '<div class="preco" role="cell">' + (i.preco ? dinheiroTela(i.preco) : 'Sob consulta') + '</div>' +
           '<div class="qtd" role="cell"><span class="loja-passos">' +
             '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
@@ -388,10 +429,10 @@
     }
     if (largo()) return h + htmlSacolaLarga(l);
     h += l.map(function (i, n) {
-      var det = descrever(i);
+      var det = descreverCurto(i);
       return '<div class="loja-item" data-linha="' + n + '">' +
         '<img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
-        '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det   /* NOMES COLLAB 26/09: "× Ayla" não se separa */ ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
+        '<div class="nome">' + nomeHTML(i.nome) + (det ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
         '<button type="button" class="tirar" data-tirar-item="' + n + '" aria-label="Tirar ' + esc(i.nome) + ' da sacola">&times;</button>' +
         '<div class="linha-qtd"><span class="loja-passos">' +
           '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
@@ -648,11 +689,12 @@
       cs.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
       var resp = raiz.querySelector('[data-cep-resposta]');
       if (d.length !== 8) { resp.textContent = ''; return; }
-      if (d === st.entrega.cep && st.entrega.cidade) return;
+      if (d === st.entrega.cep && st.entrega.cidade) { trocaCep = false; pintar(); return; }
       resp.textContent = 'Procurando…';
       L.buscarCep(d).then(function (j) {
         /* 14/10/2026 (áudio 10812): achou o CEP → cota o frete aqui mesmo, na sacola */
         st.entrega = { cep: d, logradouro: j.logradouro, bairro: j.bairro, cidade: j.cidade, uf: j.uf }; st.frete = null;
+        trocaCep = false; listaFrete = false;
         guardar(); pintar();
       }).catch(function () { resp.textContent = 'Não achamos esse CEP. Confira os números.'; });
     });
@@ -733,9 +775,16 @@
     }
   }
 
+  /* 14/10/2026 (vídeos 10909/10911 + áudios 10910/10912): no celular quem rola a página é o BODY (loja.css), pra o iPhone não
+     dar o "espação" embaixo nem andar pro lado; então o rolar vai pra quem rola de verdade */
+  function rolador() {
+    var b = document.body;
+    return getComputedStyle(b).overflowY === 'auto' ? b : (document.scrollingElement || document.documentElement);
+  }
+  function rolarAoTopo() { var r = rolador(); r.scrollTop = 0; window.scrollTo(0, 0); }
   function rolarPara(sel) {
-    var el = raiz.querySelector(sel);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 12, behavior: 'smooth' });
+    var el = raiz.querySelector(sel), r = rolador();
+    if (el) r.scrollTo({ top: el.getBoundingClientRect().top + r.scrollTop - 12, behavior: 'smooth' });
   }
 
   /* ------------------------------------------------------------- concluir
@@ -771,7 +820,7 @@
       concluido = { numero: (r && r.numero) || '', nome: d.nome, previa: L.previa, pagamento: st.pagamento, zap: zap };
       car.limpar(); L.compra.limpar();
       st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
-      pintar(); window.scrollTo(0, 0);
+      pintar(); rolarAoTopo();
     });
   }
 
@@ -830,10 +879,23 @@
     if (ev.target.closest('[data-sair]')) { L.sair().then(function () { eu = { logado: false }; st.dados = {}; st.etapa = 'dados'; guardar(); pintar(); }); return; }
     /* 14/10/2026 (áudio 10826): "Ver Opções de Entrega" abre o CEP no mesmo lugar */
     if (ev.target.closest('[data-ver-entrega-sacola]')) {
-      abreEntrega = !abreEntrega; pintar();
+      abreEntrega = true; entrou = true; pintar();
       var cepS = raiz.querySelector('[data-cep-sacola]'); if (cepS && !cepS.value) cepS.focus();
       return;
     }
+    /* 19:33 (vídeo 10860): o CEP de "Receber N itens em" volta pro campo; a caixa ao lado do CEP cota o que já foi digitado;
+       a caixa da opção escolhida abre e fecha a lista das outras */
+    if (ev.target.closest('[data-trocar-cep]')) {
+      trocaCep = true; listaFrete = false; pintar();
+      var cepT = raiz.querySelector('[data-cep-sacola]'); if (cepT) { cepT.focus(); cepT.select(); }
+      return;
+    }
+    if (ev.target.closest('[data-cotar-cep]')) {
+      var cepC = raiz.querySelector('[data-cep-sacola]');
+      if (cepC) { cepC.dispatchEvent(new Event('input')); if (cepC.value.replace(/\D/g, '').length !== 8) cepC.focus(); }
+      return;
+    }
+    if (ev.target.closest('[data-lista-frete]')) { listaFrete = !listaFrete; pintar(); return; }
     if (ev.target.closest('[data-aplicar-cupom]')) { var ci = raiz.querySelector('[name="cupom"]'); aplicarCupom(ci && ci.value); return; }
     if (ev.target.closest('[data-tirar-cupom]')) { tirarCupom(); return; }
     if (ev.target.closest('[data-concluir]')) { concluir(); }
@@ -846,7 +908,7 @@
       if (t.checked) raiz.querySelector('[data-presente-texto]').focus();
     }
     if (t.matches('[name="pagamento"]')) { st.pagamento = t.value; guardar(); pintar(); }
-    if (t.matches('[name="frete"]') && st.frete) { st.frete.escolhido = t.value; guardar(); pintar(); }
+    if (t.matches('[name="frete"]') && st.frete) { st.frete.escolhido = t.value; listaFrete = false; guardar(); pintar(); }
   });
   raiz.addEventListener('keydown', function (ev) {
     if (ev.key === 'Enter' && ev.target.matches('[name="cupom"]')) { ev.preventDefault(); aplicarCupom(ev.target.value); }
@@ -856,7 +918,7 @@
   });
 
   document.addEventListener('alea:carrinho', function () { if (!concluido) pintar(); });
-  window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+  window.addEventListener('hashchange', function () { pintar(); rolarAoTopo(); });
   if (MQ_LARGO) {                                            // mudou de computador pra tela estreita (ou o contrário)
     var mudouTela = function () { if (!concluido && !retorno && tela() !== 'compra') pintar(); };
     if (MQ_LARGO.addEventListener) MQ_LARGO.addEventListener('change', mudouTela); else if (MQ_LARGO.addListener) MQ_LARGO.addListener(mudouTela);

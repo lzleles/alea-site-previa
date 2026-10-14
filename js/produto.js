@@ -2025,15 +2025,16 @@
     var velho = document.querySelector('.aviso-sacola');
     if (velho) velho.parentNode.removeChild(velho);
     var a = document.createElement('div');
-    a.className = 'aviso-sacola';
+    /* 14/10/2026 (fotos 10852/10853 + áudio 10856 do Cassiano): "pequenininha e minimalista igual da Tiffany… na parte
+       baixa e menor", mas "tem que dar pra ver o nosso comedouro legal". Saiu do topo: vai pro canto de baixo (CSS
+       .aviso-sacola.adicionou). A janelinha de CONFIRMAR remoção continua igual. */
+    a.className = 'aviso-sacola adicionou';
     a.setAttribute('role', 'status');
     a.innerHTML =
       '<div class="miniatura"><img alt="" src="' + (miniatura || ('img/produtos/' + capa + '_obj_m.webp')) + '" ' +
       'onerror="this.onerror=null;this.src=&quot;img/produtos/' + capa + '_m.jpg&quot;"></div>' +
       '<p>Você adicionou esta criação à sua sacola de compras.</p>' +   // 22:36 minúsculo; 22:38 sem negrito
       '<button type="button" class="fechar-aviso" aria-label="Fechar aviso">&times;</button>';
-    var topo = document.querySelector('.topo');
-    a.style.top = ((topo ? Math.max(0, topo.getBoundingClientRect().bottom) : 0) + 8) + 'px';
     document.body.appendChild(a);
     requestAnimationFrame(function () { a.classList.add('visivel'); });
     function tirar() {
