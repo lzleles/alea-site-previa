@@ -272,7 +272,7 @@ window.ALEA_EN = {
 "O risco.": "The risk.",
 "O valor do kit sai por WhatsApp, junto com as opções de estampa.": "The kit price comes over WhatsApp, along with the pattern options.",
 "O ālea Pet Bowl Wave foi criado pensando em dar mais cor a um comedouro elevado. O do Matteo a gente quis texturizado e com poucas cores. Já o Wave tem essas ondas na base e foi pensado desde o início pra três cores.": "The ālea Pet Bowl Wave was designed to bring more color to a raised bowl. Matteo’s we wanted textured and with few colors. The Wave has these waves at the base and was designed for three colors from the start.",
-"Onde cada impressão começa com um sonho!": "Where every print starts with a dream!",
+"Onde cada impressão começa com um sonho!": "Where every print begins with a dream!",
 "Orbis": "Orbis",
 "Orbis Mini 8,4 × 9,1 × 9,1 cm · Orbis Pequeno 12,5 × 13,4 × 13,4 cm · Quadrum Pequeno 12,5 × 13,4 × 13,4 cm · Quadrum Grande 12,5 × 13,4 × 23,1 cm (altura × largura × comprimento, com os pés)": "Orbis Mini 8.4 × 9.1 × 9.1 cm · Orbis Small 12.5 × 13.4 × 13.4 cm · Quadrum Small 12.5 × 13.4 × 13.4 cm · Quadrum Large 12.5 × 13.4 × 23.1 cm (height × width × length, with the feet)",
 "Orçamentos e personalizados": "Quotes and custom orders",
