@@ -1,0 +1,671 @@
+/* CATALOGO:
+   nome: site
+   categoria: UTIL
+   objetivo: Inicializa recursos comuns do site, incluindo compras, contatos, categorias, redes e gavetas de conta e carrinho.
+   entrada: Configuração global, catálogos e DOM de cada página
+   saida: Links, menus, redes, campos preenchidos e gavetas interativas
+   status: ativo (cabecalho proposto pelo Codex em 2026-09-20, confianca ALTA; conferir na proxima vez que o script rodar)
+   validado_em: TBD
+   27/09/2026: o botão novo do topo `data-abrir="desejos"` (coração, entre Conta e Sacola — áudio 2300 do Cassiano) leva
+      à lista-de-desejos.html, do mesmo jeito que a Conta leva à conta.html. Antes:
+      03_site/_versoes_anteriores/lista_desejos_antes_2026-09-27/js/site.js
+   27/09/2026 (áudio 2308): embrulharNomeCollab() põe o nome do "× Nome" num <span class="nome"> onde faltar (o degradê
+      proporcional mede o nome). Antes: 03_site/_versoes_anteriores/x_azul_nome_proporcional_antes_2026-09-27/js/site.js
+   28/09/2026 (áudios 3035/3037): o botão de ORÇAMENTO (data-assunto começando por "orçamento") deixa de ir pro WhatsApp e
+      abre o e-mail da pessoa pra C.email_orcamento (comercial@alea3d.co). O botão fica igual; perde a classe .zap (não conta
+      como WhatsApp no rastro nem dispara a conversão do WhatsApp). Antes: 03_site/_versoes_anteriores/orcamento_email_antes_2026-09-28/
+   27/09/2026 (áudio 2317): o coração do TOPO fica colorido (degradê perolizado) quando a Lista de Desejos tem alguma peça;
+      vazia = igual antes. Bloco no fim do arquivo. Antes: 03_site/_versoes_anteriores/coracao_topo_colorido_antes_2026-09-27/
+   03/10/2026 (áudios 5561-5568 + vídeo 5566 do Cassiano): carrega o js/busca.js (A BUSCA: puxar pra baixo no topo no
+      celular, lupa "Buscar" no computador). Bloco de 4 linhas no fim do arquivo; toda página com site.js ganha a busca.
+   03/10/2026 (fotos 5612/5613 + áudios 5615/5616): o Linktree das redes vira a PÍLULA "✱ | Linktree" (montarRedes);
+      a cor de cada lugar mora no estilo.css. Antes: 03_site/_versoes_anteriores/linktree_botao_antes_2026-10-03/
+   06/10/2026 (print 6916 + áudio 6917): ligarCategoriaDoProduto() — a categoria em cima do nome da peça vira link pra lista.
+      Antes: 03_site/_versoes_anteriores/categoria_link_antes_2026-10-06/
+   06/10/2026 (áudios 6928/6930/6932/6935 + print 6934): carrega o js/idioma.js (O SITE EM INGLÊS: bandeiras PT/EN no topo,
+      dicionário js/idioma-en.js). Bloco no fim do arquivo. Antes: 03_site/_versoes_anteriores/site_ingles_antes_2026-10-06/
+*/
+/* =============================================================================
+   site.js — o que vale em TODA página (abertura, feed, produto, textos)
+   =============================================================================
+   Liga os botões de WhatsApp, preenche os campos vindos do config.js, monta o menu de
+   categorias e as redes do rodapé, e abre/fecha as gavetas de CONTA e CARRINHO.
+
+   A TRAVA QUE NÃO SE MEXE
+   -----------------------
+   Sem número no `config.js`, NADA vira link. Os botões saem desabilitados, com uma
+   tarja no topo explicando. Melhor um botão apagado e honesto do que um `wa.me` sem
+   número, que abre o WhatsApp em branco e faz o visitante achar que o site quebrou.
+   A mesma régua vale pras redes: endereço vazio, ícone não aparece.
+
+   E A ORDEM
+   ---------
+   Quem desenha conteúdo (o feed, as páginas geradas) avisa quando terminou, e só
+   então os botões são ligados. Ligar antes deixa botão sem href — foi o defeito pego
+   no site da Negocie em 10/09/2026, e ele só aparece conferindo o href NO AR.
+   ========================================================================== */
+
+/* ⚠️ ETAPA 110 (Cassiano, 25/09/2026 15:27, vídeo 1678 + áudio 1679): "no site da Globo.com o cabeçalho fica da
+   mesma cor que a tela, dá a impressão de que a tela é infinita; no nosso, o cabeçalho tá da cor diferente do fundo
+   das fotos, dá pra ver que tá cortado". O que o iPhone pinta lá em cima é a COR DE TEMA: o Safari lê a meta
+   `theme-color` e, nas versões novas, a cor de fundo do <html>. O site não declarava nenhuma. Agora declara (a cor
+   do cabeçalho) e cada janela de foto troca pela cor do SEU fundo enquanto está aberta. */
+window.aleaCorDoTopo = (function () {
+  var PADRAO = '#EAE4DB';
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.appendChild(meta); }
+  meta.content = PADRAO;
+  var pilha = [];
+  function aplicar() {
+    var cor = pilha.length ? pilha[pilha.length - 1].cor : PADRAO;
+    meta.content = cor;
+    document.documentElement.style.backgroundColor = pilha.length ? cor : '';
+    /* ETAPA 113 (áudios 1704-1708 + prints 1705/1707): no iPhone a meta sozinha não pintou o topo — o Safari novo copia
+       a cor do CABEÇALHO FIXO e do fundo da página. Então, com tela cheia aberta, eles todos vestem a mesma cor (CSS
+       `html.topo-emendado`), e o topo, a foto e a barra de baixo viram uma tela só. */
+    document.documentElement.classList.toggle('topo-emendado', pilha.length > 0);
+    document.documentElement.style.setProperty('--cor-do-topo', cor);
+  }
+  /* uso: aleaCorDoTopo('album', '#6E6862') ao abrir; aleaCorDoTopo('album', null) ao fechar */
+  return function (quem, cor) {
+    pilha = pilha.filter(function (p) { return p.quem !== quem; });
+    if (cor) pilha.push({ quem: quem, cor: cor });
+    aplicar();
+  };
+})();
+
+(function () {
+  'use strict';
+
+  var C = window.ALEA || {};
+  var temZap = /^\d{12,13}$/.test(String(C.whatsapp || ''));
+
+  /* ------------------------------------------------------------------ dinheiro */
+  window.aleaDinheiro = function (v) {
+    if (v === null || v === undefined) return null;
+    /* v39 (09/10/2026, áudio 8271 do Cassiano): preço inteiro sai sem centavos ("R$ 150"); quebrado (parcela, frete)
+       mantém os centavos. */
+    if (Number(v) % 1 === 0) return 'R$ ' + Number(v);
+    return 'R$ ' + v.toFixed(2).replace('.', ',');
+  };
+  /* v60 (10/10/2026, msgs 8340-8346 do Cassiano): o preço na TELA - Cormorant com algarismos antigos e o R$ com
+     metade do tamanho (css .preco-alea/.moeda). Nunca terá centavo; quebrado (parcela, frete) sai como texto.
+     O aleaDinheiro acima segue pro texto puro (WhatsApp, pedido). */
+  window.aleaDinheiroHTML = function (v) {
+    if (v === null || v === undefined) return null;
+    if (Number(v) % 1 !== 0) return window.aleaDinheiro(v);
+    return '<span class="preco-alea"><span class="moeda">R$</span> ' + Number(v) + '</span>';
+  };
+
+  /* v61 (13/10/2026, áudios 9616-9620 do Cassiano: "onde aparecer o preço tem que ter isso aí embaixo"): a linha
+     "em até 6x sem juros" (ALEA.parcelamento.texto) embaixo do preço nos cards da vitrine, da busca e da lista de desejos.
+     Sem o valor da parcela (sem centavos). Só com preço de verdade (nunca em "Em breve" / "Sob consulta"). */
+  window.aleaParcelaCard = function (v) {
+    var pc = (window.ALEA || {}).parcelamento;
+    if (!pc || !pc.texto || !(Number(v) > 0)) return '';
+    return '<small class="parcela-card">' + pc.texto + '</small>';
+  };
+
+  /* ------------------------------------------------------------------ WhatsApp */
+  function linkZap(assunto) {
+    var texto = (C.mensagem || 'Oi! Vim pelo site.').replace('{produto}', assunto);
+    return 'https://wa.me/' + C.whatsapp + '?text=' + encodeURIComponent(texto);
+  }
+  window.aleaLinkZap = function (assunto) { return temZap ? linkZap(assunto) : ''; };
+  window.aleaTemZap = temZap;
+
+  function marcarConversao() {
+    if (!C.conversao_whatsapp || typeof window.gtag !== 'function') return;
+    window.gtag('event', 'conversion', { send_to: C.conversao_whatsapp });
+  }
+
+  function avisarUmaVez(quantos) {
+    if (document.getElementById('tarja-config')) return;
+    var t = document.createElement('div');
+    t.id = 'tarja-config';
+    t.className = 'tarja-config';
+    t.innerHTML = '<strong>Site em configuração.</strong> Falta o WhatsApp comercial da ' +
+      'ālea & Co. em <code>js/config.js</code> — por isso ' +
+      (quantos === 1 ? 'o botão de compra está desligado' : 'os ' + quantos + ' botões de compra estão desligados') +
+      ' de propósito, em vez de virarem link morto.';
+    document.body.insertBefore(t, document.body.firstChild);
+    document.documentElement.classList.add('com-tarja');
+
+    /* A ALTURA DELA VIRA UMA VARIAVEL DE CSS. A tarja é fixa no topo; sem isto o
+       cabeçalho fica POR BAIXO dela e o logo da ālea some atrás do aviso — foi o que
+       apareceu no primeiro teste de 15/09/2026. Medir em vez de chutar um número
+       porque no celular o texto quebra em duas ou três linhas. */
+    var medir = function () {
+      document.documentElement.style.setProperty('--tarja', t.offsetHeight + 'px');
+    };
+    medir();
+    window.addEventListener('resize', medir);
+  }
+
+  window.aleaLigarBotoes = function (raiz) {
+    var botoes = (raiz || document).querySelectorAll('.zap:not([data-ligado])');
+    Array.prototype.forEach.call(botoes, function (b) {
+      b.setAttribute('data-ligado', '1');
+      var assunto = b.getAttribute('data-assunto') || 'os produtos da ālea & Co.';
+      if (C.email_orcamento && /^or[çc]amento/i.test(assunto)) {
+        /* 28/09/2026: orçamento vai por E-MAIL (áudios 3035/3037). */
+        b.classList.remove('zap');
+        b.classList.add('email-orcamento');
+        b.setAttribute('href', 'mailto:' + C.email_orcamento +
+          '?subject=' + encodeURIComponent('Orçamento de peça personalizada') +
+          '&body=' + encodeURIComponent('Oi! Vim pelo site da ālea & Co. e quero um orçamento de uma peça personalizada.' + String.fromCharCode(10, 10)));
+        b.removeAttribute('target');
+        return;
+      }
+      if (temZap) {
+        b.setAttribute('href', linkZap(assunto));
+        b.setAttribute('target', '_blank');
+        b.setAttribute('rel', 'noopener');
+        b.addEventListener('click', marcarConversao);
+        return;
+      }
+      b.removeAttribute('href');
+      b.setAttribute('aria-disabled', 'true');
+      b.setAttribute('title', 'WhatsApp ainda não configurado');
+    });
+    var total = document.querySelectorAll('.zap').length;
+    if (!temZap && total) avisarUmaVez(total);
+  };
+
+  /* ------------------------------------------------- campos vindos do config.js */
+  function preencherContato() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-campo]'), function (el) {
+      var v = C[el.getAttribute('data-campo')];
+      if (v) el.textContent = v;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-assinatura], [data-datilografar]'), function (el) {
+      if (C.assinatura) el.textContent = C.assinatura;
+    });
+    var ano = document.getElementById('ano');
+    if (ano) ano.textContent = new Date().getFullYear();
+  }
+
+  /* ------------------------------------------------------ menu de categorias
+     O mesmo menu aparece na abertura e no rodapé, e em toda página interna. Ele é
+     montado a partir do produtos.js: categoria nova no catálogo entra no menu sozinha.
+
+     Categoria SEM PEÇA não vira link. Ela aparece apagada, com "em breve" — porque
+     link que abre uma tela vazia é pior do que não ter link, e o Google trata isso
+     como experiência ruim na página de destino. */
+  function montarMenuCategorias() {
+    var caixas = document.querySelectorAll('[data-menu-categorias]');
+    if (!caixas.length) return;
+    var cats = window.CATEGORIAS || [];
+    var feed = window.VITRINE || [];
+    var naHome = !!document.getElementById('feed');
+
+    Array.prototype.forEach.call(caixas, function (caixa) {
+      caixa.innerHTML = '';
+      var n = 0;
+      cats.forEach(function (cat) {
+        var quantos = feed.filter(function (i) { return i.categoria === cat.id; }).length;
+        if (!quantos && C.esconder_categorias_vazias) return;
+        var el;
+        if (quantos) {
+          el = document.createElement('a');
+          el.href = (naHome ? '' : 'index.html') + '#' + cat.id;
+          el.setAttribute('data-categoria', cat.id);
+          el.textContent = cat.nome;
+          if (cat.descricao) el.title = cat.descricao;
+        } else {
+          el = document.createElement('span');
+          el.className = 'vazia';
+          el.innerHTML = cat.nome + '<small>em breve</small>';
+        }
+        caixa.appendChild(el);
+        n++;
+        /* ⚠️ ETAPA 11 (22/09/2026): o Cassiano quer o menu SEMPRE 3 na primeira fileira e 4 na
+           segunda (como na página inicial). A quebra natural do flex dependia da largura das
+           letras — com a fonte nova (Defante) ela virou 3+3+1 / 4+2+1. Uma quebra explícita depois
+           do 3º item (um elemento que ocupa a linha toda) garante o 3+4 em QUALQUER fonte. */
+        if (n === 3) {
+          var quebra = document.createElement('span');
+          quebra.className = 'quebra-linha';
+          quebra.setAttribute('aria-hidden', 'true');
+          caixa.appendChild(quebra);
+        }
+      });
+    });
+  }
+
+  /* ⚠️ EXPORTADO PRA QUEM NASCE DEPOIS (5ª rodada, 17/09/2026): o cartão de fim do feed
+     também mostra todas as categorias, e ele é desenhado pelo feed.js muito depois desta
+     montagem. Em vez de o feed.js repetir a regra do "em breve" (categoria sem peça não
+     vira link), ele chama esta função no bloco novo. Uma regra, um lugar. */
+  window.aleaMenuCategorias = montarMenuCategorias;
+
+  /* ------------------------------------------------------------------- redes
+     Ícone só existe se o endereço existir. Ver `redes` no config.js. */
+  var ICONES = {
+    linktree: '<path d="M7.2 2h9.6v4.6l3.3-3.3 2.4 2.4-3.6 3.5H24v3.4h-5.1l3.6 3.5-2.4 2.4-5.9-5.9H13v6.1h-2v-6.1H9.4l-5.9 5.9-2.4-2.4L4.7 12.6H0V9.2h5.1L1.5 5.7l2.4-2.4 3.3 3.3z" transform="scale(.85) translate(2 2)"/>',
+    instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor" stroke="none"/>',
+    youtube: '<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10.5 9.2l5 2.8-5 2.8z" fill="currentColor" stroke="none"/>',
+    twitch: '<path d="M4 3h16v11l-4 4h-3l-3 3H8v-3H4z"/><path d="M11 8v4M15 8v4"/>'
+  };
+  /* o segundo Instagram (o do canal "eaí, bora?") usa o mesmo desenho; quem diferencia os
+     dois é o nome, que aparece no toque longo e é o que o leitor de tela fala */
+  ICONES.instagram_canal = ICONES.instagram;
+  var NOMES = { linktree: 'Linktree', instagram: 'Instagram @alea.co_',
+                instagram_canal: 'Instagram @eaibora.3d', youtube: 'YouTube', twitch: 'Twitch' };
+
+  /* ⚠️ O LINKTREE É UM SÍMBOLO CHEIO, não um contorno (4ª rodada, item 5).
+     Todos os outros ícones daqui são desenhos de linha (`fill:none` + `stroke`), e a marca do
+     Linktree desenhada assim vira um risco fino em volta da estrela — some num ícone de 20 px.
+     Ele é o único que vai pintado por dentro. */
+  var CHEIOS = { linktree: true };
+
+  /* ⚠️ v29 (Cassiano, áudio 1997, 26/09/2026 03:10): "o ālea preto também do site, ele não vai direto pro Instagram,
+     arruma isso também". A logo grande do rodapé (preto) vira link pro Instagram da ālea, em aba nova. O endereço
+     sai do `C.instagram` do config.js ('alea.co_', conferido na API da Meta em 16/09/2026) — não é digitado aqui.
+     Sem @ no config, a logo continua só imagem (nunca link morto). Só no computador (v29b). */
+  function ligarLogoDoRodape() {
+    /* v29b (áudios 2000/2004): "tudo que eu pedi pra mexer no site do computador é no computador; no celular não mexe" */
+    if (!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)').matches)) return;
+    var usuario = (C.instagram || '').replace(/^@/, '');
+    if (!usuario) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.rodape img.marca-rodape'), function (img) {
+      if (img.closest('a')) return;
+      var a = document.createElement('a');
+      a.className = 'marca-rodape-link';
+      a.href = 'https://www.instagram.com/' + usuario + '/';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.setAttribute('aria-label', 'Instagram da ālea & Co. (@' + usuario + ')');
+      a.title = '@' + usuario;
+      img.parentNode.insertBefore(a, img);
+      a.appendChild(img);
+    });
+  }
+
+  function montarRedes() {
+    var caixas = document.querySelectorAll('[data-redes]');
+    if (!caixas.length) return;
+    var redes = C.redes || {};
+    Array.prototype.forEach.call(caixas, function (caixa) {
+      caixa.innerHTML = '';
+      /* a ordem é a que ele pediu na 4ª rodada: o Linktree "do lado do logo do Instagram" */
+      ['instagram', 'instagram_canal', 'linktree', 'youtube', 'twitch'].forEach(function (id) {
+        var url = redes[id];
+        if (!url) return;                     // vazio = não aparece, nunca link morto
+        var a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.setAttribute('aria-label', NOMES[id]);
+        a.title = NOMES[id];
+        /* 03/10/2026 (fotos 5612/5613 + áudios 5615/5616 do Cassiano): o Linktree deixa de ser ícone solto e vira
+           PÍLULA "✱ | Linktree". Nas partes pretas a escura (borda verde, texto branco, ">"); no resto a clara
+           (borda dourada fina, texto serifado, fundo = o nosso). Quem escolhe a versão é o CSS, pelo lugar. */
+        if (id === 'linktree') {
+          a.className = 'linktree-pilula';
+          /* o ✱ das referências desenhado em traço (o símbolo cheio de 24 px virava um borrão em 18 px) */
+          a.innerHTML = '<svg class="lt-marca" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" ' +
+            'stroke-linecap="butt" aria-hidden="true"><path d="M2 9h20M12 1v22M5.3 2.3L18.7 15.7M18.7 2.3L5.3 15.7"/></svg>' +
+            '<span class="lt-barra" aria-hidden="true"></span>' +
+            '<span class="lt-nome">Linktree</span>' +
+            '<svg class="lt-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+          caixa.appendChild(a);
+          return;
+        }
+        a.innerHTML = '<svg viewBox="0 0 24 24" ' +
+          (CHEIOS[id] ? 'fill="currentColor" stroke="none" ' : 'fill="none" stroke="currentColor" ') +
+          'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
+          'aria-hidden="true">' + ICONES[id] + '</svg>';
+        caixa.appendChild(a);
+      });
+    });
+  }
+
+  /* =======================================================================
+     AS GAVETAS — conta e carrinho
+     =======================================================================
+     Construídas aqui, uma vez, e não copiadas na mão em cada página: gaveta repetida
+     em seis arquivos é gaveta que diverge.
+
+     ⚠️ SOBRE A "CONTA" (parecer de 15/09/2026, registrado no código porque é onde ele
+     não some): conta de verdade — com login, senha e histórico de pedidos — exige
+     SERVIDOR, e este site é estático no GitHub Pages. Página estática não guarda
+     segredo nem sessão. Então a gaveta da Conta entrega o que dá pra entregar com
+     honestidade: os pedidos feitos NESTE APARELHO e os dados de contato salvos aqui,
+     que voltam preenchidos no próximo pedido. Nada de tela de login que não loga em
+     lugar nenhum. Quando o checkout da Rota A subir (ver PARECER_PAGAMENTO_E_FRETE),
+     é esta mesma gaveta que ganha o login — o botão e o lugar já existem. */
+  function montarGavetas() {
+    if (document.getElementById('cortina-alea')) return;
+
+    var cortina = document.createElement('div');
+    cortina.className = 'cortina';
+    cortina.id = 'cortina-alea';
+    document.body.appendChild(cortina);
+
+    var molde = function (id, titulo, corpo, rodape) {
+      var g = document.createElement('aside');
+      g.className = 'gaveta';
+      g.id = 'gaveta-' + id;
+      g.setAttribute('role', 'dialog');
+      g.setAttribute('aria-modal', 'true');
+      g.setAttribute('aria-label', titulo);
+      g.setAttribute('aria-hidden', 'true');
+      g.innerHTML =
+        '<header><h2>' + titulo + '</h2>' +
+        '<button type="button" aria-label="Fechar" data-fechar-gaveta>&times;</button></header>' +
+        '<div class="corpo" data-corpo>' + corpo + '</div>' +
+        (rodape ? '<div class="rodape-gaveta" data-rodape-gaveta>' + rodape + '</div>' : '');
+      /* ⚠️ ETAPA 57 (23/09/2026, vídeos do Cassiano 15:52-15:55): a página arrastava pros LADOS e o cabeçalho
+         ia junto — também no site do ar, então a trava da etapa 46 (overflow-x) não segurava no Safari dele. Causa
+         medida no WebKit (390 px): as gavetas FECHADAS moram fora da tela (x 390 a 780), e o Safari deixa arrastar
+         até elas. Agora elas moram DENTRO de uma moldura fixa do tamanho exato da tela, que corta o que passa da
+         borda: não sobra nada pra arrastar, e a animação de abrir continua a mesma. */
+      var moldura = document.getElementById('moldura-gavetas');
+      if (!moldura) {
+        moldura = document.createElement('div');
+        moldura.id = 'moldura-gavetas';
+        moldura.className = 'moldura-gavetas';
+        /* reserva pra Safari antigo sem `overflow: clip`: se a moldura rolar, volta pro zero */
+        moldura.addEventListener('scroll', function () { moldura.scrollLeft = 0; moldura.scrollTop = 0; });
+        document.body.appendChild(moldura);
+      }
+      moldura.appendChild(g);
+      return g;
+    };
+
+    /* ETAPA 33 (22/09/2026, 21:42, com print de referência): o LAYOUT do carrinho segue o modelo
+       que ele mandou — "mantenha minha fonte, cor, tudo, só quero o layout, design e posições" —
+       e fica no rodapé: Subtotal centralizado, o botão largo, e "Continue comprando" sublinhado
+       embaixo (fecha a gaveta). O aviso do frete continua, pequeno, por último. */
+    /* ⚠️ ETAPA 65 (23/09/2026 22:41, vídeo do Cassiano: "a tela tá mexendo de novo pros lados"): as gavetas de SACOLA
+       e de CONTA não são mais montadas. As duas viraram páginas (finalizar-compra.html e conta.html — etapas 61/62), mas
+       continuavam existindo escondidas à direita da tela (x 390..780), e o Safari deixava arrastar até elas mesmo com a
+       moldura da etapa 57. O molde() continua aqui pra quem precisar de gaveta nova. */
+    void molde;
+
+    function fechar() {
+      Array.prototype.forEach.call(document.querySelectorAll('.gaveta'), function (g) {
+        g.classList.remove('aberta');
+        g.setAttribute('aria-hidden', 'true');
+      });
+      /* v23 (25/09/2026): só destrava a página se uma gaveta estava aberta de verdade — o Esc chamava isto sempre e
+         destravava a página por baixo de um álbum aberto */
+      var tinhaGaveta = cortina.classList.contains('aberta');
+      cortina.classList.remove('aberta');
+      if (tinhaGaveta) document.body.classList.remove('travado');
+    }
+    function abrir(id) {
+      /* ETAPA 62 (23/09/2026 22:07, Cassiano: "temos duas sacolas (...) aquela primeira não vai existir mais"):
+         a SACOLA deixou de ser gaveta. Todo pedido de "abrir o carrinho" — o ícone do topo, o editar da peça,
+         o Comprar agora — vai direto pra página Sacola de Compras. */
+      if (id === 'carrinho') { location.href = 'finalizar-compra.html'; return; }
+      var g = document.getElementById('gaveta-' + id);
+      if (!g) return;
+      fechar();
+      g.classList.add('aberta');
+      g.setAttribute('aria-hidden', 'false');
+      cortina.classList.add('aberta');
+      document.body.classList.add('travado');
+      document.dispatchEvent(new CustomEvent('alea:gaveta', { detail: { id: id } }));
+      var alvo = g.querySelector('button, a, input');
+      if (alvo) alvo.focus();
+    }
+    window.aleaGaveta = { abrir: abrir, fechar: fechar };
+
+    cortina.addEventListener('click', fechar);
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-abrir]');
+      /* ETAPA 61 (23/09/2026): a CONTA virou PÁGINA (conta.html), como na Tiffany — "clicar lá em cima,
+         do lado da sacola, em meu perfil, para aparecer essa página". O carrinho continua gaveta. */
+      if (b && b.getAttribute('data-abrir') === 'conta') { e.preventDefault(); location.href = 'conta.html'; return; }
+      /* 14/10/2026 (áudios 10832/10837 do Cassiano): no celular o 1º toque abre a aba da sacola (carrinho.js) e o 2º a fecha */
+      if (b && b.getAttribute('data-abrir') === 'carrinho') {
+        e.preventDefault();
+        if (window.aleaAbaSacola && window.aleaAbaSacola.toque()) return;
+        location.href = 'finalizar-compra.html'; return;
+      }
+      /* 27/09/2026 (áudio 2300 do Cassiano): o coração do topo, entre a Conta e a Sacola, leva à página da Lista de Desejos */
+      if (b && b.getAttribute('data-abrir') === 'desejos') { e.preventDefault(); location.href = 'lista-de-desejos.html'; return; }
+      if (b) { e.preventDefault(); abrir(b.getAttribute('data-abrir')); return; }
+      if (e.target.closest('[data-fechar-gaveta]')) fechar();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') fechar();
+    });
+  }
+
+  /* ------------------------------------------- "voltar para o feed" (ETAPA 17)
+     Parte 3, item 2 (22/09/2026): o botão levava pra `index.html` — a PRIMEIRA página. Tem que
+     voltar pra categoria e pra tela exata de onde a pessoa saiu. O feed.js guardou essa tela em
+     `alea_feed_exato` quando ela saiu; aqui o botão aponta pra `index.html#<categoria>` (que abre
+     direto no feed, sem abertura) e deixa a marca `alea_voltar_exato` pedindo a restauração.
+     Sem tela guardada (chegou no produto por link de fora), segue pra primeira página. */
+  function ligarVoltarProFeed() {
+    Array.prototype.forEach.call(document.querySelectorAll('a.voltar'), function (a) {
+      var e = null;
+      try { e = JSON.parse(sessionStorage.getItem('alea_feed_exato') || 'null'); } catch (err) { /* nada */ }
+      if (!e || !e.cat) return;
+      a.setAttribute('href', 'index.html#' + e.cat);
+      a.addEventListener('click', function () {
+        try { sessionStorage.setItem('alea_voltar_exato', e.cat); } catch (err) { /* aba anônima */ }
+      });
+    });
+  }
+
+  /* ---------------------------------- a categoria em cima do nome é link (06/10/2026)
+     Print 6916 + áudio 6917 do Cassiano: "qualquer categoria que tiver em cima do nome, seja home, seja fan, seja
+     pet, vai direto para a categoria, tanto para o celular quanto para o computador". O rótulo <span class="linha">
+     da página de peça ganha um <a> em volta pra `index.html#<categoria>` (o mesmo endereço do menu). Feito aqui, e
+     não no gerador, pelo mesmo motivo da conta logo abaixo: as páginas são GERADAS. Categoria sem peça na vitrine
+     fica sem link (o index.html#<id> dela não abriria nada). */
+  function ligarCategoriaDoProduto() {
+    var cats = window.CATEGORIAS || [], vit = window.VITRINE || [];
+    Array.prototype.forEach.call(document.querySelectorAll('.produto-topo span.linha:not([data-album-nome])'), function (el) {
+      if (el.closest('a')) return;
+      var txt = (el.textContent || '').trim().toLowerCase();
+      var cat = cats.filter(function (c) { return c.id === txt || (c.nome || '').toLowerCase() === txt; })[0];
+      if (!cat || !vit.some(function (i) { return i.categoria === cat.id; })) return;
+      var a = document.createElement('a');
+      a.className = 'linha-link';
+      a.href = 'index.html#' + cat.id;
+      a.setAttribute('aria-label', 'Ver todas as peças de ' + (cat.nome || cat.id));
+      el.parentNode.insertBefore(a, el);
+      a.appendChild(el);
+    });
+  }
+
+  /* --------------------------------------------------- a conta no servidor (22/09/2026)
+     Os arquivos da conta e da memória da visita só carregam quando `api_conta` está
+     preenchido no config.js. Carregar DAQUI, e não com <script> em cada página, é de
+     propósito: as páginas de produto são GERADAS, e uma tag escrita à mão nelas some na
+     próxima geração. Assim nenhum HTML muda, e desligar é apagar uma linha. */
+  function carregarConta() {
+    if (!C.api_conta) return;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'css/conta.css';
+    document.head.appendChild(css);
+    ['js/rastro.js', 'js/conta.js'].forEach(function (src) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;              // rastro antes da conta: a conta usa o aparelho do rastro
+      document.body.appendChild(s);
+    });
+  }
+
+  /* ETAPA 61 (23/09/2026): na página de PEÇA entra o coração da Lista de Desejos (loja-dados.js).
+     As páginas conta.html e finalizar-compra.html carregam os arquivos da loja por conta própria. */
+  function carregarCoracao() {
+    if (!document.querySelector('.produto-topo') || window.aleaLoja) return;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = 'css/loja.css';
+    document.head.appendChild(css);
+    var s = document.createElement('script');
+    s.src = 'js/loja-dados.js';
+    document.body.appendChild(s);
+  }
+
+  /* 27/09/2026 (áudio 2308 do Cassiano): o degradê do "× Nome" mede o NOME, que precisa estar num <span class="nome">.
+     As 4 páginas de produto e o feed.js (v34) já saem assim; isto embrulha qualquer .collab que chegue sem o span
+     (página refeita por gerador antigo), pra o nome nunca ficar sem cor. Só mexe no texto que vem DEPOIS do ×. */
+  function embrulharNomeCollab() {
+    Array.prototype.forEach.call(document.querySelectorAll('.collab'), function (c) {
+      if (c.querySelector('.nome')) return;
+      var x = c.querySelector('.x');
+      var no = x ? x.nextSibling : c.firstChild;
+      if (!no || no.nodeType !== 3) return;
+      var t = no.nodeValue, sep = /^[  ]/.test(t) ? t.charAt(0) : '';
+      var n = document.createElement('span');
+      n.className = 'nome'; n.textContent = t.slice(sep.length);
+      no.nodeValue = sep;
+      c.insertBefore(n, no.nextSibling);
+    });
+  }
+
+  /* -------------------------------------------------------------------- início */
+  /* ETAPA 72 (24/09/2026): linha da ficha ainda sem número (ex.: "Peso e dimensões — a informar") só aparece na
+     PRÉVIA; no site do ar ela some. Nunca mostrar "a informar" pro cliente de verdade. */
+  function esconderFaltas() {
+    if (/github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-falta]'), function (el) { el.hidden = true; });
+  }
+
+  function iniciar() {
+    esconderFaltas();
+    embrulharNomeCollab();
+    ligarVoltarProFeed();
+    ligarCategoriaDoProduto();
+    preencherContato();
+    montarMenuCategorias();
+    montarRedes();
+    document.addEventListener('alea:feed-desenhado', montarRedes);   // 03/10/2026 (foto 5597): o cartão de fim do feed também tem as redes
+  ligarLogoDoRodape();
+    montarGavetas();
+    window.aleaLigarBotoes();     // as páginas de produto já nascem prontas no HTML
+    carregarConta();
+    carregarCoracao();
+    document.dispatchEvent(new CustomEvent('alea:site-pronto'));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciar);
+  } else {
+    iniciar();
+  }
+})();
+
+/* CORAÇÃO DO TOPO COLORIDO QUANDO A LISTA TEM PEÇA (áudio 2317 do Cassiano, 27/09/2026): "se a pessoa tiver alguma coisa
+   na lista de desejos, o coração dela lá em cima vai ficar sempre colorido. Se ela não tiver, vai permanecer igual."
+   Lê a lista direto do aparelho (a mesma chave do loja-dados.js, alea_desejos_v1), porque nem toda página carrega o
+   loja-dados.js. Repinta ao tocar num coração/remover (depois do clique), quando outra aba muda a lista e ao voltar
+   pelo "voltar" do navegador. O desenho (span .coracao-silk-topo com o degradê) está no estilo.css v35. */
+(function () {
+  function temDesejos() {
+    try { var l = JSON.parse(localStorage.getItem('alea_desejos_v1') || '[]'); return Array.isArray(l) && l.length > 0; }
+    catch (e) { return false; }
+  }
+  function pintar() {
+    var tem = temDesejos();
+    document.querySelectorAll('[data-abrir="desejos"]').forEach(function (b) {
+      if (!b.querySelector('.coracao-silk-topo')) {
+        var s = document.createElement('span');
+        s.className = 'coracao-silk-topo'; s.setAttribute('aria-hidden', 'true');
+        b.insertBefore(s, b.firstChild);
+      }
+      b.classList.toggle('tem-desejos', tem);
+    });
+  }
+  /* na CAPTURA (antes do botão agir): o coração da peça reescreve o próprio innerHTML no clique, e depois disso o alvo
+     do toque já saiu da página e o closest() não o acha mais */
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.closest && e.target.closest('[data-desejo], .loja-desejos button, .loja-desejos .tirar')) setTimeout(pintar, 0);
+  }, true);
+  window.addEventListener('storage', function (e) { if (!e.key || e.key === 'alea_desejos_v1') pintar(); });
+  window.addEventListener('pageshow', pintar);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pintar); else pintar();
+})();
+
+/* 03/10/2026 — A BUSCA (js/busca.js): carregada daqui pra valer em toda página que tem o site.js, sem mexer nas páginas geradas. */
+(function () {
+  var eu = document.currentScript, s = document.createElement('script');
+  s.src = (eu && eu.src ? eu.src.replace(/site\.js(\?.*)?$/, '') : 'js/') + 'busca.js'; s.defer = true; document.head.appendChild(s);
+})();
+
+/* 06/10/2026 — O SITE EM INGLÊS (js/idioma.js; áudios 6928/6930/6932/6935 + print 6934 do Cassiano): as bandeiras PT/EN no topo e a
+   tradução. Carregado daqui pelo mesmo motivo da busca. Em inglês, a página fica escondida até o dicionário chegar (no máximo
+   2,5 s), pra não piscar português. */
+(function () {
+  var eu = document.currentScript, s = document.createElement('script');
+  try {
+    if (localStorage.getItem('alea_idioma') === 'en' || /[?&]lang=en\b/.test(location.search)) document.documentElement.classList.add('idioma-carregando');
+  } catch (e) { /* aba anônima */ }
+  s.src = (eu && eu.src ? eu.src.replace(/site\.js(\?.*)?$/, '') : 'js/') + 'idioma.js'; s.async = false; document.head.appendChild(s);
+})();
+
+/* 03/10/2026 — O RODAPÉ COMO FECHO (fotos 5826/5828/5829 + áudios 5827/5830/5831 do Cassiano):
+   (1) página de produto (produto-*.html) ganha a classe `pagina-produto` no <html>: o rodapé dela termina em
+       "© ālea & Co. 2026 — Todos os direitos reservados." (o CSS esconde a linha dos créditos; a página inicial mantém tudo);
+   (2) a faixa preta que pinta o pedaço sob a barra do Safari (.rodape-sob-a-barra, ver estilo.css) só aparece quando o
+       rodapé chegou ao pé da tela (html.rodape-no-fim) — no meio da página a barra continua mostrando a página. */
+(function () {
+  var raiz = document.documentElement;
+  if (/(^|\/)produto-[^\/]*$/.test(location.pathname)) raiz.classList.add('pagina-produto');
+  function montar() {
+    var rod = document.querySelector('footer.rodape');
+    if (!rod) return;
+    var faixa = document.createElement('div'); faixa.className = 'rodape-sob-a-barra'; faixa.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(faixa);
+    var pedido = false;
+    var topo = document.querySelector('header.topo');
+    // v2 (03/10/2026, fotos 5852/5853): no iPhone o pé do rodapé nem sempre "chega" ao innerHeight (a barra flutuante
+    // muda a altura) e a faixa não acendia. Acende também quando o topo do rodapé encostou no pé do cabeçalho.
+    function medir() {
+      pedido = false;
+      var pe = topo ? Math.round(topo.getBoundingClientRect().bottom) : 64;
+      faixa.style.setProperty('--pe-do-topo', pe + 'px');
+      var r = rod.getBoundingClientRect();
+      raiz.classList.toggle('rodape-no-fim', r.top <= pe + 48 || r.bottom <= window.innerHeight + 2);
+    }
+    function agendar() { if (!pedido) { pedido = true; requestAnimationFrame(medir); } }
+    window.addEventListener('scroll', agendar, { passive: true });
+    window.addEventListener('resize', agendar);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', agendar);
+    medir();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();
+/* 12/10/2026 — A FAIXA DO FRETE GRÁTIS NO TOPO (áudio 9449 do Cassiano: "lá no cabeçalho, a gente vai colocar essa
+   propaganda, de frete grátis para todo o Brasil e com um asterisco; quando a pessoa clicar, abre uma página explicando").
+   Texto e link em ALEA.faixaTopo (config.js). Usa o mesmo mecanismo da tarja de obra: a altura vira `--tarja` e o
+   cabeçalho fixo desce. No checkout (body.loja, topo próprio e não fixo) ela fica no fluxo, sem mexer no `--tarja`.
+   Sem ALEA.faixaTopo, ou com a tarja de obra na tela, nada aparece. */
+(function () {
+  function montar() {
+    var F = (window.ALEA || {}).faixaTopo;
+    if (!F || !F.texto || document.getElementById('tarja-config') || document.querySelector('.faixa-topo')) return;
+    var a = document.createElement('a');
+    a.className = 'faixa-topo';
+    a.href = F.link || 'frete-gratis.html';
+    /* 13/10/2026 (áudio 9604): duas linhas dentro do MESMO link (clicar em qualquer ponto da faixa leva à página) —
+       o texto e, embaixo, bem pequena, a linha F.sub. Antes: a.textContent = F.texto. */
+    var l1 = document.createElement('span');
+    l1.className = 'faixa-topo-texto';
+    l1.textContent = F.texto;
+    a.appendChild(l1);
+    if (F.sub) {
+      var l2 = document.createElement('span');
+      l2.className = 'faixa-topo-sub';
+      l2.textContent = F.sub;
+      a.appendChild(l2);
+    }
+    document.body.insertBefore(a, document.body.firstChild);
+    if (document.body.classList.contains('loja')) return;
+    document.documentElement.classList.add('com-faixa-topo');
+    var medir = function () { document.documentElement.style.setProperty('--tarja', a.offsetHeight + 'px'); };
+    medir();
+    window.addEventListener('resize', medir);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();

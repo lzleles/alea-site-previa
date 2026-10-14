@@ -1,0 +1,940 @@
+/* CATALOGO:
+   nome: loja-compra
+   categoria: UTIL
+   objetivo: A página finalizar-compra.html no desenho da Tiffany — Sacola de Compras (itens, mensagem para presente, entrega, subtotal) e Finalizar Compra em 3 etapas (Dados Pessoais, Entrega com CEP que preenche, Pagamento) com o Resumo do Pedido.
+   entrada: window.aleaCarrinho (carrinho.js); window.aleaLoja (loja-dados.js); window.aleaLojaUtil (loja-conta.js não é carregado aqui: as máscaras vivem em loja-util abaixo)
+   saida: pedido registrado; até o pagamento do site existir, o pedido completo segue pelo WhatsApp da ālea
+   status: prévia (23/09/2026)
+   validado_em: 2026-09-23 (Playwright 390 px, motor prévia)
+   12/10/2026 (áudios 9448/9449/9451/9453/9454/9455 do Cassiano): (1) FRETE PELO CEP na Entrega — o servidor cota
+      (/api/frete, só quando o /api/config diz "frete": true) e devolve o valor FINAL de cada opção (frete grátis e as
+      regras da loja moram lá); escolhida a opção, ela entra no total e no link de pagamento (id da cotação). Na PRÉVIA
+      (sem servidor) aparecem valores de EXEMPLO, marcados como exemplo, só com a regra pública do frete grátis.
+      (2) PIX COM DESCONTO: "Desconto Pix (5%)" no total e na caixa do Pix — a % vem do servidor (/api/config
+      "pix_desconto"; na prévia, do ALEA.pagamento); a conta é a mesma do servidor (centavos, meio centavo pra cima).
+      (3) CARTÃO "em até 6x sem juros" (parcelas do servidor/ALEA.pagamento). (4) a volta 'pago_a_menor' (escolheu Pix
+      e pagou no cartão com o valor do Pix): a tela explica que a loja vai entrar em contato.
+      Antes: 03_site/_versoes_anteriores/frete_pix_antes_2026-10-12/js/loja-compra.js
+   14/10/2026 (cupom da Maria; L-0191 do Lázaro "controi o cupom da maria e valida"; espec v2 do Cassiano, msgs
+      10661/10662/10671): CAMPO DE CUPOM no Resumo do Pedido (o site não tinha). O desconto quem diz é o servidor
+      (/api/cupom, só quando o /api/config diz "cupom": true); quem valida e QUEIMA (uso único) é o servidor, no link de
+      pagamento. A conta da tela: peças − cupom + frete − Pix (o Pix incide no que sobra das peças); o frete é cotado
+      com o cupom (o frete grátis é decidido pelo que a pessoa paga nas peças). Total R$ 0 = o servidor aprova sem
+      pagamento e a página vai direto pra "pedido confirmado". Na PRÉVIA (sem servidor) o cupom de teste é "TESTE",
+      com a mesma regra, simulada no aparelho. Antes: 03_site/_versoes_anteriores/cupom_antes_2026-10-14/js/loja-compra.js
+   14/10/2026 (foto 10825 + áudios 10826/10827/10828/10830 do Cassiano, a sacola da Tiffany): na caixa do total,
+      "Entrega · Ver Opções de Entrega" FECHADO (o clique abre o CEP no mesmo lugar; o cupom SAI da Sacola, áudio 10833); a linha
+      Frete só aparece com valor; no COMPUTADOR a sacola vira a tabela larga (Produto/Preço/Quantidade/Total) com a caixa
+      do total à direita e os 2 botões dentro dela. Celular: a lista de antes. A aba do ícone do topo mora no carrinho.js.
+      Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/js/loja-compra.js
+*/
+/* =============================================================================
+   loja-compra.js — "some o fechar pedido pelo WhatsApp, aparece concluir compra" (Cassiano, 23/09/2026 20:44)
+   =============================================================================
+   O CAMINHO, IGUAL AO VÍDEO DELE NA TIFFANY:
+     sacola (gaveta) → "Finalizar Compra" → SACOLA DE COMPRAS (página) → "Finalizar Compra"
+     → FINALIZAR COMPRA: 1 Dados Pessoais → "Ir para a Entrega" → 2 Entrega → "Ir para Pagamento"
+     → 3 Pagamento → "Finalizar Compra".
+
+   ⚠️ O PAGAMENTO AINDA NÃO EXISTE NO SITE. Cartão e Pix quem integra é a ZELES, e por decisão da casa
+   (23/09/2026) o site NUNCA terá campo de cartão: o pagamento vai por checkout do gateway (link ou
+   redirecionamento). Até ele subir, o "Finalizar Compra" final manda o pedido COMPLETO — peças,
+   dados, endereço e a forma de pagamento escolhida — pelo WhatsApp da ālea, que é como o Cassiano
+   recebe hoje. Quando o gateway existir, muda SÓ a função `concluir()`.
+   ⚠️ FRETE: não há tabela de frete ainda. A tela diz "a calcular" — nunca um valor inventado.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var L = window.aleaLoja;
+  var raiz = document.querySelector('[data-loja-compra]');
+  if (!L || !raiz) return;
+  /* a faixa "isto é prévia" mora DENTRO da página (o topo do site é fixo e cobriria o que vem antes) */
+  var FAIXA = L.previa ? '<div class="loja-previa">Prévia: a conta e os dados ficam só neste aparelho. Nada vai pro servidor.</div>' : '';
+  var CAR = function () { return window.aleaCarrinho; };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function dinheiro(v) { return window.aleaDinheiro ? window.aleaDinheiro(v) : 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
+  /* v60 (10/10/2026): preço na tela no estilo do Cassiano (Cormorant, R$ pela metade); texto puro segue no dinheiro(). */
+  function dinheiroTela(v) { return window.aleaDinheiroHTML ? window.aleaDinheiroHTML(v) : dinheiro(v); }
+  function mascaraTelefone(v) {
+    var d = String(v || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '').slice(0, 11);
+    if (d.length <= 2) return d.length ? '(' + d : '';
+    if (d.length <= 6) return '(' + d.slice(0, 2) + ') ' + d.slice(2);
+    if (d.length <= 10) return '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6);
+    return '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+  }
+  function mascaraCpf(v) {
+    var d = String(v || '').replace(/\D/g, '').slice(0, 11);
+    return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+  }
+  function cpfValido(v) {
+    var d = String(v || '').replace(/\D/g, '');
+    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    for (var t = 9; t < 11; t++) {
+      var s = 0;
+      for (var i = 0; i < t; i++) s += +d[i] * (t + 1 - i);
+      if (((s * 10) % 11) % 10 !== +d[t]) return false;
+    }
+    return true;
+  }
+
+  var ICONE = {
+    pessoa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+    casa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+    casaCheia: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l10 8h-3v9h-5v-6h-4v6H5v-9H2z"/></svg>',
+    cartao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1"/><path d="M2.5 9.5h19"/></svg>',
+    lapis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>'
+  };
+
+  var eu = { logado: false };
+  var st = L.compra.ler();          // { etapa, dados, entrega, pagamento, presente }
+  st.etapa = st.etapa || 'dados';
+  st.dados = st.dados || {};
+  st.entrega = st.entrega || {};
+  st.pagamento = st.pagamento || '';
+  var erro = '';
+  var concluido = null;
+
+  /* PAGAMENTO PELA INFINITEPAY (05/10/2026 — o Cassiano trocou o Mercado Pago pela InfinitePay; ordem do Lázaro
+     "coloque no ar o qto antes"). Liga SOZINHO quando o /api/config do servidor diz {"provedor":"infinitepay"}.
+     O cliente paga na página segura da InfinitePay (Pix ou cartão até 10x sem juros) e volta pra esta página com
+     ?pedido=AL-0001&transaction_nsu=…&slug=…; quem diz "pago" é o servidor, conferindo na InfinitePay.
+     Peça sem preço (sob consulta) continua indo pelo WhatsApp, como antes. */
+  var PAG = null;                              // {provedor, parcelas_max} quando o pagamento pelo site está ligado
+  var K_PAG = 'alea_pagamento_link_v1';        // {numero, chave, nome, linhas} — sobrevive à ida e volta
+  var retorno = null;                          // a tela da volta: {estado, numero, nome, tentativas, link}
+  function usaLink() { return !!(PAG && L.pagarLink && !L.previa && !sobConsulta() && subtotal() > 0); }
+  function lerPag() { try { return JSON.parse(localStorage.getItem(K_PAG) || 'null'); } catch (e) { return null; } }
+  function gravarPag(o) { try { if (o) localStorage.setItem(K_PAG, JSON.stringify(o)); else localStorage.removeItem(K_PAG); } catch (e) { /* aba anônima */ } }
+
+  function guardar() { L.compra.gravar(st); }
+  function tela() { return (location.hash || '').indexOf('compra') >= 0 ? 'compra' : 'sacola'; }
+
+  /* ------------------------------------------------------------ as peças */
+  function itens() { return CAR() ? CAR().itens() : []; }
+  function qtd(i) { return Math.max(1, parseInt(i.qtd, 10) || 1); }
+  function foto(i) { return i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp'); }
+  function fotoReserva(i) { return 'this.onerror=null;this.src=&quot;img/produtos/' + esc(i.capa) + '_m.jpg&quot;'; }
+  function descrever(i) { return CAR() && CAR().descrever ? CAR().descrever(i) : ''; }
+  function subtotal() { return CAR() ? CAR().total() : 0; }
+  function sobConsulta() { return itens().some(function (i) { return !i.preco; }); }
+
+  /* ---------------------------------------------- 12/10/2026: Pix, parcelas e frete */
+  var C = window.ALEA || {};
+  var FRETE = false;                          // o /api/config diz "frete": true quando o servidor cota
+  function centavos(v) { return Math.round(Number(v || 0) * 100); }
+  function pagCfg() {
+    if (PAG) return { pix: Number(PAG.pix_desconto) || 0, parcelas: PAG.parcelas_max || 0 };
+    if (L.previa) { var p = C.pagamento || {}; return { pix: Number(p.pix_desconto) || 0, parcelas: p.parcelas_max || 0 }; }
+    return { pix: 0, parcelas: 0 };
+  }
+  function pctPix() { return Math.round(pagCfg().pix * 100); }
+  /* a MESMA conta do servidor (regras_loja_v1.desconto_pix_centavos): só nas peças, meio centavo arredonda pra cima */
+  function descontoPixDe(sub) {
+    var bp = Math.round(pagCfg().pix * 10000);
+    return bp ? Math.floor((centavos(sub) * bp + 5000) / 10000) / 100 : 0;
+  }
+  function descontoPix() { return (st.pagamento === 'pix' && !sobConsulta()) ? descontoPixDe(pecasPagas()) : 0; }
+  function opcaoFrete() {
+    var f = st.frete;
+    if (!f || f.estado !== 'ok') return null;
+    return (f.opcoes || []).filter(function (o) { return o.servico === f.escolhido; })[0] || null;
+  }
+  function freteValor() { var o = opcaoFrete(); return o ? Number(o.valor) : null; }
+  function totalFinal() {
+    return (centavos(subtotal()) - centavos(descontoCupom()) + centavos(freteValor() || 0) - centavos(descontoPix())) / 100;
+  }
+
+  /* ------------------------------------------------- 14/10/2026: o CUPOM (cupom da Maria) */
+  var CUPOM_SERVIDOR = false;                  // o /api/config diz "cupom": true quando o servidor sabe validar
+  var K_CUPOM_PREVIA = 'alea_previa_cupom_usado_v1';
+  var cupomMsg = '';
+  function cupomLigado() { return L.previa ? true : !!(CUPOM_SERVIDOR && L.verCupom); }
+  function chaveSacola() {
+    return JSON.stringify(itens().map(function (i) {
+      return [i.slug, qtd(i), i.personalizacao || null, (i.extras || []).map(function (x) { return x && x.id; })];
+    }));
+  }
+  /* o cupom vale para ESTA sacola: mexeu nas peças, a tela pergunta de novo ao servidor */
+  function cupomAtual() { var c = st.cupom; return c && c.sacola === chaveSacola() ? c : null; }
+  function descontoCupom() { var c = cupomAtual(); return c && !sobConsulta() ? Number(c.desconto) || 0 : 0; }
+  function pecasPagas() { return Math.max(0, (centavos(subtotal()) - centavos(descontoCupom())) / 100); }
+  /* PRÉVIA: a mesma regra do servidor (regras_loja_v2_cupom_maria), simulada no aparelho, com o cupom de TESTE.
+     O código de verdade NÃO mora no site (o site é público): só no servidor. */
+  var PREVIA_CUPOM = { codigo: 'TESTE', poopProduto: 'poop-bag-holder', poopAdicional: 'poop_bag', conjuntos: ['ayla-pompom'],
+    comedouros: ['luke-bowl', 'matteo-texturized', 'claudia-wave', 'pet-bowl-caesar', 'pet-bowl-prisma', 'pet-bowl-retis',
+                 'pet-petra', 'bowl-wave'] };
+  function normalizarCupom(s) {
+    return String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').toUpperCase();
+  }
+  function cupomNaPrevia(codigo) {
+    var P = PREVIA_CUPOM;
+    if (normalizarCupom(codigo) !== P.codigo) return Promise.reject(new Error('Cupom inválido.'));
+    try { if (localStorage.getItem(K_CUPOM_PREVIA)) return Promise.reject(new Error('Este cupom já foi usado.')); } catch (e) { /* aba anônima */ }
+    var com = 0, poop = 0, par = 0;
+    itens().forEach(function (i) {
+      var pb = 0;
+      (i.extras || []).forEach(function (x) { if (x && x.id === P.poopAdicional) pb = centavos(x.preco); });
+      for (var n = 0; n < qtd(i); n++) {
+        if (P.conjuntos.indexOf(i.slug) >= 0) par = Math.max(par, centavos(i.preco));
+        else if (P.comedouros.indexOf(i.slug) >= 0) { com = Math.max(com, centavos(i.preco) - pb); poop = Math.max(poop, pb); }
+        else if (i.slug === P.poopProduto) poop = Math.max(poop, centavos(i.preco));
+      }
+    });
+    var v = Math.max(par, com + poop);
+    if (!v) return Promise.reject(new Error('Este cupom vale para um comedouro e um Poop Bag Holder: coloque um deles na sacola.'));
+    return Promise.resolve({ ok: true, codigo: P.codigo, rotulo: 'Cupom de teste', desconto: v / 100 });
+  }
+  function aplicarCupom(codigo) {
+    codigo = String(codigo || '').trim();
+    if (!codigo) { cupomMsg = 'Digite o cupom.'; pintar(); return; }
+    cupomMsg = 'Conferindo…'; pintar();
+    var pedir = L.previa ? cupomNaPrevia(codigo) : L.verCupom({ codigo: codigo, itens: itensServidor() });
+    pedir.then(function (j) {
+      st.cupom = { codigo: j.codigo, rotulo: j.rotulo, desconto: Number(j.desconto) || 0, sacola: chaveSacola() };
+      cupomMsg = ''; st.frete = null; guardar(); pintar();          // o frete é cotado de novo, com o cupom
+    }).catch(function (x) {
+      st.cupom = null; cupomMsg = (x && x.message) || 'Não deu para conferir o cupom agora.'; guardar(); pintar();
+    });
+  }
+  function tirarCupom() { st.cupom = null; cupomMsg = ''; st.frete = null; guardar(); pintar(); }
+  function htmlCupom() {
+    if (!cupomLigado() || sobConsulta()) return '';
+    var c = cupomAtual();
+    if (c) {
+      return '<div class="loja-cupom" data-cupom style="margin:14px 0 0;font-size:12.5px">Cupom <strong>' + esc(c.codigo) +
+        '</strong> aplicado. <button type="button" class="loja-link sublinha loja-miudo" data-tirar-cupom>Tirar</button></div>';
+    }
+    return '<div class="loja-cupom" data-cupom style="margin:14px 0 0"><p class="loja-rotulo" style="margin:0 0 6px">Cupom de desconto</p>' +
+      '<div style="display:flex;gap:8px;align-items:stretch"><input name="cupom" autocomplete="off" autocapitalize="characters" maxlength="40" ' +
+      'aria-label="Cupom de desconto" style="flex:1;min-width:0;padding:10px 12px;border:1px solid var(--lj-linha, #d8d2c8);font:inherit;text-transform:uppercase">' +
+      '<button type="button" class="loja-bt contorno" data-aplicar-cupom style="white-space:nowrap">Aplicar</button></div>' +
+      (cupomMsg ? '<p class="loja-miudo" data-cupom-msg role="status" style="margin:6px 0 0">' + esc(cupomMsg) + '</p>' : '') + '</div>';
+  }
+  function itensServidor() {                  // as miniaturas (imagem) ficam no aparelho: o servidor só precisa da escolha
+    return itens().map(function (i) {
+      var c = JSON.parse(JSON.stringify(i)); delete c.miniatura;
+      (c.extras || []).forEach(function (x) { if (x) delete x.miniatura; });
+      return c;
+    });
+  }
+  function chaveFrete() {
+    var c = cupomAtual();                       // 14/10/2026: com cupom, o frete grátis muda: cota de novo
+    return (st.entrega.cep || '') + '|' + (c ? c.codigo : '') + '|' + JSON.stringify(itens().map(function (i) {
+      return [i.slug, qtd(i), i.personalizacao || null, (i.extras || []).map(function (x) { return x && x.id; })];
+    }));
+  }
+  /* região pelo CEP (as faixas dos Correios, iguais às do servidor): Sudeste, DF/GO, MT/MS e Sul = "sseco" */
+  function regiaoDoCep(cep) {
+    var n = parseInt(String(cep || '').replace(/\D/g, ''), 10) || 0;
+    return ((n >= 1000000 && n <= 39999999) || (n >= 70000000 && n <= 76799999) || n >= 78000000) ? 'sseco' : 'demais';
+  }
+  /* PRÉVIA: sem servidor, a tela mostra valores de EXEMPLO (marcados) e só a regra PÚBLICA do frete grátis */
+  function freteDeExemplo(chave) {
+    var g = C.freteGratis || {}, sub = pecasPagas();     // 14/10/2026: o grátis é decidido pelo que a pessoa paga
+    var lim = regiaoDoCep(st.entrega.cep) === 'sseco' ? g.sul_sudeste_centro_oeste : g.demais;
+    var gratis = !!lim && sub >= lim;
+    /* áudio 9759 (13/10/2026): SEMPRE só duas opções, Jadlog + SEDEX com o valor normal; o PAC some sempre, não só no grátis */
+    var outra = { servico: 'exemplo:correios-2', empresa: 'Correios', nome: 'SEDEX', valor: 61.7, prazo_dias: 3 };
+    return { chave: chave, estado: 'ok', exemplo: true, escolhido: 'exemplo:jadlog-3',
+             opcoes: [{ servico: 'exemplo:jadlog-3', empresa: 'Jadlog', nome: '.Package', valor: gratis ? 0 : 32.9, prazo_dias: 7, gratis: gratis },
+                      outra] };
+  }
+  function cotar() {
+    var e = st.entrega;
+    if (!e || !e.cep || String(e.cep).length !== 8 || !itens().length || sobConsulta()) return;
+    var chave = chaveFrete(), f = st.frete;
+    var vencida = f && f.expira && Date.parse(f.expira) < Date.now() + 60000;
+    if (f && f.chave === chave && f.estado !== 'erro' && !vencida) return;
+    if (L.previa) { st.frete = freteDeExemplo(chave); guardar(); return; }
+    if (!FRETE || !L.cotarFrete) return;
+    var antes = f && f.escolhido;
+    st.frete = { chave: chave, estado: 'carregando' };
+    var corpoFrete = { cep: e.cep, itens: itensServidor() };
+    if (cupomAtual()) corpoFrete.cupom = cupomAtual().codigo;
+    L.cotarFrete(corpoFrete).then(function (j) {
+      if (!st.frete || st.frete.chave !== chave) return;
+      if (!j || !j.disponivel || !(j.opcoes || []).length) {
+        st.frete = { chave: chave, estado: 'indisponivel', motivo: (j && j.motivo) || '' };
+      } else {
+        var manter = j.opcoes.some(function (o) { return o.servico === antes; });
+        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: j.opcoes,
+                     escolhido: manter ? antes : j.opcoes[0].servico };
+      }
+      guardar(); pintar();
+    }).catch(function () {
+      if (st.frete && st.frete.chave === chave) { st.frete = { chave: chave, estado: 'erro' }; guardar(); pintar(); }
+    });
+  }
+  function textoFrete(v) { return v === 0 ? 'Grátis' : dinheiroTela(v); }
+  function htmlOpcoesFrete() {
+    var f = st.frete;
+    if (f && f.estado === 'carregando') {
+      return '<p class="loja-rotulo">Forma de Entrega</p><p class="loja-miudo" data-frete-calculando>Calculando o frete…</p>';
+    }
+    if (f && f.estado === 'ok') {
+      return '<p class="loja-rotulo">Forma de Entrega</p>' + f.opcoes.map(function (o) {
+        var sel = o.servico === f.escolhido;
+        return '<label class="loja-radio' + (sel ? ' escolhido' : '') + '"><input type="radio" name="frete" value="' + esc(o.servico) + '"' +
+          (sel ? ' checked' : '') + '><span class="txt">' + (o.valor === 0 ? 'Frete grátis' /* áudio 9759: sem o nome da Jadlog */ : esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : '')) +
+          '<small>' + (o.prazo_dias ? 'Chega em até ' + o.prazo_dias + ' dias úteis depois de pronta' : 'Prazo confirmado com o pedido') + '</small></span>' +
+          '<span class="preco' + (o.valor === 0 ? ' gratis' : '') + '">' + textoFrete(o.valor) + '</span></label>';
+      }).join('') + (f.exemplo ? '<p class="loja-miudo" style="margin-top:6px">Prévia: valores de frete de EXEMPLO. No site, o valor vem da transportadora pelo CEP.</p>' : '');
+    }
+    return '<p class="loja-rotulo">Forma de Entrega</p>' +
+      '<label class="loja-radio escolhido"><input type="radio" name="forma" value="padrao" checked>' +
+      '<span class="txt">Entrega Padrão<small>' + (f && f.estado === 'indisponivel' && f.motivo ? esc(f.motivo) : 'Prazo de produção e envio confirmado com o pedido') +
+      '</small></span><span class="preco">a calcular</span></label>';
+  }
+
+  /* ETAPA 62 (22:08, Cassiano): "ninguém mais fica preocupado com quanto vai pagar de frete nessa página (...)
+     vamos deixar essa página mais clean" — na SACOLA sai o bloco Entrega e a linha do frete; ele volta no fim. */
+  function htmlTotais(semFrete, semPix) {
+    /* 25/09/2026 (msg 1885, produtos "sob consulta"): sacola só com peça sem preço mostrava "R$ 0,00" no subtotal e
+       no total. Agora diz "Sob consulta" (a regra mora no carrinho.js, textoTotal). O WhatsApp segue igual. */
+    var soConsulta = sobConsulta() && !subtotal();
+    /* 12/10/2026: o frete escolhido e o desconto do Pix entram aqui (a mesma conta que o servidor cobra)
+       14/10/2026 (áudio 10812): na SACOLA entra o frete, mas não o Pix (a forma de pagar só se escolhe no fim) */
+    var fv = semFrete ? null : freteValor(), dp = (semFrete || semPix) ? 0 : descontoPix();
+    var carregando = st.frete && st.frete.estado === 'carregando';
+    var total = semFrete ? pecasPagas() : (centavos(subtotal()) - centavos(descontoCupom()) + centavos(fv || 0) - centavos(dp)) / 100;
+    return '<div class="loja-totais"><div><span>Subtotal</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(subtotal())) + '</span></div>' +
+      (semFrete ? '' : '<div><span>Frete</span><span' + (fv === 0 ? ' class="gratis"' : '') + '>' +
+        (fv === null ? (carregando ? 'calculando…' : 'a calcular') : textoFrete(fv)) + '</span></div>') +
+      (descontoCupom() ? '<div class="desconto-cupom"><span>Cupom ' + esc(cupomAtual().codigo) + '</span><span>− ' + dinheiroTela(descontoCupom()) + '</span></div>' : '') +
+      (dp ? '<div class="desconto-pix"><span>Desconto Pix (' + pctPix() + '%)</span><span>− ' + dinheiroTela(dp) + '</span></div>' : '') +
+      '<div class="total"><span>Total</span><span>' + (soConsulta ? 'Sob consulta' : dinheiroTela(total) + (sobConsulta() ? ' + itens sob consulta' : '')) + '</span></div></div>';
+  }
+
+  /* ======================================================= SACOLA DE COMPRAS */
+  /* 14/10/2026 (áudio 10812 do Cassiano): "nessa página aqui já tem que ter frete e cupom (...) senão muita gente nem
+     finaliza a compra com medo de ficar caro e tem que fazer um cadastro à toa" — volta o CEP com o frete calculado
+     (desfaz a ETAPA 62 de 22:08, "deixar essa página mais clean") e entra o cupom, ANTES do cadastro. */
+  /* 14/10/2026 (foto 10825 + áudio 10826 do Cassiano): o frete entra NA CAIXA DO TOTAL, fechado. "Entrega" à esquerda e
+     "Ver Opções de Entrega" sublinhado à direita: "só se a pessoa clicar lá é que vai abrir o campo de entrega (...) de
+     CEP, no mesmo local". O "Adicionar cupom" dos áudios 10827/10828 SAIU no 10833 ("site de luxo não tem cupom"): o
+     cupom da Sacola some e fica só no Resumo do Pedido.
+     Antes: 03_site/_versoes_anteriores/sacola_tiffany_antes_2026-10-14/js/loja-compra.js */
+  /* 14/10/2026 19:33 (vídeo 10860 da Tiffany + áudio 10862): "a mesma frase, a mesma caixa, o mesmo lugar, igual". O bloco
+     Entrega sai de DENTRO da caixa do total e fica ACIMA dela: título "Entrega", a frase e a caixa "Ver Opções de Entrega".
+     Clicou → no mesmo lugar, o campo CEP com a caixa ao lado e "Não sei meu CEP"; 8 números → cota sozinho. Cotado →
+     "Receber N itens em CEP" e UMA caixa com a 1ª opção já escolhida ("sempre vai aparecer o primeiro"); a seta abre as outras.
+     Antes: 03_site/_versoes_anteriores/sacola_rodada2_antes_2026-10-14/js/loja-compra.js */
+  var abreEntrega = false, trocaCep = false, listaFrete = false, entrou = false;
+  function htmlEscolhaFrete() {
+    var f = st.frete;
+    if (f && f.estado === 'carregando') return '<div class="ent-carregando" data-frete-calculando aria-label="Calculando o frete"><i></i><i></i></div>';
+    if (!(f && f.estado === 'ok')) return htmlOpcoesFrete();
+    var nomeDe = function (o) { return o.valor === 0 ? 'Entrega Padrão' : esc(o.empresa) + (o.nome ? ' · ' + esc(o.nome) : ''); };
+    var prazoDe = function (o) { return o.prazo_dias ? 'Em até ' + o.prazo_dias + ' dias úteis depois de pronta' : 'Prazo confirmado com o pedido'; };
+    var o = opcaoFrete() || f.opcoes[0];
+    var h = '<button type="button" class="ent-escolha" data-lista-frete aria-expanded="' + listaFrete + '">' +
+      '<span class="txt">' + nomeDe(o) + '<small>' + prazoDe(o) + '</small></span>' +
+      '<span class="preco' + (o.valor === 0 ? ' gratis' : '') + '">' + textoFrete(o.valor) + '</span><span class="seta" aria-hidden="true"></span></button>';
+    if (listaFrete) h += '<div class="ent-lista">' + f.opcoes.map(function (x) {
+      var sel = x.servico === o.servico;
+      return '<label class="loja-radio' + (sel ? ' escolhido' : '') + '"><input type="radio" name="frete" value="' + esc(x.servico) + '"' +
+        (sel ? ' checked' : '') + '><span class="txt">' + nomeDe(x) + '<small>' + prazoDe(x) + '</small></span>' +
+        '<span class="preco' + (x.valor === 0 ? ' gratis' : '') + '">' + textoFrete(x.valor) + '</span></label>';
+    }).join('') + '</div>';
+    if (f.exemplo) h += '<p class="loja-miudo" style="margin-top:6px">Prévia: valores de frete de EXEMPLO. No site, o valor vem da transportadora pelo CEP.</p>';
+    return h;
+  }
+  function htmlEntregaSacola() {
+    if (sobConsulta()) return '';
+    var e = st.entrega || {}, ok = e.cep && String(e.cep).length === 8 && e.cidade;
+    var cepTela = ok ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '';
+    var h = '<div class="sacola-entrega' + (entrou ? ' entra' : '') + '"><h3 class="ent-titulo">Entrega</h3>';
+    entrou = false;
+    if (!abreEntrega) {
+      return h + '<p class="ent-frase">Veja as opções de entrega para seus itens, com todos os prazos e valores.</p>' +
+        '<button type="button" class="ent-botao" data-ver-entrega-sacola aria-expanded="false">Ver Opções de Entrega</button></div>';
+    }
+    if (ok && !trocaCep) {
+      var n = itens().reduce(function (s, i) { return s + qtd(i); }, 0);
+      return h + '<p class="ent-receber"><strong>Receber</strong> ' + n + (n === 1 ? ' item' : ' itens') + ' em ' +
+        '<button type="button" class="ent-cep" data-trocar-cep aria-label="Trocar o CEP">' + esc(cepTela) + '</button></p>' +
+        htmlEscolhaFrete() + '</div>';
+    }
+    return h + '<div class="ent-linha-cep"><label class="ent-campo"><span>CEP</span>' +
+        '<input data-cep-sacola inputmode="numeric" autocomplete="postal-code" maxlength="9" value="' + esc(cepTela) + '"></label>' +
+        '<button type="button" class="ent-botao pequeno" data-cotar-cep>Ver Opções de Entrega</button></div>' +
+      '<a class="ent-nao-sei" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a>' +
+      '<p class="loja-miudo" data-cep-resposta style="margin:6px 0 0"></p></div>';
+  }
+  /* a caixa do total (Entrega, cupom, subtotal, total) e os dois botões; no computador os botões ficam DENTRO da caixa,
+     lado a lado como na Tiffany ("Escolher mais Produtos" + "Finalizar Compra"); no celular, embaixo, como já estava */
+  function htmlCaixaSacola() {
+    /* a linha "Frete" só aparece quando há valor (ou está calculando): sem CEP, a caixa fica limpa como a da Tiffany */
+    var semFrete = freteValor() === null && !(st.frete && st.frete.estado === 'carregando');
+    /* 14/10/2026 18:49 (áudio 10833): "esquece só a parte do cupom (...) site de luxo não tem cupom (...) nessa primeira
+       aba vai ser só o frete" — a Sacola NÃO mostra cupom; ele fica só no Resumo do Pedido (htmlCupom, Finalizar Compra) */
+    /* 19:33 (vídeo 10860): o bloco Entrega fica ACIMA da caixa; dentro dela a linha do frete se chama "Entrega", como na Tiffany */
+    return '<div class="sacola-dir">' + htmlEntregaSacola() + '<div class="loja-caixa-sacola">' +
+      htmlTotais(semFrete, true).replace('<span>Frete</span>', '<span>Entrega</span>') + '</div>' +
+      '<div class="cx-botoes"><button type="button" class="loja-bt largo" data-ir-compra>Finalizar Compra</button>' +
+      '<a class="loja-mais-produtos" href="index.html">Escolher mais Produtos</a></div></div>';
+  }
+  function htmlPresente() {
+    return '<div class="loja-presente">' +
+      '<label class="loja-marca"><input type="checkbox" data-presente' + (st.presente ? ' checked' : '') + '>' +
+        '<span><strong style="font-weight:600">Mensagem para Presente</strong><br>' +
+        '<span class="loja-miudo">Adicione uma mensagem personalizada que será impressa e enviada com seu presente.</span></span></label>' +
+      '<textarea data-presente-texto maxlength="240" placeholder="Sua mensagem"' + (st.presente ? '' : ' hidden') + '>' +
+        esc(st.presente_texto || '') + '</textarea></div>';
+  }
+  /* 14/10/2026 (áudio 10830 do Cassiano): "na versão web eu quero igual o Tiffany (...) grandona, ocupando a tela inteira
+     pra ficar bonito"; "no celular tá perfeito". Só no COMPUTADOR (a mesma régua do site.js: mouse e tela > 760 px) a
+     sacola vira a tabela larga da Tiffany: Produto / Preço / Quantidade / Total, a mensagem para presente à esquerda e
+     a caixa do total à direita. O celular segue a lista de antes. */
+  var MQ_LARGO = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)') : null;
+  function largo() { return !!(MQ_LARGO && MQ_LARGO.matches); }
+  function htmlSacolaLarga(l) {
+    return '<div class="sacola-tabela" role="table" aria-label="Peças da sacola">' +
+      '<div class="cab" role="row"><span role="columnheader">Produto</span><span role="columnheader">Preço</span>' +
+      '<span role="columnheader">Quantidade</span><span role="columnheader">Total</span><span></span></div>' +
+      l.map(function (i, n) {
+        var det = descrever(i);
+        return '<div class="lin" role="row" data-linha="' + n + '">' +
+          '<div class="prod" role="cell"><img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
+            '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
+          '<div class="preco" role="cell">' + (i.preco ? dinheiroTela(i.preco) : 'Sob consulta') + '</div>' +
+          '<div class="qtd" role="cell"><span class="loja-passos">' +
+            '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
+            '<button type="button" data-passo="1" data-item="' + n + '" aria-label="Aumentar">+</button></span></div>' +
+          '<div class="tot" role="cell">' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</div>' +
+          '<button type="button" class="tirar" data-tirar-item="' + n + '" aria-label="Tirar ' + esc(i.nome) + ' da sacola">&times;</button></div>';
+      }).join('') + '</div>' +
+      '<div class="sacola-base"><div class="sacola-esq">' + htmlPresente() + '</div>' + htmlCaixaSacola() + '</div>';
+  }
+  function htmlSacola() {
+    var l = itens();
+    var h = '<h1 class="loja-titulo grande">Sacola de Compras</h1>';
+    if (!l.length) {
+      return h + '<p class="loja-vazio" style="margin:26px 0">Sua sacola está vazia.</p>' +
+        '<a class="loja-bt largo" href="index.html">Escolher Produtos</a>';
+    }
+    if (largo()) return h + htmlSacolaLarga(l);
+    h += l.map(function (i, n) {
+      var det = descrever(i);
+      return '<div class="loja-item" data-linha="' + n + '">' +
+        '<img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
+        '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det   /* NOMES COLLAB 26/09: "× Ayla" não se separa */ ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
+        '<button type="button" class="tirar" data-tirar-item="' + n + '" aria-label="Tirar ' + esc(i.nome) + ' da sacola">&times;</button>' +
+        '<div class="linha-qtd"><span class="loja-passos">' +
+          '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
+          '<button type="button" data-passo="1" data-item="' + n + '" aria-label="Aumentar">+</button></span>' +
+          '<span class="valor">' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</span></div></div>';
+    }).join('');
+    h += htmlPresente() + htmlCaixaSacola();
+    return h;
+  }
+
+  /* ======================================================== FINALIZAR COMPRA */
+  function nomeCompleto() { return [st.dados.nome, st.dados.sobrenome].filter(Boolean).join(' '); }
+
+  function etapaDados() {
+    var d = st.dados;
+    if (st.etapa !== 'dados') {
+      return '<section class="loja-etapa"><header>' + ICONE.pessoa + '<h2>Dados Pessoais</h2>' +
+        '<button type="button" class="editar" data-etapa="dados" aria-label="Editar dados pessoais">' + ICONE.lapis + '</button></header>' +
+        '<div class="feito">' + esc(d.email) + (eu.logado ? ' &nbsp;<button type="button" class="loja-link sublinha loja-miudo" data-sair>Não é você? Sair</button>' : '') +
+        '<br>Nome: ' + esc(nomeCompleto()) + '<br>Telefone: ' + esc(mascaraTelefone(d.telefone)) + '</div></section>';
+    }
+    var trava = eu.logado ? ' readonly aria-readonly="true"' : '';
+    return '<section class="loja-etapa"><header>' + ICONE.pessoa + '<h2>Dados Pessoais</h2></header>' +
+      '<p class="intro">Com o intuito de lhe atender da melhor forma, solicitamos informações essenciais para finalizar sua compra.</p>' +
+      (eu.logado ? '' : '<p class="loja-miudo" style="margin:-6px 0 14px">Já tem conta? <a href="conta.html?voltar=finalizar-compra.html%23%2Fcompra" style="color:var(--terracota)">Entrar</a></p>') +
+      '<form data-form="dados" novalidate>' +
+      '<label class="loja-campo"><span>E-mail</span><input name="email" type="email" autocomplete="email" inputmode="email" value="' + esc(d.email) + '"' + trava + '></label>' +
+      '<label class="loja-campo"><span>Nome</span><input name="nome" autocomplete="given-name" maxlength="60" value="' + esc(d.nome) + '"></label>' +
+      '<label class="loja-campo"><span>Sobrenome</span><input name="sobrenome" autocomplete="family-name" maxlength="80" value="' + esc(d.sobrenome) + '"></label>' +
+      '<div class="loja-dupla">' +
+        '<label class="loja-campo"><span>CPF</span><input name="cpf" inputmode="numeric" maxlength="14" placeholder="999.999.999-99" value="' + esc(mascaraCpf(d.cpf)) + '"></label>' +
+        '<label class="loja-campo"><span>Telefone</span><input name="telefone" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="15" placeholder="(64) 99999-9999" value="' + esc(mascaraTelefone(d.telefone)) + '"></label>' +
+      '</div>' +
+      '<p class="loja-miudo" style="margin:10px 0">Ao clicar em "Finalizar Compra", você confirma que leu, entendeu e aceita as condições de ' +
+        '<a href="trocas-e-entrega.html" target="_blank" rel="noopener" style="color:var(--terracota)">Trocas, Devoluções e Entregas</a>.</p>' +
+      (eu.logado && eu.politica_aceita ? '' :
+        '<label class="loja-marca" data-politica><input type="checkbox" name="aceite_politica"' + (d.aceite_politica ? ' checked' : '') + '><span>Li e aceito a ' +
+        '<a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> da ālea & Co.</span></label>') +
+      '<label class="loja-marca"><input type="checkbox" name="consent_marketing"' + (d.consent_marketing ? ' checked' : '') + '>' +
+        '<span>Desejo receber as comunicações digitais da ālea & Co.<br><span class="loja-miudo">Ao se inscrever, você concorda em receber por e-mail ' +
+        'e WhatsApp informações sobre produtos, serviços e novidades da ālea & Co., seguindo nossa Política de Privacidade.</span></span></label>' +
+      (erro ? '<p class="loja-erro" role="alert">' + esc(erro) + '</p>' : '') +
+      '<button type="submit" class="loja-bt largo" style="margin-top:14px">Ir para a Entrega</button></form></section>';
+  }
+
+  function etapaEntrega() {
+    var e = st.entrega;
+    if (st.etapa === 'dados') {
+      return '<section class="loja-etapa apagada"><header>' + ICONE.casa + '<h2>Entrega</h2></header></section>';
+    }
+    if (st.etapa === 'pagamento') {
+      return '<section class="loja-etapa"><header>' + ICONE.casa + '<h2>Entrega</h2>' +
+        '<button type="button" class="editar" data-etapa="entrega" aria-label="Editar entrega">' + ICONE.lapis + '</button></header>' +
+        '<div class="feito">' + esc(e.logradouro) + ' ' + esc(e.numero) + (e.complemento ? ' — ' + esc(e.complemento) : '') + '<br>' +
+        esc(e.bairro) + ' - ' + esc(e.cidade) + ' - ' + esc(e.uf) + '<br>' + esc(String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2')) +
+        '<br>Destinatário: ' + esc(e.destinatario) + '<br>Envio: ' + (opcaoFrete()
+          ? esc(opcaoFrete().empresa) + (opcaoFrete().nome ? ' · ' + esc(opcaoFrete().nome) : '') + ' — ' + (freteValor() === 0 ? 'Grátis' : esc(dinheiro(freteValor())))
+          : 'prazo e frete confirmados com o pedido') + '</div>' +
+        '<p style="margin:14px 0 0"><button type="button" class="loja-bt contorno largo" data-etapa="entrega">Alterar Opções de Entrega</button></p></section>';
+    }
+    var temRua = !!(e.logradouro && e.cidade);
+    var h = '<section class="loja-etapa"><header>' + ICONE.casa + '<h2>Entrega</h2></header>' +
+      '<form data-form="entrega" novalidate>' +
+      '<div class="loja-cep"><label class="loja-campo' + (e.cep && e.cep.length === 8 && temRua ? ' ok' : '') + '"><span>CEP</span>' +
+        '<input name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="' +
+        esc(e.cep ? String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2') : '') + '"></label>' +
+        '<a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener">Não sei meu CEP</a></div>';
+    if (temRua) {
+      h += htmlOpcoesFrete() +
+        '<p class="loja-rotulo">Endereço de Entrega</p>' +
+        '<div class="loja-endereco" data-endereco-caixa' + (e.editando ? ' hidden' : '') + '>' + ICONE.casaCheia + '<div>' + esc(e.logradouro) + '<br>' +
+          (e.bairro ? esc(e.bairro) + ' - ' : '') + esc(e.cidade) + ' - ' + esc(e.uf) + ' - <button type="button" data-alterar-endereco>Alterar</button></div></div>' +
+        '<div data-endereco-campos' + (e.editando ? '' : ' hidden') + '>' +
+          '<label class="loja-campo"><span>Rua</span><input name="logradouro" value="' + esc(e.logradouro) + '"></label>' +
+          '<label class="loja-campo"><span>Bairro</span><input name="bairro" value="' + esc(e.bairro) + '"></label>' +
+          '<div class="loja-dupla"><label class="loja-campo"><span>Cidade</span><input name="cidade" value="' + esc(e.cidade) + '"></label>' +
+          '<label class="loja-campo"><span>UF</span><input name="uf" maxlength="2" value="' + esc(e.uf) + '" style="text-transform:uppercase"></label></div></div>' +
+        '<div class="loja-dupla">' +
+          '<label class="loja-campo"><span>Número <small>(obrigatório)</small></span><input name="numero" value="' + esc(e.numero) + '"></label>' +
+          '<label class="loja-campo"><span>Complemento <small>(opcional)</small></span><input name="complemento" placeholder="Opcional" value="' + esc(e.complemento) + '"></label></div>' +
+        '<label class="loja-campo' + (e.destinatario || nomeCompleto() ? ' ok' : '') + '"><span>Destinatário <small>(obrigatório)</small></span>' +
+          '<input name="destinatario" autocomplete="name" value="' + esc(e.destinatario || nomeCompleto()) + '"></label>' +
+        (erro ? '<p class="loja-erro" role="alert">' + esc(erro) + '</p>' : '') +
+        '<button type="submit" class="loja-bt largo" style="margin-top:14px">Ir para Pagamento</button>';
+    } else {
+      h += (erro ? '<p class="loja-erro" role="alert">' + esc(erro) + '</p>' : '');
+    }
+    return h + '</form></section>';
+  }
+
+  function etapaPagamento() {
+    if (st.etapa !== 'pagamento') {
+      return '<section class="loja-etapa apagada"><header>' + ICONE.cartao + '<h2>Pagamento</h2></header>' +
+        '<p class="espera">Aguardando o preenchimento dos dados</p></section>';
+    }
+    var p = st.pagamento;
+    var caixa = '';
+    var pct = pctPix(), parc = pagCfg().parcelas;
+    /* 12/10/2026: o desconto do Pix em reais, na caixa (o "5%" sozinho obriga a pessoa a fazer conta) */
+    var linhaPix = pct && !sobConsulta() && descontoPixDe(pecasPagas()) > 0 ? '<p class="pix-desconto"><strong>' + pct + '% de desconto no Pix</strong>: ' +
+      dinheiro(descontoPixDe(pecasPagas())) + ' a menos nas peças.</p>' : '';
+    if (usaLink() && p === 'pix') {
+      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div>' + linhaPix + '<p>Ao finalizar, você vai para a página segura ' +
+        'de pagamento, paga o Pix e volta para cá. A aprovação é na hora.</p></div>';
+    } else if (usaLink() && p === 'cartao') {
+      caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
+        '<p>Em até ' + (parc || 10) + 'x sem juros. Ao finalizar, você digita o cartão na página segura de pagamento ' +
+        'e volta para cá. A ālea & Co. não recebe nem guarda o número do seu cartão.</p></div>';
+    } else if (p === 'pix') {
+      caixa = '<div class="loja-pagar-caixa"><div class="logo-pix">pix</div>' + linhaPix + '<p>Para pagar, finalize sua compra abaixo.</p></div>';
+    } else if (p === 'cartao') {
+      caixa = '<div class="loja-pagar-caixa"><span class="loja-seguro">Ambiente Seguro</span>' +
+        '<p>' + (parc ? 'Em até ' + parc + 'x sem juros. ' : '') + 'Você digita os dados do cartão na página segura do pagamento, logo depois de finalizar a compra. ' +
+        'A ālea & Co. não recebe nem guarda o número do seu cartão.</p></div>';
+    }
+    return '<section class="loja-etapa"><header>' + ICONE.cartao + '<h2>Pagamento</h2></header>' +
+      '<label class="loja-radio' + (p === 'cartao' ? ' escolhido' : '') + '"><input type="radio" name="pagamento" value="cartao"' + (p === 'cartao' ? ' checked' : '') + '>' +
+        '<span class="txt">Cartão de crédito' + (parc ? '<small>Em até ' + parc + 'x sem juros</small>' : '') + '</span></label>' +
+      '<label class="loja-radio' + (p === 'pix' ? ' escolhido' : '') + '"><input type="radio" name="pagamento" value="pix"' + (p === 'pix' ? ' checked' : '') + '>' +
+        '<span class="txt">Pix' + (pct && !sobConsulta() ? '<small>' + pct + '% de desconto</small>' : '') + '</span></label>' + caixa +
+      (erro ? '<p class="loja-erro" role="alert">' + esc(erro) + '</p>' : '') + '</section>';
+  }
+
+  function htmlResumo() {
+    return '<div class="loja-resumo"><h2>Resumo do Pedido</h2>' + itens().map(function (i) {
+      var det = descrever(i);
+      return '<div class="linha"><img src="' + esc(foto(i)) + '" alt="" onerror="' + fotoReserva(i) + '">' +
+        '<div>' + (qtd(i) > 1 ? qtd(i) + '× ' : '') + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
+        '<div>' + (i.preco ? dinheiroTela(i.preco * qtd(i)) : 'Sob consulta') + '</div></div>';
+    }).join('') + '<a class="voltar-sacola" href="#/sacola">Voltar para a Sacola de Compras</a>' + htmlCupom() + htmlTotais() + '</div>';
+  }
+
+  function htmlCompra() {
+    if (!itens().length) return htmlSacola();
+    return '<h1 class="loja-titulo grande">Finalizar Compra</h1>' + etapaDados() + etapaEntrega() + etapaPagamento() +
+      htmlResumo() +
+      (st.etapa === 'pagamento' ? '<button type="button" class="loja-bt largo" data-concluir' + (st.pagamento ? '' : ' disabled') + '>Finalizar Compra</button>' +
+        '<p class="loja-miudo" style="text-align:center;margin-top:10px">' + (usaLink()
+          ? (opcaoFrete() ? 'O frete já está no total. Você paga tudo de uma vez, na página segura.'
+                          : 'O valor pago agora é o das peças. O frete é combinado com a ālea & Co. pelo WhatsApp, depois do pagamento.')
+          : 'Enquanto o pagamento pelo site não liga, o pedido completo segue pelo WhatsApp da ālea & Co.') + '</p>' : '');
+  }
+
+  /* a tela da VOLTA da InfinitePay */
+  function htmlRetorno() {
+    var r = retorno;
+    if (r.estado === 'aprovado') {
+      return '<div class="loja-concluido"><h1>' + (r.semPagamento ? 'Pedido confirmado' : 'Pagamento aprovado') + '</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Obrigado' + (r.nome ? ', ' + esc(r.nome) : '') + '! ' + (r.semPagamento ? 'Seu pedido saiu por R$ 0,00 com o cupom' : 'Seu pagamento foi confirmado') +
+        ' e a confirmação chega no seu e-mail. ' +
+        (r.comFrete ? 'O frete já foi pago junto: agora sua peça entra na produção.</p>' : 'Agora é só combinar o frete com a ālea & Co. pelo WhatsApp.</p>') +
+        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">' + (r.comFrete ? 'Falar com a ālea & Co. no WhatsApp' : 'Combinar o frete no WhatsApp') + '</a></p>' : '') +
+        '<p><a class="loja-mais-produtos" href="index.html">Continuar comprando</a></p></div>';
+    }
+    if (r.estado === 'pago_a_menor') {
+      /* 12/10/2026: escolheu Pix aqui (com o desconto) e pagou no CARTÃO lá — o desconto é só do Pix. A loja recebeu
+         o aviso e acerta a diferença (ou devolve) com a pessoa. */
+      return '<div class="loja-concluido"><h1>Recebemos o seu pagamento</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Você escolheu Pix aqui, mas pagou com cartão na página de pagamento. O desconto vale só para o Pix, então ' +
+        'a ālea & Co. vai falar com você para acertar a diferença antes de produzir a peça.</p>' +
+        (r.zap ? '<p><a class="loja-bt" href="' + esc(r.zap) + '" target="_blank" rel="noopener">Falar com a ālea & Co. no WhatsApp</a></p>' : '') +
+        '<p><a class="loja-mais-produtos" href="index.html">Voltar para a loja</a></p></div>';
+    }
+    if (r.estado === 'conferindo') {
+      return '<div class="loja-concluido"><h1>Confirmando o pagamento…</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Estamos conferindo com o banco. Não feche esta página.</p></div>';
+    }
+    if (r.estado === 'sem_chave') {
+      return '<div class="loja-concluido"><h1>Recebemos o seu retorno</h1><p class="numero">' + esc(r.numero) + '</p>' +
+        '<p>Assim que o pagamento for confirmado, você recebe a confirmação no seu e-mail.</p>' +
+        '<p><a class="loja-bt" href="index.html">Voltar para a loja</a></p></div>';
+    }
+    return '<div class="loja-concluido"><h1>Pagamento ainda não confirmado</h1><p class="numero">' + esc(r.numero) + '</p>' +
+      '<p>Se você já pagou, a confirmação chega no seu e-mail em alguns minutos. Se não terminou, pode voltar e pagar.</p>' +
+      (r.link ? '<p><a class="loja-bt" href="' + esc(r.link) + '">Voltar para o pagamento</a></p>' : '') +
+      '<p><a class="loja-mais-produtos" href="finalizar-compra.html#/compra">Rever a compra</a></p></div>';
+  }
+
+  function conferirRetorno(q) {
+    var guardado = lerPag();
+    var numero = q.get('pedido') || q.get('order_nsu') || '';
+    if (!guardado || guardado.numero !== numero || !L.statusLink) {
+      retorno = { estado: 'sem_chave', numero: numero }; pintar(); return;
+    }
+    retorno = { estado: 'conferindo', numero: numero, nome: guardado.nome, zap: guardado.zap, comFrete: !!guardado.comFrete, tentativas: 0 };
+    pintar();
+    (function perguntar() {
+      L.statusLink(numero, { chave: guardado.chave, transaction_nsu: q.get('transaction_nsu') || '', slug: q.get('slug') || '',
+                             receipt_url: q.get('receipt_url') || '' }).then(function (s) {
+        retorno.link = s.link;
+        if (s.estado === 'pago_a_menor') { retorno.estado = 'pago_a_menor'; gravarPag(null); pintar(); return; }
+        if (s.estado === 'aprovado') {
+          retorno.estado = 'aprovado';
+          retorno.semPagamento = Number(s.total) === 0 && s.forma === 'cupom';     // 14/10/2026: R$ 0 com o cupom
+          gravarPag(null); L.compra.limpar(); if (CAR()) CAR().limpar();
+          st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
+          pintar(); return;
+        }
+        if (++retorno.tentativas < 15) { setTimeout(perguntar, 4000); return; }   // ~1 min: o Pix às vezes demora
+        retorno.estado = 'pendente'; pintar();
+      }).catch(function () {
+        if (++retorno.tentativas < 15) { setTimeout(perguntar, 4000); return; }
+        retorno.estado = 'pendente'; pintar();
+      });
+    })();
+  }
+
+  function htmlConcluido() {
+    return '<div class="loja-concluido"><h1>Pedido recebido</h1><p class="numero">' + esc(concluido.numero) + '</p>' +
+      '<p>Obrigado, ' + esc(concluido.nome) + '! Abrimos o WhatsApp da ālea & Co. com o seu pedido completo: é por lá que você recebe ' +
+        'o valor do frete e o ' + (concluido.pagamento === 'pix' ? 'Pix' : 'link seguro do cartão') + ' para pagar.</p>' +
+      '<p><a class="loja-bt" href="index.html">Continuar comprando</a></p>' +
+      (concluido.zap ? '<p class="loja-miudo">O WhatsApp não abriu? <a href="' + esc(concluido.zap) + '" target="_blank" rel="noopener" style="color:var(--terracota)">Toque aqui</a>.</p>' : '') +
+      '</div>';
+  }
+
+  /* ================================================================ desenhar */
+  function pintar() {
+    /* 12/10/2026: frete pelo CEP · 14/10/2026 (áudio 10812): cota também na SACOLA */
+    /* 14/10/2026 (áudio 10833: o cupom fica só no Resumo): com o CEP já dado na Sacola, cota também na etapa Dados
+       Pessoais — senão o cupom aplicado ali (que recota o frete) deixava "a calcular" até a Entrega */
+    var cepPronto = st.entrega && String(st.entrega.cep || '').length === 8;
+    if (!retorno && !concluido && (tela() !== 'compra' || st.etapa !== 'dados' || cepPronto)) cotar();
+    raiz.innerHTML = FAIXA + (retorno ? htmlRetorno() : concluido ? htmlConcluido() : (tela() === 'compra' ? htmlCompra() : htmlSacola()));
+    /* 14/10/2026 (áudio 10830): a sacola larga do computador precisa da página larga */
+    raiz.classList.toggle('sacola-larga', !retorno && !concluido && tela() !== 'compra' && itens().length > 0 && largo());
+    ligar();
+    erro = '';
+  }
+
+  function ligar() {
+    Array.prototype.forEach.call(raiz.querySelectorAll('form'), function (f) { f.addEventListener('submit', enviar); });
+    var tel = raiz.querySelector('[name="telefone"]');
+    if (tel) tel.addEventListener('input', function () { tel.value = mascaraTelefone(tel.value); });
+    var cpf = raiz.querySelector('[name="cpf"]');
+    if (cpf) cpf.addEventListener('input', function () { cpf.value = mascaraCpf(cpf.value); });
+    var cep = raiz.querySelector('form[data-form="entrega"] [name="cep"]');
+    if (cep) cep.addEventListener('input', function () {
+      var d = cep.value.replace(/\D/g, '').slice(0, 8);
+      cep.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+      if (d.length !== 8 || d === st.entrega.cep && st.entrega.logradouro) return;
+      L.buscarCep(d).then(function (j) {
+        st.entrega.cep = d; st.entrega.logradouro = j.logradouro; st.entrega.bairro = j.bairro;
+        st.entrega.cidade = j.cidade; st.entrega.uf = j.uf; st.entrega.editando = !j.logradouro;
+        guardar(); pintar();
+        var n = raiz.querySelector(j.logradouro ? '[name="numero"]' : '[name="logradouro"]'); if (n) n.focus();
+      }).catch(function () {
+        st.entrega = { cep: d, editando: true, logradouro: ' ', cidade: ' ' }; guardar(); pintar();
+      });
+    });
+    var cs = raiz.querySelector('[data-cep-sacola]');
+    if (cs) cs.addEventListener('input', function () {
+      var d = cs.value.replace(/\D/g, '').slice(0, 8);
+      cs.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+      var resp = raiz.querySelector('[data-cep-resposta]');
+      if (d.length !== 8) { resp.textContent = ''; return; }
+      if (d === st.entrega.cep && st.entrega.cidade) { trocaCep = false; pintar(); return; }
+      resp.textContent = 'Procurando…';
+      L.buscarCep(d).then(function (j) {
+        /* 14/10/2026 (áudio 10812): achou o CEP → cota o frete aqui mesmo, na sacola */
+        st.entrega = { cep: d, logradouro: j.logradouro, bairro: j.bairro, cidade: j.cidade, uf: j.uf }; st.frete = null;
+        trocaCep = false; listaFrete = false;
+        guardar(); pintar();
+      }).catch(function () { resp.textContent = 'Não achamos esse CEP. Confira os números.'; });
+    });
+  }
+
+  /* ETAPA 66 (22:51, Cassiano): faltou algo obrigatório → a tela TREME (a tremida do site) e o cursor vai direto
+     pro primeiro campo que falta, já ativo. Antes só mudava a cor — discreto demais. */
+  function tremerEIr(el) {
+    raiz.classList.remove('loja-tremendo'); void raiz.offsetWidth; raiz.classList.add('loja-tremendo');
+    if (el) { try { el.focus({ preventScroll: true }); } catch (x) { el.focus(); } el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+
+  function marcaFalta(form, nome, ok, dica) {
+    var el = form.querySelector('[name="' + nome + '"]');
+    var lab = el && el.closest('.loja-campo, .loja-marca');
+    if (!lab) return ok;
+    lab.classList.toggle('faltou', !ok);
+    var velha = lab.querySelector('.dica-erro'); if (velha) velha.remove();
+    if (!ok && dica && lab.classList.contains('loja-campo')) lab.insertAdjacentHTML('beforeend', '<small class="dica-erro">' + dica + '</small>');
+    return ok;
+  }
+
+  function enviar(ev) {
+    ev.preventDefault();
+    var f = ev.target;
+    var v = function (n) { var el = f.querySelector('[name="' + n + '"]'); return el ? (el.type === 'checkbox' ? el.checked : el.value.trim()) : ''; };
+    var tipo = f.getAttribute('data-form');
+
+    if (tipo === 'dados') {
+      var d = { email: v('email').toLowerCase(), nome: v('nome'), sobrenome: v('sobrenome'), cpf: v('cpf').replace(/\D/g, ''),
+                telefone: v('telefone').replace(/\D/g, ''), consent_marketing: v('consent_marketing'),
+                aceite_politica: f.querySelector('[name="aceite_politica"]') ? v('aceite_politica') : true };
+      var ok = [marcaFalta(f, 'email', L.emailValido(d.email), 'Digite um e-mail válido'),
+                marcaFalta(f, 'nome', !!d.nome, 'Preencha o nome'),
+                marcaFalta(f, 'sobrenome', !!d.sobrenome, 'Preencha o sobrenome'),
+                marcaFalta(f, 'cpf', cpfValido(d.cpf), d.cpf ? 'CPF inválido' : 'Preencha o CPF'),
+                marcaFalta(f, 'telefone', d.telefone.length >= 10, 'Telefone com DDD'),
+                marcaFalta(f, 'aceite_politica', !!d.aceite_politica)].every(Boolean);
+      if (!ok) { tremerEIr(f.querySelector('.faltou input')); return; }
+      st.dados = d; st.etapa = 'entrega';
+      if (!st.entrega.destinatario) st.entrega.destinatario = nomeCompleto();
+      guardar();
+      /* logado: a ficha da conta aprende o que a pessoa digitou aqui — na próxima compra já vem pronta */
+      if (eu.logado) {
+        L.salvarFicha({ nome: d.nome, sobrenome: d.sobrenome, cpf: d.cpf, telefone: d.telefone,
+          nascimento: eu.nascimento || '', consent_marketing: d.consent_marketing,
+          consent_personalizar: !!eu.consent_personalizar, aceite_politica: d.aceite_politica })
+          .then(function (j) { eu = j; }).catch(function () { /* a compra segue mesmo se a ficha não salvar */ });
+      }
+      pintar(); rolarPara('.loja-etapa:nth-of-type(2)');
+      return;
+    }
+    if (tipo === 'entrega') {
+      var e = st.entrega;
+      ['logradouro', 'bairro', 'cidade', 'uf', 'numero', 'complemento', 'destinatario'].forEach(function (k) {
+        if (f.querySelector('[name="' + k + '"]')) e[k] = k === 'uf' ? v(k).toUpperCase() : v(k);
+      });
+      var ok2 = [marcaFalta(f, 'numero', !!e.numero, 'Preencha o número (ou S/N)'),
+                 marcaFalta(f, 'destinatario', !!e.destinatario, 'Quem vai receber?'),
+                 marcaFalta(f, 'logradouro', !!e.logradouro.trim(), 'Preencha a rua'),
+                 marcaFalta(f, 'cidade', !!e.cidade.trim(), 'Preencha a cidade'),
+                 marcaFalta(f, 'uf', /^[A-Z]{2}$/.test(e.uf || ''), 'UF')].every(Boolean);
+      if (!ok2) {
+        var campos = raiz.querySelector('[data-endereco-campos]');
+        if (campos && campos.querySelector('.faltou')) { campos.hidden = false; raiz.querySelector('[data-endereco-caixa]').hidden = true; }
+        tremerEIr(f.querySelector('.faltou input'));
+        return;
+      }
+      if (st.frete && st.frete.estado === 'carregando') {      // 12/10/2026: espera a cotação (segundos)
+        erro = 'Calculando o frete, um instante…'; pintar(); return;
+      }
+      e.editando = false; st.etapa = 'pagamento'; guardar();
+      if (eu.logado && !(eu.enderecos || []).some(function (x) { return x.cep === e.cep && String(x.numero) === String(e.numero); })) {
+        L.guardarEndereco({ cep: e.cep, logradouro: e.logradouro, numero: e.numero, complemento: e.complemento,
+          bairro: e.bairro, cidade: e.cidade, uf: e.uf, apelido: 'casa' }).then(function (j) { eu = j; }).catch(function () {});
+      }
+      pintar(); rolarPara('.loja-etapa:nth-of-type(3)');
+    }
+  }
+
+  function rolarPara(sel) {
+    var el = raiz.querySelector(sel);
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 12, behavior: 'smooth' });
+  }
+
+  /* ------------------------------------------------------------- concluir
+     Até o gateway existir: o pedido inteiro vai pelo WhatsApp (e fica registrado na conta). */
+  function concluir() {
+    var car = CAR();
+    if (!car || !car.quantos()) return;
+    var d = st.dados, e = st.entrega;
+    var linhas = [
+      '',
+      'Dados: ' + nomeCompleto() + ' · CPF ' + mascaraCpf(d.cpf) + ' · ' + mascaraTelefone(d.telefone) + ' · ' + d.email,
+      'Entrega: ' + e.logradouro + ', ' + e.numero + (e.complemento ? ' — ' + e.complemento : '') + ' · ' +
+        (e.bairro ? e.bairro + ' · ' : '') + e.cidade + '-' + e.uf + ' · CEP ' + String(e.cep).replace(/^(\d{5})(\d{3})$/, '$1-$2'),
+      'Destinatário: ' + e.destinatario,
+      'Pagamento escolhido: ' + (st.pagamento === 'pix' ? 'Pix' : 'Cartão de crédito')
+    ];
+    if (opcaoFrete()) linhas.push('Frete: ' + opcaoFrete().empresa + (opcaoFrete().nome ? ' ' + opcaoFrete().nome : '') + ' — ' +
+      (freteValor() === 0 ? 'Grátis' : dinheiro(freteValor())));
+    if (descontoCupom()) linhas.push('Cupom ' + cupomAtual().codigo + ': − ' + dinheiro(descontoCupom()));
+    if (descontoPix()) linhas.push('Desconto Pix (' + pctPix() + '%): − ' + dinheiro(descontoPix()) + ' · Total: ' + dinheiro(totalFinal()));
+    if (st.presente && st.presente_texto) linhas.push('Mensagem para presente: "' + st.presente_texto + '"');
+    var pedido = { itens: car.itens(), total: car.total(), cupom: cupomAtual() ? cupomAtual().codigo : null, dados: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, telefone: d.telefone, cpf: d.cpf },
+                   entrega: e, pagamento: st.pagamento, presente: st.presente ? (st.presente_texto || '') : null,
+                   consent_marketing: !!d.consent_marketing, visitante: window.aleaRastro ? window.aleaRastro.visitante() : null };
+    var botao = raiz.querySelector('[data-concluir]'); if (botao) botao.disabled = true;
+    if (usaLink()) { pagarNaInfinitePay(pedido, linhas, botao); return; }
+    var zap = null;
+    /* 14/10/2026: na PRÉVIA, finalizar com o cupom de teste o "queima" no aparelho (o uso único simulado) */
+    if (L.previa && cupomAtual()) { try { localStorage.setItem(K_CUPOM_PREVIA, '1'); } catch (x) { /* aba anônima */ } }
+    /* 21:46: "deixa [o WhatsApp] até você confirmar com ele" — vale na prévia também */
+    zap = car.abrirWhatsApp(linhas);                         // abre JÁ, no mesmo toque (senão o navegador bloqueia)
+    L.registrarPedido(pedido).catch(function () { return {}; }).then(function (r) {
+      concluido = { numero: (r && r.numero) || '', nome: d.nome, previa: L.previa, pagamento: st.pagamento, zap: zap };
+      car.limpar(); L.compra.limpar();
+      st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
+      pintar(); window.scrollTo(0, 0);
+    });
+  }
+
+  /* o servidor cobra pela tabela e devolve o link; guardamos número + chave (pra conferir na volta) e o texto do
+     WhatsApp (pra combinar o frete depois de pago) e saímos pra página segura da InfinitePay */
+  function pagarNaInfinitePay(pedido, linhas, botao) {
+    var car = CAR(), d = st.dados, e = st.entrega;
+    var corpo = {
+      forma: st.pagamento === 'pix' ? 'pix' : 'cartao',
+      itens: itensServidor(),
+      total: totalFinal(),                         // 12/10/2026: peças + frete escolhido − desconto do Pix
+      comprador: { nome: d.nome, sobrenome: d.sobrenome, email: d.email, cpf: d.cpf, telefone: d.telefone },
+      entrega: { cep: e.cep, logradouro: e.logradouro, numero: e.numero, complemento: e.complemento || '',
+                 bairro: e.bairro || '', cidade: e.cidade, uf: e.uf, destinatario: e.destinatario },
+      presente: pedido.presente, visitante: pedido.visitante, consent_marketing: !!d.consent_marketing
+    };
+    var of = opcaoFrete();
+    if (of && st.frete.id_cotacao) corpo.frete = { id_cotacao: st.frete.id_cotacao, servico: of.servico };
+    if (cupomAtual()) corpo.cupom = cupomAtual().codigo;           // 14/10/2026: o servidor refaz e queima
+    if (botao) botao.textContent = totalFinal() > 0 ? 'Indo para o pagamento…' : 'Confirmando o pedido…';
+    L.pagarLink(corpo).then(function (r) {
+      var extras = linhas.concat(['', 'PAGO pelo site: pedido ' + r.numero + ' (' + dinheiro(r.total) + ').' + (corpo.frete ? '' : ' Falta combinar o frete.')]);
+      gravarPag({ numero: r.numero, chave: r.chave, nome: d.nome, comFrete: !!corpo.frete, zap: car.linkWhatsApp ? car.linkWhatsApp(extras) : null });
+      /* 14/10/2026: total R$ 0 com o cupom = o servidor já aprovou, sem página de pagamento */
+      location.href = r.aprovado && !r.url ? 'finalizar-compra.html?pedido=' + encodeURIComponent(r.numero) : r.url;
+    }).catch(function (x) {
+      erro = (x && x.message) || 'O pagamento não respondeu agora. Nada foi cobrado. Tente de novo em instantes.';
+      if (/frete/i.test(erro)) st.frete = null;              // frete vencido ou sacola mudou: cota de novo
+      if (/cupom/i.test(erro)) { st.cupom = null; st.frete = null; cupomMsg = erro; }   // 14/10/2026: usado/inválido
+      pintar(); rolarPara('.loja-etapa:nth-of-type(3)');
+    });
+  }
+
+  raiz.addEventListener('click', function (ev) {
+    var t;
+    if ((t = ev.target.closest('[data-tirar-item]'))) {
+      if (confirm('Tem certeza de que deseja remover este item da sua sacola?')) CAR().remover(+t.getAttribute('data-tirar-item'));
+      return;
+    }
+    if ((t = ev.target.closest('[data-passo]'))) { CAR().mudarQuantidade(+t.getAttribute('data-item'), +t.getAttribute('data-passo')); return; }
+    if (ev.target.closest('[data-ver-entrega]')) {
+      var box = raiz.querySelector('[data-entrega-previa]'); box.hidden = false;
+      ev.target.closest('[data-ver-entrega]').hidden = true; box.querySelector('input').focus(); return;
+    }
+    /* ETAPA 63 (22:15, Cassiano): "clicou em finalizar compra, vai pra tela do login". Quem já entrou segue direto;
+       quem não entrou vê a tela de entrar, com "continuar sem cadastro" na linha do Cadastre-se. */
+    if (ev.target.closest('[data-ir-compra]')) {
+      if (eu.logado) { location.hash = '#/compra'; return; }
+      location.href = 'conta.html?compra=1&voltar=' + encodeURIComponent('finalizar-compra.html#/compra');
+      return;
+    }
+    if ((t = ev.target.closest('[data-etapa]'))) { st.etapa = t.getAttribute('data-etapa'); guardar(); pintar(); return; }
+    if (ev.target.closest('[data-alterar-endereco]')) {
+      raiz.querySelector('[data-endereco-campos]').hidden = false; raiz.querySelector('[data-endereco-caixa]').hidden = true; return;
+    }
+    if (ev.target.closest('[data-sair]')) { L.sair().then(function () { eu = { logado: false }; st.dados = {}; st.etapa = 'dados'; guardar(); pintar(); }); return; }
+    /* 14/10/2026 (áudio 10826): "Ver Opções de Entrega" abre o CEP no mesmo lugar */
+    if (ev.target.closest('[data-ver-entrega-sacola]')) {
+      abreEntrega = true; entrou = true; pintar();
+      var cepS = raiz.querySelector('[data-cep-sacola]'); if (cepS && !cepS.value) cepS.focus();
+      return;
+    }
+    /* 19:33 (vídeo 10860): o CEP de "Receber N itens em" volta pro campo; a caixa ao lado do CEP cota o que já foi digitado;
+       a caixa da opção escolhida abre e fecha a lista das outras */
+    if (ev.target.closest('[data-trocar-cep]')) {
+      trocaCep = true; listaFrete = false; pintar();
+      var cepT = raiz.querySelector('[data-cep-sacola]'); if (cepT) { cepT.focus(); cepT.select(); }
+      return;
+    }
+    if (ev.target.closest('[data-cotar-cep]')) {
+      var cepC = raiz.querySelector('[data-cep-sacola]');
+      if (cepC) { cepC.dispatchEvent(new Event('input')); if (cepC.value.replace(/\D/g, '').length !== 8) cepC.focus(); }
+      return;
+    }
+    if (ev.target.closest('[data-lista-frete]')) { listaFrete = !listaFrete; pintar(); return; }
+    if (ev.target.closest('[data-aplicar-cupom]')) { var ci = raiz.querySelector('[name="cupom"]'); aplicarCupom(ci && ci.value); return; }
+    if (ev.target.closest('[data-tirar-cupom]')) { tirarCupom(); return; }
+    if (ev.target.closest('[data-concluir]')) { concluir(); }
+  });
+  raiz.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (t.matches('[data-presente]')) {
+      st.presente = t.checked; guardar();
+      raiz.querySelector('[data-presente-texto]').hidden = !t.checked;
+      if (t.checked) raiz.querySelector('[data-presente-texto]').focus();
+    }
+    if (t.matches('[name="pagamento"]')) { st.pagamento = t.value; guardar(); pintar(); }
+    if (t.matches('[name="frete"]') && st.frete) { st.frete.escolhido = t.value; listaFrete = false; guardar(); pintar(); }
+  });
+  raiz.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.matches('[name="cupom"]')) { ev.preventDefault(); aplicarCupom(ev.target.value); }
+  });
+  raiz.addEventListener('input', function (ev) {
+    if (ev.target.matches('[data-presente-texto]')) { st.presente_texto = ev.target.value; guardar(); }
+  });
+
+  document.addEventListener('alea:carrinho', function () { if (!concluido) pintar(); });
+  window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+  if (MQ_LARGO) {                                            // mudou de computador pra tela estreita (ou o contrário)
+    var mudouTela = function () { if (!concluido && !retorno && tela() !== 'compra') pintar(); };
+    if (MQ_LARGO.addEventListener) MQ_LARGO.addEventListener('change', mudouTela); else if (MQ_LARGO.addListener) MQ_LARGO.addListener(mudouTela);
+  }
+
+  function comecar() {
+    var q = new URLSearchParams(location.search);
+    var cfg = (L.previa || !L.config) ? Promise.resolve(null) : L.config().catch(function () { return null; });
+    cfg.then(function (c) {
+      var pg = c && c.pagamento;
+      PAG = (pg && pg.provedor === 'infinitepay') ? pg : null;
+      FRETE = !!(c && c.frete);
+      CUPOM_SERVIDOR = !!(pg && pg.cupom);           // 14/10/2026
+      if (PAG && (q.get('pedido') || q.get('order_nsu'))) conferirRetorno(q);   // a volta da InfinitePay
+      else if (PAG || FRETE) pintar();
+    });
+    L.eu().then(function (j) {
+      eu = j || { logado: false };
+      if (eu.logado) {
+        /* logado: os dados pessoais já vêm da ficha (o que ele digitou nesta compra vence) */
+        var dd = st.dados;
+        ['nome', 'sobrenome', 'cpf', 'telefone'].forEach(function (k) { if (!dd[k] && eu[k]) dd[k] = eu[k]; });
+        dd.email = eu.email;
+        var pr = (eu.enderecos || []).filter(function (x) { return x.principal; })[0];
+        if (pr && !st.entrega.cep) {
+          st.entrega = { cep: pr.cep, logradouro: pr.logradouro, bairro: pr.bairro, cidade: pr.cidade, uf: pr.uf,
+                         numero: pr.numero, complemento: pr.complemento, destinatario: '' };
+        }
+        guardar();
+      }
+    }).catch(function () { eu = { logado: false }; }).then(pintar);
+  }
+  if (window.aleaCarrinho) comecar(); else document.addEventListener('DOMContentLoaded', comecar);
+})();

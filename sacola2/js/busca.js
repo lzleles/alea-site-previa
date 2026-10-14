@@ -1,0 +1,528 @@
+/* CATALOGO:
+   nome: busca
+   categoria: UTIL
+   objetivo: A BUSCA DO SITE. No celular abre puxando a tela pra baixo quando a página já está no topo (igual a busca do
+             iPhone), com um aviso na primeira visita; no computador abre pela lupa "Buscar" do topo. A tela de busca é
+             esfumaçada com o site atrás, traz palavras sugeridas e acha a peça por palavra parecida (cachorro, gato, pote...).
+   entrada: window.VITRINE e window.PRODUTOS (produtos.js), window.CATEGORIAS; o que a pessoa digita
+   saida: tela de busca por cima do site; clique leva à página da peça (produto-<slug>.html) ou à categoria (index.html#id);
+          Enter leva à página de resultados busca.html?q=<texto>, que este mesmo arquivo desenha
+   status: v7 (10/10/2026) - em prévia
+   validado_em: 10/10/2026
+   v1 (03/10/2026, Cassiano, áudios 5561/5562/5564/5567/5568 + vídeo 5566 da busca do iPhone):
+      "se a pessoa pesquisar por cachorro, ou gato, ou comedouro, ou pote (...) ele cai no comedouro?" -> o site NÃO tinha
+      busca. "Quando a gente rola a tela pra baixo e ela já está no topo (...) a gente consegue buscar (...) só se a pessoa
+      estiver no topo da página, não tiver como mais subir (...) um pouco esfumaçado, com o fundo do site atrás (...) já
+      com palavras-chave". "Isso aí só vale para o celular (...) no computador não tem como" e "quando a pessoa abrir,
+      a gente já mostra um tutorial: arraste a tela para baixo para pesquisar produtos".
+      No computador entra a lupa "Buscar" no topo, ao lado de Conta/Desejos/Sacola (a mesma tela de busca).
+      Carregado pelo site.js (toda página que tem site.js ganha a busca; nenhuma página gerada precisou mudar).
+   v2 (03/10/2026, vídeo 5572 + áudios 5573/5575 + foto 5574, na prévia v1): "ótimo, é isso aí", e mais dois:
+      (1) o aviso some na 1ª interação (bom: não enche a tela), mas "se você vê que tá indo pro topo da página, faz a
+          animação de novo, pra ele saber que tem a barra de pesquisa ali" -> no celular, quem desceu pelo menos uma tela
+          e VOLTA ao topo vê o aviso de novo (some no próximo toque/rolagem). Ir e voltar um pouquinho não dispara.
+      (2) "entre as categorias e o logo do Linktree, um campo igual esse de buscar, falando 'buscar item'; clicou, abre
+          a tela da busca" -> campo no rodapé de toda página, antes das redes (celular e computador).
+   v3 (03/10/2026, vídeo 5576 + áudio 5577): "a transição perfeita do buscar do iPhone (...) enquanto estou com o dedo
+      apertado e abaixando, ele vai montando aos poucos a tela de buscar. Ele só monta ela a hora que eu solto o dedo".
+      -> a tela da busca SEGUE O DEDO: o esfumaçado cresce, as sugestões descem e a barra sobe na medida do puxão; só
+      ABRE de verdade (teclado) ao soltar passado o ponto; soltou antes ou voltou o dedo, ela se desmonta. Saiu a
+      pílula "Buscar" que descia do topo (a própria tela é o retorno). O teclado abre no próprio soltar (o iPhone só
+      deixa focar o campo dentro do toque).
+   v4 (03/10/2026, Cassiano, vídeo 5583 + áudio 5584, vídeo 5586 + áudio 5587, vídeo 5590 + áudio 5591):
+      (1) "nunca pôr o cursor sozinho": a tela abre SEM foco (sem teclado) em qualquer caminho - puxão, lupa, campo do
+          rodapé, sugestão. O teclado só abre quando a pessoa toca na caixa "Buscar". (No iPhone o teclado empurrava a tela
+          e mostrava o rodapé por baixo.) Exceção: a tecla "/" ou Ctrl+K no computador, que já é a pessoa querendo digitar.
+      (2) "a transição está inconstante (...) tem hora que abre de uma vez. Ela SEMPRE tem que entrar embaçada, mesmo que
+          eu arraste de uma vez, movimento brusco, ela tem que entrar DEVAGAR" -> o esfumaçado NÃO segue o dedo cru: um
+          motor por quadro (requestAnimationFrame) persegue o dedo com velocidade máxima (0 a 1 em 600 ms, curva suave
+          nas pontas). Puxão brusco = a tela vem no mesmo ritmo do puxão lento. Ao soltar passado o ponto ela termina de
+          entrar devagar a partir de onde estava (nunca salta); soltou antes, volta devagar (380 ms). Abrir pela lupa ou
+          pelo rodapé e fechar pelo Cancelar usam o mesmo motor - toda entrada e saída é igual.
+   v5 (03/10/2026, vídeos 5594/5595 + áudio 5596, "tá quase", os dois com puxão brusco): o ritmo já batia (~0,6 s);
+      faltava a ORDEM do iPhone - primeiro o fundo esfumaça inteiro, só depois as sugestões aparecem. Na v4 a lista
+      vinha junto com o esfumaçado e a capivara do site aparecia vazada por trás. Agora são duas fases do mesmo
+      motor: --b (esfumaçado) vai de 0 a 1 nos primeiros 40% e --c (conteúdo) entra de 35% a 100%. Ao fechar, ao
+      contrário: o conteúdo some primeiro e o fundo desembaça depois.
+      v5.1 (vídeo 5602, puxão brusco no iPhone dele): a lista PISCAVA cheia no começo e sumia - era a transição de .28s
+      da própria lista desbotando do estado anterior. Tirada: só o motor anima.
+      + (foto 5597 + áudio 5598) o campo "Buscar item" também no cartão de fim de cada categoria do feed ([data-busca-fim]),
+      em tom escuro, porque ali o fundo é claro.
+   v6 (03/10/2026, foto 5812 + áudio 5813 do Cassiano, celular dele na página da saboneteira): o aviso "Arraste a tela
+      para baixo..." ficava EM CIMA do "← voltar para o feed" -> "subir ele um pouquinho para ficar entre os dois, para
+      conseguir ver tudo". posicionarDica() mede o fundo dos ícones do topo e o topo do link e centra o aviso no vão.
+   v7 (10/10/2026, vídeo 8356 + áudio 8357 do Cassiano, "foi a mesma coisa lá do site do Marcel"):
+      (1) "se eu rolar a tela, quando eu clicar lá no procurar, a tela já tem que voltar para o começo de novo, porque
+          enquanto eu vou digitando, eu vou vendo o que vai aparecendo" -> tocar na caixa Buscar (e cada letra)
+          leva a lista ao topo. No iPhone o teclado encolhe a tela visível: a tela da busca passa a ter a altura
+          do visualViewport, então o topo da lista fica à vista e a barra fica colada no teclado.
+      (2) "quando eu aperto para buscar, está caindo direto no primeiro. Não é para cair no primeiro, é para cair nas
+          buscas (...) se eu digitar vaso, vai ter que abrir uma página com todos os itens que tem a palavra-chave
+          vaso ou que tem o nome vaso no título" -> Enter abre busca.html?q=<texto>: título, quantidade e os cartões
+          de TODOS os resultados (a mesma buscar(), com sinônimos), preço no estilo do site (v61). Campo vazio: nada.
+          Na página, o "Buscar item" reabre a busca já com a palavra.
+*/
+(function () {
+  'use strict';
+  if (window.__aleaBusca) return; window.__aleaBusca = true;
+
+  var VITRINE = window.VITRINE || [], PRODUTOS = window.PRODUTOS || [], CATS = window.CATEGORIAS || [];
+  var CELULAR = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  var CHAVE_DICA = 'alea_busca_dica_v1';
+  var PUXAR = 80;                          // px puxando pra baixo no topo pra abrir
+  var ENTRA_MS = 600, SAI_MS = 380;        // v4: tempo mínimo de 0 a 1 (entrar) e de 1 a 0 (sair), mesmo com puxão brusco
+
+  /* palavra que a pessoa digita -> palavras que existem nas peças (sem acento, minúsculo) */
+  var SINONIMOS = {
+    cachorro: 'pet comedouro cao', cachorros: 'pet comedouro cao', cao: 'pet comedouro', caes: 'pet comedouro cao',
+    cadela: 'pet comedouro', dog: 'pet comedouro', doguinho: 'pet comedouro', filhote: 'pet comedouro',
+    gato: 'pet comedouro', gatos: 'pet comedouro', gata: 'pet comedouro', felino: 'pet comedouro', cat: 'pet comedouro',
+    pote: 'comedouro', potinho: 'comedouro', tigela: 'comedouro', vasilha: 'comedouro', bowl: 'comedouro',
+    comida: 'comedouro', racao: 'comedouro', agua: 'comedouro', bebedouro: 'comedouro', prato: 'comedouro',
+    vaso: 'vase', vasos: 'vase', vasinho: 'vase',          // v7 (áudio 8357): os vasos têm nome em inglês (Vase)
+    alto: 'elevado', elevada: 'elevado', melancia: 'watermelon', inox: 'comedouro', animal: 'pet', bicho: 'pet'
+  };
+  var Q_PAGINA = '';                                                 // v7: a palavra da página busca.html?q=
+  var SUGESTOES = ['Comedouro', 'Cachorro', 'Gato', 'Elevado', 'Melancia', 'PET'];
+
+  function norm(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ā/g, 'a')
+      .replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function catNome(id) { for (var i = 0; i < CATS.length; i++) if (CATS[i].id === id) return CATS[i].nome; return ''; }
+  function prodDe(slug) { for (var i = 0; i < PRODUTOS.length; i++) if (PRODUTOS[i].slug === slug) return PRODUTOS[i]; return null; }
+
+  /* o índice: SÓ o que está na vitrine (o que saiu da vitrine não aparece na busca) */
+  var ITENS = VITRINE.map(function (v) {
+    var p = prodDe(v.pagina) || {};
+    var texto = [v.produto, v.nome, p.nome, p.linha, v.categoria, catNome(v.categoria), (p.paragrafos || []).join(' '), p.resumo].join(' ');
+    return {
+      v: v,                                                       // v7: a página de resultados usa o preço da vitrine
+      titulo: v.produto, linha: p.linha || '', cat: catNome(v.categoria), url: 'produto-' + v.pagina + '.html',
+      foto: 'img/produtos/' + (v.fotos && v.fotos[0] ? v.fotos[0] : p.capa) + '_m.jpg',
+      forte: norm([v.produto, v.nome, p.linha, catNome(v.categoria)].join(' ')), fraco: norm(texto)
+    };
+  });
+
+  function buscar(q) {
+    var termos = norm(q).split(' ').filter(Boolean);
+    if (!termos.length) return [];
+    var res = [];
+    ITENS.forEach(function (it) {
+      var nota = 0, todos = true;
+      termos.forEach(function (t) {
+        var alvos = [t].concat((SINONIMOS[t] || '').split(' ').filter(Boolean));
+        var achou = 0;
+        alvos.forEach(function (a) {
+          var re = new RegExp('(^| )' + a);
+          if (re.test(it.forte)) achou = Math.max(achou, a === t ? 3 : 2);
+          else if (t.length >= 3 && re.test(it.fraco)) achou = Math.max(achou, 1);
+        });
+        if (!achou) todos = false; nota += achou;
+      });
+      if (todos) res.push({ it: it, nota: nota });
+    });
+    return res.sort(function (a, b) { return b.nota - a.nota; }).map(function (r) { return r.it; });
+  }
+
+  /* ---------- a tela ---------- */
+  var css = document.createElement('style');
+  css.textContent = [
+    '.busca-tela{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;opacity:0;visibility:hidden;',
+    ' transition:none;background:rgba(234,228,219,.42);',   /* v4: quem anima entrada e saída é o motor (--p); sem a sobra de .28s, que deixava a lista tocável depois de fechar */
+    ' -webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);font-family:var(--fonte-corpo)}',
+    '.busca-tela.aberta{opacity:1;visibility:visible}',
+    /* v3: enquanto o dedo puxa, a tela se monta na medida de --p (0 a 1), sem transição (segue o dedo) */
+    '.busca-tela.arrastando{visibility:visible;opacity:1;transition:none;pointer-events:none;',
+    ' background:rgba(234,228,219,calc(.42*var(--b)));-webkit-backdrop-filter:blur(calc(22px*var(--b))) saturate(calc(1 + .5*var(--b)));',
+    ' backdrop-filter:blur(calc(22px*var(--b))) saturate(calc(1 + .5*var(--b)))}',
+    /* v5: o conteúdo só entra depois que o fundo já esfumaçou (--c), igual ao iPhone */
+    '.busca-tela.arrastando .busca-corpo{opacity:var(--c);transform:translateY(calc(-48px*(1 - var(--c))))}',
+    '.busca-tela.arrastando .busca-barra{opacity:var(--c);transform:translateY(calc(40px*(1 - var(--c))))}',
+    /* v5.1 (vídeo 5602): SEM transição própria - a sobra de .28s fazia a lista aparecer cheia e sumir no começo do puxão
+       (ela "desbotava" do estado anterior até o --c=0). Quem anima é só o motor. */
+    '.busca-corpo,.busca-barra{transition:none}',
+    '.busca-corpo{flex:1;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 22px) var(--gutter,20px) 16px;',
+    ' -webkit-overflow-scrolling:touch;overscroll-behavior:contain}',
+    '.busca-rot{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--tinta-fraca,#6B5D50);margin:4px 2px 10px}',
+    '.busca-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}',
+    '.busca-chips button{font:inherit;font-size:15px;padding:9px 16px;border-radius:999px;border:0;cursor:pointer;',
+    ' color:var(--tinta,#2B2118);background:rgba(255,255,255,.55);box-shadow:0 1px 2px rgba(43,33,24,.08)}',
+    '.busca-lista{display:flex;flex-direction:column;gap:10px;max-width:720px}',
+    '.busca-item{display:flex;align-items:center;gap:14px;padding:10px;border-radius:18px;text-decoration:none;',
+    ' color:var(--tinta,#2B2118);background:rgba(255,255,255,.55);box-shadow:0 1px 3px rgba(43,33,24,.08)}',
+    '.busca-item img{width:62px;height:62px;border-radius:12px;object-fit:cover;flex:none;background:#ddd}',
+    '.busca-item b{display:block;font-weight:600;font-size:15px;line-height:1.25}',
+    '.busca-item small{display:block;font-size:13px;color:var(--tinta-fraca,#6B5D50);margin-top:3px}',
+    '.busca-vazio{color:var(--tinta-fraca,#6B5D50);font-size:15px;padding:6px 2px}',
+    '.busca-barra{display:flex;align-items:center;gap:10px;padding:10px var(--gutter,20px) calc(env(safe-area-inset-bottom) + 12px)}',
+    '.busca-campo{flex:1;display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;border-radius:999px;',
+    ' background:rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(43,33,24,.12)}',
+    '.busca-campo svg{flex:none;color:var(--tinta-fraca,#6B5D50)}',
+    '.busca-campo input{flex:1;border:0;background:transparent;font:inherit;font-size:16px;color:var(--tinta,#2B2118);outline:0;min-width:0}',
+    '.busca-cancelar{font:inherit;font-size:16px;border:0;background:none;color:var(--terracota,#9D3E20);cursor:pointer;padding:8px 2px}',
+    /* no computador a barra fica em cima */
+    '@media (hover:hover) and (pointer:fine){.busca-tela{flex-direction:column-reverse}.busca-barra{padding-top:28px;max-width:760px;width:100%;margin:0 auto}',
+    ' .busca-corpo{padding-top:8px;max-width:760px;width:100%;margin:0 auto}}',
+    /* o aviso da primeira visita */
+    '.busca-dica{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 86px);z-index:1998;transform:translate(-50%,-14px);',
+    ' display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:999px;white-space:nowrap;opacity:0;',
+    ' font:500 14px var(--fonte-corpo);color:var(--tinta,#2B2118);background:rgba(255,255,255,.62);',
+    ' -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 2px 12px rgba(43,33,24,.15);',
+    ' transition:opacity .4s ease,transform .4s ease;pointer-events:none}',
+    '.busca-dica.vis{opacity:1;transform:translate(-50%,0)}',
+    '.busca-dica i{display:inline-block;font-style:normal;animation:busca-seta 1.1s ease-in-out infinite}',
+    '@keyframes busca-seta{0%,100%{transform:translateY(-3px)}50%{transform:translateY(4px)}}',
+    '@media (prefers-reduced-motion:reduce){.busca-dica i{animation:none}}',
+    /* v7: a página de resultados (busca.html) - a grade é a mesma da Lista de Desejos (.loja-desejos, loja.css) */
+    '.busca-res-conta{font-size:13px;color:var(--lj-cinza,#6B5D50);margin:-6px 0 18px}',
+    '.busca-res .busca-res-linha{display:block;font-size:11px;color:var(--lj-cinza,#6B5D50);margin:2px 0 4px}',
+    '.busca-res-de-novo{margin:28px 0 8px}'
+  ].join('');
+  document.head.appendChild(css);
+
+  var LUPA = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+  var tela = document.createElement('div');
+  tela.className = 'busca-tela'; tela.setAttribute('role', 'dialog'); tela.setAttribute('aria-label', 'Buscar produtos');
+  tela.innerHTML =
+    '<div class="busca-corpo"><div class="busca-rot" data-rot>Sugestões</div><div class="busca-chips" data-chips></div>' +
+    '<div class="busca-lista" data-lista></div></div>' +
+    '<div class="busca-barra"><label class="busca-campo">' + LUPA +
+    '<input type="search" enterkeyhint="search" autocomplete="off" placeholder="Buscar" aria-label="Buscar produtos"></label>' +
+    '<button type="button" class="busca-cancelar">Cancelar</button></div>';
+  var campo = tela.querySelector('input'), lista = tela.querySelector('[data-lista]'), chips = tela.querySelector('[data-chips]');
+  var rot = tela.querySelector('[data-rot]');
+
+  SUGESTOES.forEach(function (s) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = s;
+    b.addEventListener('click', function () { campo.value = s; pintar(); });   // v4: sem foco (sem teclado)
+    chips.appendChild(b);
+  });
+
+  function itemHTML(it) {
+    return '<a class="busca-item" href="' + it.url + '"><img src="' + it.foto + '" alt="" loading="lazy">' +
+      '<span><b>' + it.titulo.replace(/</g, '&lt;') + '</b><small>' + [it.linha, it.cat].filter(Boolean).join(' · ') + '</small></span></a>';
+  }
+  function pintar() {
+    var q = campo.value;
+    if (!norm(q)) {
+      rot.textContent = 'Sugestões'; chips.style.display = '';
+      lista.innerHTML = ITENS.map(itemHTML).join('');
+      return;
+    }
+    chips.style.display = 'none';
+    var r = buscar(q);
+    rot.textContent = r.length ? 'Produtos' : '';
+    lista.innerHTML = r.length ? r.map(itemHTML).join('')
+      : '<div class="busca-vazio">Ainda não temos peça com “' + q.replace(/</g, '&lt;') + '”. Fala com a gente: fazemos sob encomenda.</div>';
+  }
+  campo.addEventListener('input', pintar);
+  /* v7 (1): tocou na caixa ou digitou -> a lista no topo, pra ver o resultado aparecendo */
+  var corpo = tela.querySelector('.busca-corpo');
+  function aoTopo() { corpo.scrollTop = 0; }
+  campo.addEventListener('pointerdown', aoTopo);
+  campo.addEventListener('focus', function () { aoTopo(); setTimeout(aoTopo, 350); });   // de novo depois do teclado subir
+  campo.addEventListener('input', aoTopo);
+  /* v7 (2): Enter NÃO vai pro 1º produto: abre a página com todos os resultados. Campo vazio: nada. */
+  campo.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var q = campo.value.trim();
+    if (!norm(q)) return;
+    campo.blur();
+    location.href = 'busca.html?q=' + encodeURIComponent(q);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && aberta) fechar(); });
+  tela.querySelector('.busca-cancelar').addEventListener('click', fechar);
+  tela.addEventListener('click', function (e) { if (e.target === tela || e.target.classList.contains('busca-corpo')) fechar(); });
+
+  /* ---------- v4: o motor da transição (o esfumaçado nunca anda mais rápido que ENTRA_MS/SAI_MS) ---------- */
+  var atual = 0, alvo = 0, durMs = ENTRA_MS, raf = 0, ultimo = 0, aoChegar = null, montada = false;
+  function suave(x) { return x * x * (3 - 2 * x); }                  // devagar no começo e no fim
+  var FUNDO_ATE = 0.40, CONTEUDO_DE = 0.35;                          // v5: as duas fases (fundo, depois conteúdo)
+  function fase(x, a, b) { return suave(Math.max(0, Math.min(1, (x - a) / (b - a)))); }
+  function pintarP(x) {
+    tela.style.setProperty('--p', suave(x).toFixed(3));
+    tela.style.setProperty('--b', fase(x, 0, FUNDO_ATE).toFixed(3));
+    tela.style.setProperty('--c', fase(x, CONTEUDO_DE, 1).toFixed(3));
+  }
+  function limparP() { ['--p', '--b', '--c'].forEach(function (v) { tela.style.removeProperty(v); }); }
+  function montarTela() {
+    if (montada) return; montada = true; atual = 0;
+    campo.value = Q_PAGINA; pintar();                                // v7: na página de resultados, já com a palavra
+    tela.classList.remove('aberta'); tela.classList.add('arrastando'); pintarP(0);
+  }
+  function levarA(p, ms, fim) {
+    alvo = Math.max(0, Math.min(1, p)); durMs = ms; aoChegar = fim || null;
+    if (!raf) { ultimo = 0; raf = requestAnimationFrame(passo); }
+  }
+  function passo(t) {
+    var dt = ultimo ? Math.min(50, t - ultimo) : 16; ultimo = t;
+    var d = alvo - atual, max = dt / durMs;
+    atual = Math.abs(d) <= max ? alvo : atual + (d > 0 ? max : -max);
+    pintarP(atual);
+    if (atual === alvo) {
+      raf = 0; var f = aoChegar; aoChegar = null; if (f) f();
+    } else raf = requestAnimationFrame(passo);
+  }
+  function terminouDeAbrir() {
+    tela.classList.remove('arrastando'); tela.classList.add('aberta'); limparP();
+  }
+  function terminouDeFechar() {
+    montada = false; tela.classList.remove('arrastando', 'aberta'); limparP(); soltarDaTela();
+  }
+  /* v7 (1): com o teclado do iPhone aberto, a tela da busca ocupa só a parte VISÍVEL (visualViewport): o topo da lista
+     não fica escondido em cima e a barra fica logo acima do teclado. */
+  var VV = window.visualViewport;
+  function caberNaTela() {
+    if (!VV || !montada) return;
+    tela.style.top = VV.offsetTop + 'px'; tela.style.height = VV.height + 'px'; tela.style.bottom = 'auto';
+  }
+  function soltarDaTela() { tela.style.top = ''; tela.style.height = ''; tela.style.bottom = ''; }
+  if (VV) { VV.addEventListener('resize', caberNaTela); VV.addEventListener('scroll', caberNaTela); }
+
+  var aberta = false;
+  function abrir(focar) {
+    if (aberta) return; aberta = true;
+    montarTela();                                                    // se o dedo já montou, segue de onde está
+    caberNaTela();
+    document.documentElement.style.overflow = 'hidden';
+    levarA(1, ENTRA_MS, terminouDeAbrir);
+    if (focar === true) setTimeout(function () { campo.focus(); }, 60);   // só "/" ou Ctrl+K no computador
+    esconderDica(true);
+  }
+  function fechar() {
+    if (!aberta) return; aberta = false; campo.blur();
+    document.documentElement.style.overflow = '';
+    if (!montada) return;
+    tela.classList.remove('aberta'); tela.classList.add('arrastando'); pintarP(atual);
+    levarA(0, SAI_MS, terminouDeFechar);
+  }
+  window.aleaAbrirBusca = abrir;
+
+  function montar() {
+    paginaResultados();                                              // v7: antes do campoDoRodape (põe o [data-busca-fim])
+    document.body.appendChild(tela);
+    campoDoRodape();
+    if (CELULAR) ligarPuxar(); else ligarLupa();
+  }
+
+  /* ---------- v2: o campo "Buscar item" no rodapé, entre as categorias e as redes (foto 5574) ---------- */
+  function campoDoRodape() {
+    var css2 = document.createElement('style');
+    css2.textContent = '.busca-rodape{display:flex;align-items:center;gap:8px;width:min(100%,240px);height:38px;margin:20px auto 16px;' +
+      'padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:rgba(255,255,255,.72);' +
+      'font:400 13px var(--fonte-corpo);cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}' +
+      '.busca-rodape:hover{background:rgba(255,255,255,.14);color:#fff}.busca-rodape svg{flex:none;width:15px;height:15px}' +   // v3.1 (áudio 5581): menor
+      '.busca-rodape.busca-fim{margin:0 auto;border-color:rgba(43,33,24,.22);background:rgba(255,255,255,.35);color:var(--tinta,#2B2118)}' +
+      '.busca-rodape.busca-fim:hover{background:rgba(255,255,255,.6);color:var(--tinta,#2B2118)}';   // v5: no fim do feed (fundo claro)
+    document.head.appendChild(css2);
+    document.querySelectorAll('footer.rodape').forEach(function (rod) {
+      if (rod.querySelector('.busca-rodape')) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'busca-rodape'; b.setAttribute('aria-label', 'Buscar item');
+      b.innerHTML = LUPA + '<span>Buscar item</span>';
+      b.addEventListener('click', function () { abrir(); });
+      var antes = rod.querySelector('[data-redes]');
+      if (antes) rod.insertBefore(b, antes); else rod.appendChild(b);
+    });
+    campoNoFim();
+    document.addEventListener('alea:feed-desenhado', campoNoFim);
+  }
+  /* v5 (foto 5597): o mesmo campo no cartão de fim do feed, que o feed.js redesenha a cada categoria */
+  function campoNoFim() {
+    document.querySelectorAll('[data-busca-fim]').forEach(function (caixa) {
+      if (caixa.querySelector('.busca-rodape')) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'busca-rodape busca-fim'; b.setAttribute('aria-label', 'Buscar item');
+      b.innerHTML = LUPA + '<span>Buscar item</span>';
+      b.addEventListener('click', function () { abrir(); });
+      caixa.appendChild(b);
+    });
+  }
+
+  /* ---------- computador: a lupa no topo ---------- */
+  function ligarLupa() {
+    var nav = document.querySelector('header.topo nav');
+    if (!nav || nav.querySelector('[data-abrir="busca"]')) return;
+    var b = document.createElement('button');
+    b.className = 'botao-icone'; b.type = 'button'; b.setAttribute('data-abrir', 'busca'); b.setAttribute('aria-label', 'Buscar');
+    b.innerHTML = LUPA + ' <span class="rotulo">Buscar</span>';
+    b.addEventListener('click', function () { abrir(); });
+    nav.insertBefore(b, nav.firstChild);
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === '/' || (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey))) && !/INPUT|TEXTAREA/.test((e.target || {}).tagName || '')) {
+        e.preventDefault(); abrir(true);
+      }
+    });
+  }
+
+  /* ---------- celular: puxar a tela pra baixo no topo ---------- */
+  function ondeRola(el) {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      if (el.tagName === 'CANVAS' && el.closest('.janela3d-fundo, .telacheia')) return null; // a peça 3D gira pelo dedo (o canvas do feed não conta)
+      var cs = getComputedStyle(el);
+      if ((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el;
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+  function travada() {
+    var b = document.body, home = b.classList.contains('home');
+    if (home && !b.classList.contains('site-revelado') && !b.classList.contains('sem-abertura')) return true; // abertura rodando
+    if (document.querySelector('.gaveta.aberta') || document.documentElement.classList.contains('janela3d-aberta')) return true; // sacola, conta ou personalizar aberta (o body.travado do feed NÃO conta)
+    if (document.body.classList.contains('janela-sacola')) return true; // 14/10/2026 (áudio 10859): a janela da sacola no celular
+    return !!document.querySelector('.telacheia.aberta, .janela3d-fundo.aberta, [role="dialog"].aberta:not(.busca-tela)');
+  }
+  /* 14/10/2026 (vídeo 10838 + áudio 10839 do Cassiano): "somente na sacola de compra o busca não vai aparecer se a gente
+     apertar pra baixo" — na tela Sacola de Compras (finalizar-compra.html sem #/compra) o puxar não abre a busca nem
+     mostra o aviso; o Finalizar Compra e as outras páginas seguem iguais. */
+  function naSacola() { return !!document.querySelector('[data-loja-compra]') && (location.hash || '').indexOf('compra') < 0; }
+  function ligarPuxar() {
+    var y0 = null, dy = 0;
+    function pintarPuxao(p) {                                        // v4: o dedo só diz ATÉ ONDE; o motor diz a velocidade
+      montarTela(); levarA(p, ENTRA_MS);
+    }
+    function desmontar() {
+      if (!montada || aberta) return;
+      levarA(0, SAI_MS, terminouDeFechar);
+    }
+    document.addEventListener('touchstart', function (e) {
+      y0 = null; dy = 0;
+      if (aberta || e.touches.length !== 1 || travada() || naSacola()) return;
+      var sc = ondeRola(e.target);
+      if (!sc || sc.scrollTop > 0) return;                            // só no topo, sem ter mais pra onde subir
+      y0 = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchmove', function (e) {
+      if (y0 === null) return;
+      dy = e.touches[0].clientY - y0;
+      if (dy <= 6) { if (montada) pintarPuxao(0); return; }
+      esconderDica();
+      pintarPuxao(Math.min(1, dy / (PUXAR * 1.6)));                   // monta aos poucos, na medida do dedo
+    }, { passive: true });
+    function soltar() {
+      if (y0 === null) return;
+      var abre = dy >= PUXAR; y0 = null;
+      if (abre) abrir(); else desmontar();                             // só abre de verdade ao soltar, sem teclado
+    }
+    document.addEventListener('touchend', soltar, { passive: true });
+    document.addEventListener('touchcancel', function () { y0 = null; desmontar(); }, { passive: true });
+    if (!naSacola()) mostrarDica();
+  }
+
+  /* ---------- o aviso da primeira visita (só celular) ---------- */
+  var dica = null, dicaTimer = null;
+  function jaViuDica() { try { return localStorage.getItem(CHAVE_DICA) === '1'; } catch (e) { return false; } }
+  function marcarDica() { try { localStorage.setItem(CHAVE_DICA, '1'); } catch (e) {} }
+  function exibirDica() {
+    if (dica || aberta) return;
+    dica = document.createElement('div'); dica.className = 'busca-dica';
+    dica.innerHTML = '<i aria-hidden="true">↓</i> Arraste a tela para baixo para pesquisar produtos';
+    document.body.appendChild(dica);
+    var d = dica;
+    posicionarDica(d);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { d.classList.add('vis'); }); });
+    dicaTimer = setTimeout(function () { esconderDica(); }, 5000);
+    /* some na primeira interação (toque ou rolagem), depois de um respiro pra não sumir com o próprio gesto que a trouxe */
+    setTimeout(function () {
+      if (dica !== d) return;
+      function sai() { document.removeEventListener('touchstart', sai, true); document.removeEventListener('scroll', sai, true); if (dica === d) esconderDica(); }
+      document.addEventListener('touchstart', sai, true); document.addEventListener('scroll', sai, true);
+    }, 700);
+  }
+  /* v6: o aviso fica NO VÃO entre os ícones do topo e o "← voltar para o feed", sem cobrir nenhum dos dois.
+     Mede na hora (a altura do topo e do link mudam com a fonte e a tela). Página sem o link: fica no lugar do CSS. */
+  function posicionarDica(d) {
+    var topo = document.querySelector('header.topo'), volta = document.querySelector('main a.voltar');
+    if (!topo || !volta) return;
+    var rv = volta.getBoundingClientRect();
+    if (!rv.height || rv.top <= 0) return;
+    var fundoTopo = 0;
+    Array.prototype.forEach.call(topo.querySelectorAll('img,svg,a,button'), function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.height && r.width && r.bottom > fundoTopo && r.bottom < rv.top) fundoTopo = r.bottom;
+    });
+    if (!fundoTopo) return;
+    var h = d.getBoundingClientRect().height, vao = rv.top - fundoTopo;
+    d.style.top = Math.round(fundoTopo + Math.max(4, (vao - h) / 2)) + 'px';
+  }
+  function mostrarDica() {
+    vigiarVoltaAoTopo();
+    if (jaViuDica() && !/[?&]dica=1/.test(location.search)) return;
+    var tenta = 0;
+    (function esperar() {
+      if (travada()) { if (++tenta < 60) setTimeout(esperar, 500); return; }
+      marcarDica(); exibirDica();
+    })();
+  }
+  /* v2: desceu pelo menos uma tela e voltou ao topo (sem mais pra onde subir) -> o aviso de novo */
+  function vigiarVoltaAoTopo() {
+    var desceu = false;
+    document.addEventListener('scroll', function (e) {
+      var el = (e.target === document || e.target === document.documentElement) ? (document.scrollingElement || document.documentElement) : e.target;
+      if (!el || typeof el.scrollTop !== 'number' || el.scrollHeight <= el.clientHeight + 1) return;
+      var alt = el.clientHeight || window.innerHeight;
+      if (el.scrollTop > alt) desceu = true;
+      else if (el.scrollTop <= 0 && desceu) { desceu = false; if (!travada()) exibirDica(); }
+    }, true);
+  }
+  function esconderDica() {
+    if (!dica) return;
+    clearTimeout(dicaTimer); var d = dica; dica = null;
+    d.classList.remove('vis'); setTimeout(function () { d.remove(); }, 450);
+  }
+
+
+  /* ---------- v7 (2): a página de resultados busca.html?q=<texto> (vídeo 8356 + áudio 8357) ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function emIngles() {
+    var m = /[?&]lang=(en|pt)\b/.exec(location.search); if (m) return m[1] === 'en';
+    try { return localStorage.getItem('alea_idioma') === 'en'; } catch (e) { return false; }
+  }
+  function moeda(v) { return (window.aleaDinheiroHTML && window.aleaDinheiroHTML(v)) || 'Sob consulta'; }
+  /* o MESMO preço do cartão da vitrine (feed.js valorDoCard): em breve, preço, "a partir de" o menor, ou sob consulta */
+  function valorDoCard(c) {
+    if ((((window.ALEA || {}).emBreve) || []).indexOf(c.pagina) >= 0) return '<small class="em-breve">Em breve</small>';
+    /* 13/10/2026 (áudio 9620): + a linha da parcela embaixo (site.js aleaParcelaCard). */
+    if (c.preco !== null && c.preco !== undefined) return moeda(c.preco) + ((window.aleaParcelaCard && window.aleaParcelaCard(c.preco)) || '');
+    var tab = ((window.ALEA || {}).precoPorEscolha || {})[c.pagina];
+    var vs = tab ? Object.keys(tab).map(function (k) { return tab[k]; }).filter(function (v) { return typeof v === 'number'; }) : [];
+    if (!vs.length) return 'Sob consulta';
+    var menor = Math.min.apply(null, vs);
+    return '<small class="a-partir">a partir de</small> ' + moeda(menor) + ((window.aleaParcelaCard && window.aleaParcelaCard(menor)) || '');
+  }
+  function paginaResultados() {
+    var raiz = document.querySelector('[data-busca-resultados]');
+    if (!raiz) return;
+    var q = '';
+    try { q = (new URLSearchParams(location.search).get('q') || '').trim(); } catch (e) { q = ''; }
+    Q_PAGINA = q;
+    var en = emIngles(), r = norm(q) ? buscar(q) : [];
+    var h = '';
+    if (!norm(q)) {
+      h = '<h1 class="loja-titulo grande">Buscar</h1>';
+    } else {
+      h = '<h1 class="loja-titulo grande" data-sem-traducao>' + (en ? 'Results for “' : 'Resultados para “') + esc(q) + '”</h1>' +
+        '<p class="busca-res-conta" data-sem-traducao data-busca-conta="' + r.length + '">' +
+        (en ? r.length + (r.length === 1 ? ' piece' : ' pieces') : r.length + (r.length === 1 ? ' peça' : ' peças')) + '</p>';
+      h += r.length
+        ? '<div class="loja-desejos busca-res">' + r.map(function (it) {
+            return '<div><a href="' + esc(it.url) + '"><img src="' + esc(it.foto) + '" alt="" loading="lazy">' + esc(it.titulo) +
+              '<small class="busca-res-linha">' + esc([it.linha, it.cat].filter(Boolean).join(' · ')) + '</small>' +
+              valorDoCard(it.v) + '</a></div>';
+          }).join('') + '</div>'
+        : '<p class="loja-vazio" data-sem-traducao>' + (en
+            ? 'We don’t have a piece with “' + esc(q) + '” yet. Hit us up: we make things to order.'
+            : 'Ainda não temos peça com “' + esc(q) + '”. Fala com a gente: fazemos sob encomenda.') + '</p>' +
+          '<p class="loja-vazio"><a href="index.html">Ver as peças</a></p>';
+    }
+    raiz.innerHTML = h + '<div class="busca-res-de-novo" data-busca-fim></div>';
+    if (norm(q)) document.title = (en ? 'Search: ' : 'Busca: ') + q + ' · ālea & Co.';
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();

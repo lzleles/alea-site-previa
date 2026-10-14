@@ -1,0 +1,66 @@
+{
+ "matriz_mundo_zup": [
+  [
+   -0.000999999997,
+   6.6057455882821045e-09,
+   -5.329258003135666e-08,
+   -0.000529058007947919
+  ],
+  [
+   -7.401676079987752e-08,
+   -8.911767408869432e-05,
+   0.0007200152586866899,
+   0.03802926231678193
+  ],
+  [
+   9.582128610000001e-12,
+   0.0009960211047212544,
+   6.4422415525365e-05,
+   0.17977016134134627
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "bbox_local_texto": [
+  [
+   -11.6112118,
+   -3.29999995,
+   -1.12507999
+  ],
+  [
+   10.0555639,
+   4.81799984,
+   0.874920011
+  ]
+ ],
+ "text_info": {
+  "text": "Cacá",
+  "font_name": "Defante",
+  "font_version": "2.5",
+  "style_name": "Recomendado",
+  "boldness": "0",
+  "skew": "0",
+  "font_index": "-1",
+  "font_size": "11",
+  "thickness": "2",
+  "embeded_depth": "0",
+  "rotate_angle": "0",
+  "text_gap": "0",
+  "bold": "0",
+  "italic": "0",
+  "surface_type": "1",
+  "hit_mesh": "0",
+  "hit_position": "0 0 0",
+  "hit_normal": "0 0 0"
+ },
+ "altura_peca_m": 0.25808743947,
+ "tipo_nome": "gravado_no_site",
+ "subtype_no_arquivo": "modifier_part",
+ "extrusora_nome": 1,
+ "cor_no_arquivo": "#FFFFFF (Elegoo PLA Matte White)",
+ "origem": "Urubu Flamengo - A1.3mf placa 13 obj 171 parte 170 (text_shape) levada pra placa 1 obj 161 parte 134 (barrinha casada: rot 180, dist media 0.776 mm) - montar_urubu_glb_v1"
+}

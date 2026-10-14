@@ -1,0 +1,590 @@
+/* CATALOGO:
+   nome: carrinho
+   categoria: UTIL
+   objetivo: Mantém carrinho, dados locais e histórico de pedidos e prepara o fechamento da compra pelo WhatsApp.
+   entrada: DOM, configuração global e dados do localStorage
+   saida: Gavetas, contador, histórico local e mensagem de pedido no WhatsApp
+   status: ativo (05/10/2026: `adicionar` recusa peça "Em breve" — ALEA.emBreve, áudio 6726; antes em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/; 04/10/2026 tarde: "Formato: X" e as cores por parte "Exterior: …, Interior: …" do Stria Planter, produto.js v42; 04/10/2026: sai a frase "Cliente ciente da variação de cor da tela" da descrição do item; 28/09/2026: a descrição do item abre com "Tamanho: X" quando o produto tem tamanho — produto.js v36)
+   validado_em: 28/09/2026 (Playwright, 03_site/_testar_tamanhos_v3_2026-09-28.py: sacola e texto do pedido com o tamanho)
+*/
+/* =============================================================================
+   carrinho.js — o carrinho e a conta, os dois botões que ele pediu no canto
+   =============================================================================
+   Pedido do Cassiano, 15/09/2026: "no canto superior direito, onde está escrito pedir,
+   retirar esse botão e colocar 2 botões de Conta e Carrinho".
+
+   ⚠️ PARECER ANTES DE CONSTRUIR — LEIA ANTES DE MEXER
+   ---------------------------------------------------
+   Um carrinho de verdade termina em PAGAMENTO, e pagamento precisa de servidor: o
+   valor da cobrança tem que nascer fora do navegador, senão o cliente troca R$ 179 por
+   R$ 1,79 antes de pagar. Este site é estático (GitHub Pages) e não tem esse servidor
+   — ainda. O caminho inteiro, com custo e três rotas, está em
+   `PARECER_PAGAMENTO_E_FRETE_2026-09-14.md`.
+
+   Então o que existe aqui é o carrinho COMPLETO até a borda do pagamento:
+
+     · o visitante escolhe a peça, escreve o nome do pet, a cor e aceita as condições;
+     · o item fica guardado NO APARELHO DELE (localStorage), e sobrevive a fechar a aba;
+     · "fechar pedido" monta o pedido inteiro — peça, personalização, valor, aceite com
+       data e hora — e manda pro WhatsApp da ālea, que é como o Cassiano fecha hoje.
+
+   Quando o checkout subir, o que muda é SÓ o botão "fechar pedido": em vez de abrir o
+   WhatsApp, ele manda o mesmo objeto pro servidor. O carrinho, a personalização e o
+   aceite já estão no formato certo pra isso. Nada aqui vira lixo.
+
+   ⚠️ O QUE FICA NO APARELHO NUNCA SAI DELE SOZINHO. Nenhum dado daqui é enviado pra
+   lugar nenhum sem o visitante clicar. Está escrito na política de privacidade, e é
+   por isso que o site continua sem precisar de banner de cookie.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var CHAVE_CARRINHO = 'alea_carrinho_v1';
+  var CHAVE_PEDIDOS = 'alea_pedidos_v1';
+  var CHAVE_CLIENTE = 'alea_cliente_v1';
+
+  /* Todo acesso a localStorage é protegido: em aba anônima, com cookies de site
+     bloqueados, ou dentro de uma prévia, o acessador ESTOURA em vez de devolver vazio.
+     Um carrinho que derruba a página inteira é pior do que um carrinho que esquece. */
+  function ler(chave, padrao) {
+    try {
+      var cru = localStorage.getItem(chave);
+      return cru ? JSON.parse(cru) : padrao;
+    } catch (e) { return padrao; }
+  }
+  function gravar(chave, valor) {
+    try { localStorage.setItem(chave, JSON.stringify(valor)); return true; }
+    catch (e) { return false; }
+  }
+
+  var itens = ler(CHAVE_CARRINHO, []) || [];
+
+  function salvar() {
+    gravar(CHAVE_CARRINHO, itens);
+    document.dispatchEvent(new CustomEvent('alea:carrinho'));
+  }
+
+  /* ETAPA 33: cada linha ganhou QUANTIDADE (o "− 1 +" do modelo dele). Item antigo, gravado
+     antes disto no aparelho de alguém, não tem o campo: vale 1. */
+  function qtd(i) { return Math.max(1, parseInt(i.qtd, 10) || 1); }
+  function total() {
+    return itens.reduce(function (s, i) { return s + (i.preco || 0) * qtd(i); }, 0);
+  }
+  function pecas() { return itens.reduce(function (s, i) { return s + qtd(i); }, 0); }
+  function temSobConsulta() {
+    return itens.some(function (i) { return !i.preco; });
+  }
+  /* 25/09/2026 (lote das 20:01, msg 1885): os 4 produtos novos são "sob consulta" (preço null). Com a sacola SÓ de
+     peças sob consulta o total virava "R$ 0,00 + itens sob consulta" — parece que a peça é de graça. Agora: nada com
+     preço -> "Sob consulta"; mistura -> "R$ x + itens sob consulta" (como antes). O pedido pelo WhatsApp não muda. */
+  /* v60: o total da sacola na tela, com o preço no estilo (o textoTotal segue pro texto puro). */
+  function htmlTotal() {
+    if (temSobConsulta() && !total()) return 'Sob consulta';
+    return window.aleaDinheiroHTML(total()) + (temSobConsulta() ? ' + itens sob consulta' : '');
+  }
+  function textoTotal() {
+    if (temSobConsulta() && !total()) return 'Sob consulta';
+    return window.aleaDinheiro(total()) + (temSobConsulta() ? ' + itens sob consulta' : '');
+  }
+
+  window.aleaCarrinho = {
+    /* o "Comprar agora" da página de produto chama isto de fora: ele põe no carrinho e
+       já quer fechar. Devolve `false` quando não deu (sem WhatsApp, carrinho vazio) —
+       e aí quem chamou abre a gaveta, que explica o que falta. */
+    fecharPedido: function () { return fecharPedido(); },
+    /* ETAPA 61 (23/09/2026, conta e compra "iguais às da Tiffany"): a página Finalizar Compra usa a
+       MESMA descrição da sacola e o MESMO envio pelo WhatsApp, agora com dados, entrega e pagamento. */
+    descrever: function (i) { return descreverItem(i); },
+    abrirWhatsApp: function (extras) { return abrirWhatsApp(extras); },
+    /* 05/10/2026 (pagamento pela InfinitePay): o MESMO texto do pedido, só o link, sem abrir — a página guarda antes
+       de ir pagar e mostra o botão na volta, já com a sacola limpa. */
+    linkWhatsApp: function (extras) {
+      if (!itens.length || !window.aleaTemZap) return null;
+      return 'https://wa.me/' + (window.ALEA || {}).whatsapp + '?text=' + encodeURIComponent(textoDoPedido(extras));
+    },
+    itens: function () { return itens.slice(); },
+    quantos: function () { return pecas(); },
+    total: total,
+    textoTotal: textoTotal,     // 25/09/2026: o mesmo texto do total, pra quem precisar (o loja-compra.js tem a regra igual)
+    adicionar: function (item) {
+      /* 05/10/2026 (áudio 6726 do Cassiano): peça "Em breve" (ALEA.emBreve, config.js) não entra na sacola — trava aqui
+         também, além do botão desligado no produto.js v49, pra nenhum outro caminho (busca, desejos) furar. */
+      if (item && (((window.ALEA || {}).emBreve) || []).indexOf(item.slug) >= 0) return;
+      item.quando = new Date().toISOString();
+      itens.push(item);
+      salvar();
+    },
+    remover: function (i) { itens.splice(i, 1); salvar(); },
+    /* ETAPA 45: o "editar" troca a linha no MESMO lugar, com a mesma quantidade e o mesmo id */
+    substituir: function (id, novo) {
+      for (var k = 0; k < itens.length; k++) {
+        if (itens[k].quando === id) {
+          novo.quando = id; novo.qtd = qtd(itens[k]); itens[k] = novo; salvar(); return true;
+        }
+      }
+      return false;
+    },
+    /* ⚠️ ETAPA 36 (22:06, "pensando melhor"): o − NUNCA tira da sacola — com 1 unidade ele não
+       faz nada. "A pessoa pode clicar sem querer e tirar o produto que demorou pra personalizar."
+       Quem tira é SÓ o × no canto da linha, como no modelo dele. (Era: − com 1 removia.) */
+    mudarQuantidade: function (i, passo) {
+      if (!itens[i]) return;
+      var n = qtd(itens[i]) + passo;
+      if (n < 1) return;
+      itens[i].qtd = n;
+      soALinha = i;          // ETAPA 39: repinta SÓ esta linha (ver `atualizarLinha`)
+      salvar();
+      soALinha = null;
+    },
+    limpar: function () { itens = []; salvar(); }
+  };
+
+  /* ------------------------------------------------------------- o contador */
+  function pintarContador() {
+    /* ETAPA 38 (22:10): a sacola ao lado do "Comprar agora" também fica cor de kraft quando há item
+       — SEM número (o número só lá em cima). Uma classe no <html> serve as duas sacolas. */
+    document.documentElement.classList.toggle('sacola-cheia', pecas() > 0);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-abrir="carrinho"]'), function (b) {
+      var n = pecas();
+      b.classList.toggle('tem-item', n > 0);
+      var bolinha = b.querySelector('[data-quantos]');
+      if (bolinha) bolinha.textContent = String(n);
+      b.setAttribute('aria-label', n ? ('Sacola com ' + n + (n === 1 ? ' item' : ' itens')) : 'Sacola vazia');
+    });
+  }
+
+  /* -------------------------------------------------------- a gaveta do carrinho */
+  function descreverItem(i, comMaterial) {
+    var p = i.personalizacao || {};
+    var partes = [];
+    /* 28/09/2026 (Cassiano, áudios ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho"): o TAMANHO escolhido
+       na página (produto.js v36; M ou G nas 3 peças desde o áudio 3033, "não tem P") abre a descrição — na sacola, no Resumo do Pedido
+       (loja-compra.js) e na mensagem do pedido. Item antigo, sem tamanho, sai como antes. */
+    if (p.formato) partes.push('Formato: ' + p.formato);   // 04/10/2026, Stria Planter (produto.js v42): Orbis | Quadrum
+    if (p.tamanho) partes.push('Tamanho: ' + p.tamanho);
+    if (p.nome_pet) partes.push('Nome: ' + p.nome_pet);    // ETAPA 44 (22:38): N maiúsculo
+    else if (p.sem_nome) partes.push('Nome: sem nome');      // ETAPA 58 (8): o cliente confirmou que não quer nome
+    if (p.cor) partes.push('cores da peça: ' + p.cor);      // formato antigo, ainda no aparelho de quem já comprou
+    /* as cores viraram escolha (Tricolor, Bicolor, Monocromático, Degradê) em
+       15/09/2026. O Degradê não traz cor nenhuma: traz a combinação a fazer depois. */
+    /* 04/10/2026 (Stria Planter, áudio 6138): com o nome de cada parte, sai "Exterior: Mármore, Interior: Cáqui" no lugar
+       de "Bicolor: Mármore, Cáqui" — o cliente nunca viu a palavra Bicolor nessa peça */
+    if (p.cores && p.cores.partes && p.cores.partes.length && p.cores.cores && !p.cores.a_combinar) {
+      partes.push(p.cores.cores.map(function (c, k) { return (p.cores.partes[k] || 'Cor') + ': ' + c; }).join(', '));
+    } else if (p.cores && p.cores.modo) {
+      partes.push(p.cores.a_combinar
+        ? (p.cores.modo + ' (cores a combinar depois do pagamento)')
+        : (p.cores.modo + (p.cores.cores && p.cores.cores.length
+            ? ': ' + p.cores.cores.join(', ') : '')));
+    }
+    /* ETAPA 51 (23/09/2026): no PEDIDO (a mensagem que chega pro Cassiano) vai também o nome ORIGINAL de
+       cada filamento — o cliente escolheu "Azul Fosco", ele precisa ler a bobina exata. Na sacola não. */
+    if (comMaterial && p.cores && p.cores.originais && p.cores.originais.length) {
+      partes.push('filamentos: ' + p.cores.originais.join(' / '));
+    }
+    if (p.cor_nome) partes.push('cor do nome: ' + p.cor_nome +
+      (comMaterial && p.cor_nome_original ? ' (' + p.cor_nome_original + ')' : ''));
+    (i.extras || []).forEach(function (x) {
+      partes.push(x.rotulo + ' (+' + window.aleaDinheiro(x.preco) + ')');
+    });
+    /* ETAPA 44: o material (PLA) SAI da sacola — "não faz sentido estar ali". Continua indo na
+       mensagem do WhatsApp (é informação de produção pra quem faz a peça). */
+    if (i.material && comMaterial) partes.push(i.material);
+    /* 26/09/2026 (Cassiano, áudios 2178/2180): o aceite do aviso de cor da janela "Personalize" entra em TODA descrição
+       do item — na sacola, no "Resumo do Pedido" do Finalizar Compra (loja-compra.js) e no pedido que chega pra ele.
+       Quem marca é o personalizar3d.js (v9); quem grava no item, o produto.js. */
+    /* 04/10/2026 (Cassiano, áudios 6044/6047): a frase SAI dos 3 lugares (sacola, resumo, pedido no WhatsApp) — "eu sei
+       que ele aceitou; se ele não aceitar, não tem como ele comprar". O aviso e o quadradinho da janela Personalize ficam;
+       o `ciente_cor` continua gravado no item, só não vira texto. Antes:
+       if (p.ciente_cor) partes.push('Cliente ciente da variação de cor da tela'); */
+    return partes.join(' · ');
+  }
+
+  /* ⚠️ ETAPA 39 (22:16, com vídeo): "quando eu aumento um produto, treme os DOIS produtos". Causa:
+     cada + ou − redesenhava a sacola INTEIRA (innerHTML), e as fotos de todas as linhas recarregavam
+     — o pisca que ele viu como tremor. Agora a quantidade atualiza só o número, o preço da linha e
+     o subtotal, no lugar; e a linha mexida ganha um brilho suave (`.mexeu`) pra mostrar que é ela. */
+  var soALinha = null;
+  function atualizarLinha(n) {
+    var g = document.getElementById('gaveta-carrinho');
+    var linha = g && g.querySelectorAll('.linha-carrinho')[n];
+    var i = itens[n];
+    if (!linha || !i) { pintarGaveta(); return; }
+    linha.querySelector('.passos .n').textContent = qtd(i);
+    linha.querySelector('.valor-linha').innerHTML = i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta';
+    var alvoTotal = g.querySelector('[data-total]');
+    if (alvoTotal) {
+      alvoTotal.innerHTML = htmlTotal();
+    }
+    linha.classList.remove('mexeu');
+    void linha.offsetWidth;
+    linha.classList.add('mexeu');
+  }
+
+  function pintarGaveta() {
+    var g = document.getElementById('gaveta-carrinho');
+    if (!g) return;
+    var corpo = g.querySelector('[data-corpo]');
+    var alvoTotal = g.querySelector('[data-total]');
+    var botao = g.querySelector('[data-finalizar-compra]');
+
+    if (!itens.length) {
+      corpo.innerHTML = '<p class="vazio">Sua sacola está vazia.</p>';
+      if (alvoTotal) alvoTotal.textContent = '—';
+      if (botao) botao.disabled = true;
+      return;
+    }
+
+    corpo.innerHTML = itens.map(function (i, n) {
+      var valor = i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta';
+      /* ETAPA 33: o layout do modelo — foto à esquerda; à direita o nome, o que foi escolhido,
+         a linha "Quantidade  − 1 +" com o traço embaixo, e o preço por último. Saiu o "tirar":
+         quem tira é o − com 1 unidade. */
+      return '<div class="linha-carrinho">' +
+        /* miniatura: o recorte quando existe, a foto normal quando nao. Nem toda peca
+           tem recorte (ver `recorte` no produtos.js), e imagem quebrada no carrinho e'
+           a ultima coisa que alguem quer ver antes de fechar um pedido. */
+        '<img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
+        'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
+        /* NOMES COLLAB (26/09/2026): "× Ayla" nunca se separa — o × não fica sozinho no fim da linha */
+        '<div class="lado"><div class="cabeca-linha"><div class="titulo">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
+        '<button class="tirar-x" type="button" data-tirar="' + n + '" aria-label="Tirar ' + i.nome +
+        ' da sacola" title="Tirar da sacola">&times;</button></div>' +
+        '<div class="detalhe">' + (descreverItem(i) || 'sem personalização') + '</div>' +
+        /* ETAPA 45: o "editar" embaixo da personalização volta pra página da peça com tudo preenchido */
+        (i.slug ? '<a class="editar-item" href="produto-' + i.slug + '.html?editar=' +
+          encodeURIComponent(i.quando || '') + '">editar</a>' : '') +
+        '<div class="quantidade"><span>Quantidade</span>' +
+          '<span class="passos">' +
+          '<button type="button" data-qtd="' + n + '" data-passo="-1" aria-label="Diminuir quantidade">−</button>' +
+          '<span class="n" aria-live="polite">' + qtd(i) + '</span>' +
+          '<button type="button" data-qtd="' + n + '" data-passo="1" aria-label="Aumentar quantidade">+</button>' +
+          '</span></div>' +
+        '<div class="valor-linha">' + valor + '</div></div></div>';
+    }).join('');
+
+    if (alvoTotal) {
+      alvoTotal.innerHTML = htmlTotal();
+    }
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = 'Finalizar Compra';       // ETAPA 61: o nome do botão da Tiffany
+    }
+  }
+
+  function fecharConfirmacao() {
+    var c = document.querySelector('.aviso-sacola.confirmar');
+    if (c) c.parentNode.removeChild(c);
+  }
+  function confirmarRemocao(n) {
+    var i = itens[n];
+    if (!i) return;
+    fecharConfirmacao();
+    var g = document.getElementById('gaveta-carrinho');
+    var a = document.createElement('div');
+    a.className = 'aviso-sacola confirmar visivel';
+    a.setAttribute('role', 'alertdialog');
+    a.setAttribute('aria-label', 'Remover item da sacola');
+    a.innerHTML =
+      '<div class="miniatura"><img alt="" src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" ' +
+      'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;"></div>' +
+      '<div class="texto"><p>Tem certeza de que deseja remover este item da sua sacola?</p>' +
+      '<div class="escolha"><button type="button" class="botao" data-remover-sim="' + n + '">Sim</button>' +
+      '<button type="button" class="botao contorno" data-remover-nao>Não</button></div></div>';
+    var cab = g && g.querySelector('header');
+    a.style.top = ((cab ? Math.max(0, cab.getBoundingClientRect().bottom) : 0) + 8) + 'px';
+    document.body.appendChild(a);
+    var nao = a.querySelector('[data-remover-nao]');
+    if (nao) nao.focus();
+  }
+
+  /* ---------------------------------------------------------- fechar o pedido */
+  function textoDoPedido(extras) {
+    var linhas = ['Olá! Quero fechar este pedido pelo site da ālea & Co.:', ''];
+    itens.forEach(function (i, n) {
+      var q = qtd(i);
+      linhas.push((n + 1) + ') ' + (q > 1 ? q + 'x ' : '') + i.nome +
+        (i.preco ? ' — ' + window.aleaDinheiro(i.preco * q) : ' — sob consulta'));
+      var d = descreverItem(i, true);
+      if (d) linhas.push('   ' + d);
+    });
+    linhas.push('');
+    linhas.push('Total das peças: ' + ((temSobConsulta() && !total()) ? 'sob consulta' :   // 25/09/2026: sem "R$ 0,00"
+      window.aleaDinheiro(total()) + (temSobConsulta() ? ' (fora os itens sob consulta)' : '')));
+    linhas.push('Frete: a combinar pelo CEP.');
+    (extras || []).forEach(function (l) { linhas.push(l); });
+    linhas.push('');
+    linhas.push('Declarei no site que revisei a personalização e que estou ciente das ' +
+      'condições de produtos personalizados.');
+    var cliente = ler(CHAVE_CLIENTE, null);
+    if (!extras && cliente && cliente.nome) linhas.push('Meu nome: ' + cliente.nome);
+    return linhas.join('\n');
+  }
+
+  /* ⚠️ ETAPA 61: "fechar pedido" não abre mais o WhatsApp direto — leva pra SACOLA DE COMPRAS
+     (finalizar-compra.html), como no vídeo da Tiffany que o Cassiano mandou. O WhatsApp virou o
+     último passo do Finalizar Compra, com o pedido completo (`abrirWhatsApp`). */
+  function fecharPedido() {
+    if (!itens.length) return false;
+    location.href = 'finalizar-compra.html';
+    return true;
+  }
+
+  function abrirWhatsApp(extras) {
+    if (!itens.length || !window.aleaTemZap) return null;
+    /* O pedido vira histórico ANTES de abrir o WhatsApp: se a conversa não abrir (app
+       fora do ar, janela bloqueada), o visitante não perde o que montou. */
+    var pedidos = ler(CHAVE_PEDIDOS, []) || [];
+    pedidos.unshift({ quando: new Date().toISOString(), itens: itens.slice(), total: total() });
+    gravar(CHAVE_PEDIDOS, pedidos.slice(0, 20));
+
+    var url = 'https://wa.me/' + (window.ALEA || {}).whatsapp +
+      '?text=' + encodeURIComponent(textoDoPedido(extras));
+    window.open(url, '_blank', 'noopener');
+    return url;
+  }
+
+  /* ------------------------------------------------------------ a gaveta da conta */
+  function pintarConta() {
+    var g = document.getElementById('gaveta-conta');
+    if (!g) return;
+    var corpo = g.querySelector('[data-corpo]');
+    var cliente = ler(CHAVE_CLIENTE, {}) || {};
+    var pedidos = ler(CHAVE_PEDIDOS, []) || [];
+
+    var historico = pedidos.length
+      ? '<ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">' +
+        pedidos.map(function (p) {
+          var d = new Date(p.quando);
+          var quando = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) +
+            '/' + d.getFullYear();
+          return '<li style="border-top:1px solid var(--borda);padding-top:8px">' +
+            '<strong>' + quando + '</strong> — ' + p.itens.length +
+            (p.itens.length === 1 ? ' peça' : ' peças') + ' · ' + window.aleaDinheiro(p.total) +
+            '<div class="detalhe" style="font-size:13px;color:var(--tinta-fraca)">' +
+            p.itens.map(function (i) { return i.nome; }).join(', ') + '</div></li>';
+        }).join('') + '</ul>'
+      : '<p class="vazio">Nenhum pedido feito neste aparelho ainda.</p>';
+
+    corpo.innerHTML =
+      '<p style="margin-top:0;font-size:14.5px;color:var(--tinta-fraca)">' +
+      'Seus dados ficam <strong>neste aparelho</strong> e servem pra não precisar ' +
+      'digitar tudo de novo no próximo pedido. Nada é enviado sem você clicar.</p>' +
+      '<div class="personalizar">' +
+      '<label>Seu nome<input type="text" data-cliente="nome" value="' +
+      (cliente.nome || '').replace(/"/g, '&quot;') + '" placeholder="como você quer ser chamado"></label>' +
+      '<label>Sua cidade<input type="text" data-cliente="cidade" value="' +
+      (cliente.cidade || '').replace(/"/g, '&quot;') + '" placeholder="pra gente já calcular o frete"></label>' +
+      '</div>' +
+      '<h3 style="font-family:var(--fonte-titulo);font-weight:500;font-size:1.05rem;margin:22px 0 8px">Seus pedidos</h3>' +
+      historico +
+      '<p style="font-size:12.5px;color:var(--tinta-fraca);margin-top:22px">' +
+      'Login com senha e histórico que segue você de aparelho em aparelho entram ' +
+      'quando o pagamento pelo site subir. Até lá, o acompanhamento do seu pedido é ' +
+      'pelo WhatsApp, com a pessoa que faz a peça.</p>';
+
+    Array.prototype.forEach.call(corpo.querySelectorAll('[data-cliente]'), function (campo) {
+      campo.addEventListener('change', function () {
+        var atual = ler(CHAVE_CLIENTE, {}) || {};
+        atual[campo.getAttribute('data-cliente')] = campo.value.trim();
+        gravar(CHAVE_CLIENTE, atual);
+      });
+    });
+  }
+
+  /* ------------------------------------------------- a ABA DA SACOLA no ícone do topo
+     14/10/2026 (áudio 10832 do Cassiano + vídeo OBS 18-29-19, a aba da Tiffany): "no site, se a gente só para o mouse em
+     cima da sacola, ela abre aquela aba (...) no celular, se a gente clicar na sacola uma vez só, vai abrir um pouco da
+     página mostrando o que tem no carrinho; aí se a gente clicar de novo, vai para a sacola".
+     ⚠️ Não é a gaveta antiga (ETAPA 65: escondida fora da tela, deixava o Safari arrastar a página pros lados). A aba
+     desce logo abaixo do topo, só existe enquanto está aberta (fechada = display:none) e deixa o ícone à mostra pro
+     2º toque. Computador: abre ao parar o mouse no ícone e fecha quando o mouse sai do ícone e da aba; o clique no
+     ícone continua levando à Sacola de Compras. */
+  var MQ_PC = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)') : null;
+  function ehPC() { return !!(MQ_PC && MQ_PC.matches); }
+  var aba = null, abaTimer = null;
+  function abaAberta() { return !!(aba && !aba.hidden); }
+  /* 14/10/2026 19:31 (vídeo 10860 da Tiffany + áudio 10859 do Cassiano): NO CELULAR a aba virou uma JANELA DE TELA INTEIRA —
+     "clicou uma vez, abre essa janela inteira (...) com essa transição da esquerda pra direita (...) esquece o cabeçalho (...)
+     um xizinho só pra fechar". E "não é para rolar a página de trás": com a janela aberta só a sacola rola (travarFundo).
+     Dentro: as peças com Quantidade − / + e o ×, Subtotal, Finalizar Compra e "Continue Comprando" (fecha). O computador segue
+     com a aba do mouse. Antes: 03_site/_versoes_anteriores/sacola_rodada2_antes_2026-10-14/js/carrinho.js */
+  function pintarJanela() {
+    var html = '<div class="jan-topo"><p class="aba-titulo">Sua Sacola de Compras</p>' +
+      '<button type="button" class="jan-fechar" data-fechar-aba aria-label="Fechar a sacola">&times;</button></div>';
+    if (!itens.length) {
+      html += '<div class="jan-corpo"><p class="aba-vazia">Sua sacola está vazia.</p></div>';
+    } else {
+      html += '<div class="jan-corpo">' + itens.map(function (i, n) {
+        var d = descreverItem(i);
+        return '<div class="aba-linha"><img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
+          'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
+          '<div class="aba-lado"><div class="jan-cabeca"><div class="aba-nome">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
+          '<button class="tirar-x" type="button" data-tirar="' + n + '" aria-label="Tirar ' + i.nome + ' da sacola">&times;</button></div>' +
+          (d ? '<div class="aba-detalhe">' + d + '</div>' : '') +
+          '<div class="aba-qtd"><span>Quantidade</span><span class="passos">' +
+            '<button type="button" data-qtd="' + n + '" data-passo="-1" aria-label="Diminuir quantidade">−</button>' +
+            '<span class="n">' + qtd(i) + '</span>' +
+            '<button type="button" data-qtd="' + n + '" data-passo="1" aria-label="Aumentar quantidade">+</button></span></div>' +
+          '<div class="aba-valor">' + (i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta') + '</div></div></div>';
+      }).join('') + '</div>';
+    }
+    html += '<div class="jan-rodape">' + (itens.length ? '<div class="aba-subtotal"><span>Subtotal:</span><span>' + htmlTotal() + '</span></div>' +
+      '<a class="botao aba-ir" href="finalizar-compra.html">Finalizar Compra</a>' : '') +
+      '<button type="button" class="jan-continuar" data-fechar-aba>Continue Comprando</button></div>';
+    aba.innerHTML = html;
+  }
+  var fundoY = 0;
+  function travarFundo(sim) {
+    var b = document.body;
+    if (sim) {
+      if (b.classList.contains('janela-sacola')) return;
+      fundoY = window.scrollY || window.pageYOffset || 0;
+      b.classList.add('janela-sacola');
+      b.style.top = (-fundoY) + 'px';
+    } else if (b.classList.contains('janela-sacola')) {
+      b.classList.remove('janela-sacola');
+      b.style.top = '';
+      window.scrollTo(0, fundoY);
+    }
+  }
+  function pintarAba() {
+    if (!aba) return;
+    if (aba.classList.contains('janela')) { pintarJanela(); return; }
+    var html = '<p class="aba-titulo">Sua Sacola de Compras</p>';
+    if (!itens.length) {
+      html += '<p class="aba-vazia">Sua sacola está vazia.</p>';
+    } else {
+      html += '<div class="aba-itens">' + itens.map(function (i) {
+        var d = descreverItem(i);
+        return '<div class="aba-linha"><img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
+          'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
+          '<div class="aba-lado"><div class="aba-nome">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
+          (d ? '<div class="aba-detalhe">' + d + '</div>' : '') +
+          '<div class="aba-qtd"><span>Quantidade</span><span>' + qtd(i) + '</span></div>' +
+          '<div class="aba-valor">' + (i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta') + '</div></div></div>';
+      }).join('') + '</div>' +
+      '<div class="aba-rodape"><div class="aba-subtotal"><span>Subtotal</span><span>' + htmlTotal() + '</span></div>' +
+      '<a class="botao aba-ir" href="finalizar-compra.html">Finalizar Compra</a></div>';
+    }
+    aba.innerHTML = html;
+  }
+  function posicionarAba() {
+    var topo = document.querySelector('.topo');
+    var baixo = topo ? Math.max(0, topo.getBoundingClientRect().bottom) : 0;
+    aba.style.top = baixo + 'px';
+    aba.style.maxHeight = 'calc(' + (ehPC() ? '100vh' : '70vh') + ' - ' + baixo + 'px)';
+  }
+  function abrirAba() {
+    clearTimeout(abaTimer);
+    if (!aba) {
+      aba = document.createElement('div');
+      aba.className = 'aba-sacola';
+      aba.setAttribute('role', 'dialog');
+      aba.setAttribute('aria-label', 'Sua Sacola de Compras');
+      aba.hidden = true;
+      aba.addEventListener('mouseenter', function () { clearTimeout(abaTimer); });
+      aba.addEventListener('mouseleave', function () { if (ehPC()) fecharAbaLogo(); });
+      document.body.appendChild(aba);
+    }
+    var pc = ehPC();
+    aba.classList.toggle('pc', pc);
+    aba.classList.toggle('janela', !pc);
+    aba.classList.remove('saindo');
+    pintarAba();
+    if (pc) posicionarAba(); else { aba.style.top = ''; aba.style.maxHeight = ''; aba.setAttribute('aria-modal', 'true'); travarFundo(true); }
+    aba.hidden = false;
+    document.querySelectorAll('[data-abrir="carrinho"]').forEach(function (b) { b.setAttribute('aria-expanded', 'true'); });
+  }
+  function fecharAba() {
+    clearTimeout(abaTimer);
+    if (aba && !aba.hidden && aba.classList.contains('janela')) {
+      /* a janela sai pelo mesmo lado que entrou; só depois some (fechada = display:none, lição da ETAPA 65) */
+      var j = aba; j.classList.add('saindo'); travarFundo(false);
+      setTimeout(function () { if (j.classList.contains('saindo')) { j.hidden = true; j.classList.remove('saindo'); } }, 260);
+    } else if (aba) aba.hidden = true;
+    document.querySelectorAll('[data-abrir="carrinho"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+  }
+  function fecharAbaLogo() { clearTimeout(abaTimer); abaTimer = setTimeout(fecharAba, 280); }
+  /* o site.js pergunta antes de levar à página: true = o toque ficou aqui (abriu ou fechou a aba); false = segue pra Sacola.
+     14/10/2026 18:55 (áudio 10837): no celular o 2º toque FECHA a aba; pra Sacola só pelo "Finalizar Compra" de dentro dela */
+  window.aleaAbaSacola = {
+    toque: function () {
+      if (ehPC()) { fecharAba(); return false; }
+      if (abaAberta()) { fecharAba(); return true; }
+      abrirAba(); return true;
+    },
+    abrir: abrirAba, fechar: fecharAba
+  };
+  function ligarAba() {
+    document.addEventListener('mouseover', function (e) {
+      if (!ehPC()) return;
+      var b = e.target.closest && e.target.closest('[data-abrir="carrinho"]');
+      if (b) abrirAba();
+    });
+    document.addEventListener('mouseout', function (e) {
+      if (!ehPC() || !abaAberta()) return;
+      var b = e.target.closest && e.target.closest('[data-abrir="carrinho"]');
+      if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) fecharAbaLogo();
+    });
+    /* celular: tocar fora da aba (e fora do ícone) fecha; rolar a página também */
+    document.addEventListener('click', function (e) {
+      if (!abaAberta()) return;
+      if (e.target.closest('[data-fechar-aba]')) { fecharAba(); return; }
+      /* a janelinha "Tem certeza de que deseja remover?" mora fora da aba: tocar nela não fecha a sacola */
+      if (e.target.closest('.aba-sacola') || e.target.closest('[data-abrir="carrinho"]') || e.target.closest('.aviso-sacola')) return;
+      fecharAba();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharAba(); });
+    window.addEventListener('resize', function () { if (abaAberta()) posicionarAba(); });
+  }
+
+  /* ---------------------------------------------------------------- ligações */
+  function ligar() {
+    ligarAba();
+    pintarContador();
+    pintarGaveta();
+
+    document.addEventListener('click', function (e) {
+      /* ⚠️ ETAPA 48 (22:55, "pensando em acidentes"): o × não tira mais direto — abre uma janelinha
+         no mesmo desenho da de "adicionou" (miniatura + frase), perguntando "Tem certeza de que deseja
+         remover este item da sua sacola?" com Sim e Não. Só o Sim remove. */
+      var tirar = e.target.closest('[data-tirar]');
+      if (tirar) { confirmarRemocao(parseInt(tirar.getAttribute('data-tirar'), 10)); return; }
+      var sim = e.target.closest('[data-remover-sim]');
+      if (sim) {
+        var n = parseInt(sim.getAttribute('data-remover-sim'), 10);
+        fecharConfirmacao();
+        window.aleaCarrinho.remover(n);
+        return;
+      }
+      if (e.target.closest('[data-remover-nao]')) { fecharConfirmacao(); return; }
+      var passo = e.target.closest('[data-qtd]');
+      if (passo) {
+        window.aleaCarrinho.mudarQuantidade(parseInt(passo.getAttribute('data-qtd'), 10),
+                                           parseInt(passo.getAttribute('data-passo'), 10));
+        return;
+      }
+      if (e.target.closest('[data-finalizar-compra]')) fecharPedido();
+    });
+
+    document.addEventListener('alea:carrinho', function () {
+      pintarContador();
+      if (abaAberta()) pintarAba();
+      if (soALinha !== null) atualizarLinha(soALinha); else pintarGaveta();
+    });
+    document.addEventListener('alea:gaveta', function (e) {
+      if (e.detail.id === 'conta') pintarConta();
+      if (e.detail.id === 'carrinho') pintarGaveta();
+    });
+  }
+
+  /* o site.js constrói as gavetas no DOMContentLoaded; este arquivo carrega depois
+     dele, então este ouvinte roda logo em seguida — nunca antes. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ligar);
+  } else {
+    ligar();
+  }
+})();

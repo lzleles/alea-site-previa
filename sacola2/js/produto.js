@@ -1,0 +1,2370 @@
+/* CATALOGO:
+   nome: produto
+   categoria: UTIL
+   objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
+   entrada: DOM da página, configuração comercial e dados do produto
+   saida: Galeria interativa, item personalizado e comandos para o carrinho
+   status: ativo — v56 (14/10/2026, "Personalize agora" só abre depois de Formato/Tamanho, em todos os produtos)
+   v56 (14/10/2026, vídeo 10646 + áudios 10647/10648 do Cassiano, ofício 3.1.32): "Personalize agora" só abre com TODAS as
+     escolhas da página marcadas (faltasDeEscolha: Formato e Tamanho). Até a v55 isso só valia no produto com um 3D por
+     escolha (glbPorEscolha: Stria, Una); os outros (Bowl, Luke, Caesar, Prisma...) abriam sem tamanho. A v55 está em
+     03_site/_versoes_anteriores/personalize_depois_das_escolhas_antes_2026-10-14/js/.
+   v55 (14/10/2026): nomeDoCliente() pula a cor com `copiaDe` (config.js: Branco do Clássico = o mesmo filamento do Branco
+     Fosco), senão a legenda do filamento na foto passaria de "Branco Fosco" pra "Branco". Só isso mudou; a v54 está em
+     03_site/_versoes_anteriores/cores_alfabetica_antes_2026-10-14/js/.
+   v54 (13/10/2026): cfgDaEscolha() também troca o acessório fixo pela escolha (modelos3d[slug].acessoriosPorEscolha, o tubo
+     PETG do Una 15 / 22 cm). Só isso mudou; a v53 está em 03_site/_versoes_anteriores/3d_todos_com_cor_antes_2026-10-13/js/.
+   v53 (13/10/2026): partesCorDoProduto() também lê `ALEA.partesCor[slug]` (config.js v62) quando o produto não tem
+     modelos3d — o Una (sem .glb) ganha as caixas Corpo/Aro, as frases de falta e o `partes` na sacola. Só isso mudou;
+     a v52 está em 03_site/_versoes_anteriores/una_duas_cores_antes_2026-10-13/js/.
+   v52 (13/10/2026, áudio 9891 do Cassiano: "o nosso urubu também pode deixar personalizar a chuteira"; a v51 está em
+     03_site/_versoes_anteriores/urubu_chuteira_antes_2026-10-13/js/): produto com `ALEA.modelos3d[slug].chuteira` (config.js v60)
+     ganha a caixa "Chuteira" (uma janela de acabamento + cor por parte, já marcada na cor do arquivo); na sacola e no pedido sai
+     "Parte dourada da chuteira: Dourado Perolizado, Parte branca da chuteira: Branco Perolizado" + o filamento exato; o
+     "editar" remonta. Produto sem o campo = igual à v51.
+   v51 (06/10/2026, ālea Urubu Mascote Flamengo, msgs 6897-6904 do Cassiano: "abaixo de pequeno, médio e gigante, só duas opções de
+     filamento (...) clássico e perolizado, sem escolher cor"; só o vermelho muda): produto com `ALEA.modelos3d[slug].filamentoFixo`
+     ({ titulo, cor, acabamentos }, config.js v56) — a caixa de cor mostra SÓ as bolinhas daqueles acabamentos (Clássico/Perolizado)
+     e a cor fica fixa (a lista some, já escolhida). Na sacola e no pedido sai "Filamento: Perolizado" (+ o filamento exato pro
+     Cassiano); o modo continua o Monocromático (o "editar" da sacola remonta igual). E `textoFaltaNome` troca a frase de falta
+     do nome ("Por favor, digite o nome do pet." não serve pra um boneco). A v50 está em
+     03_site/_versoes_anteriores/urubu_antes_2026-10-06/js/.
+   v50 (06/10/2026, vídeo 6790 + áudio 6791 do Cassiano: "tô clicando só no clássico, no fosco, no perolizado, ele já tá abrindo
+     as cores automático (...) eu quero que clica e eu mesmo clico em escolher a cor"): os 2 sel.focus() depois de marcar o
+     acabamento (cores da peça e cor do nome) saíram — no iPhone o foco num <select> abre a lista. A v49 está em
+     03_site/_versoes_anteriores/lista_nao_abre_sozinha_antes_2026-10-06/js/.
+   v49 (05/10/2026, áudio 6726 do Cassiano: "no lugar do valor, em breve (...) só pra me enviar a prévia (...) quero que você já
+     deixe o modelo pronto, pra eu ver se na hora lá do 3D eu personalize"): produto listado em `ALEA.emBreve` (config.js v52)
+     mostra "Em breve" no preço (topo e acima dos botões, sem parcela), o botão de compra fica DESLIGADO dizendo "Em breve",
+     a sacola e a declaração somem e nada vai pro carrinho (carrinho.js também trava). O "Personalize agora" com o 3D
+     funciona igual. A v48 está em 03_site/_versoes_anteriores/home_lote_em_breve_antes_2026-10-05/js/.
+   v48 (04/10/2026, print 6401 + áudio 6402 do Cassiano): a caixinha do Poop Bag vira <div> (só o quadradinho marca); a
+     miniatura e o texto levam à página do Poop Bag (mesma aba); ao sair por eles a personalização e a altura da tela vão pro
+     sessionStorage e voltam no "voltar" do navegador se ele recarregar a página (bfcache = já volta intacta). Fundo bege e
+     borda terracota: CSS v50. O miolo do "editar" virou preencherComItem(), usado pelos dois. Ver voltarDoPoopBag().
+   v47 (04/10/2026, msg 6399 do Cassiano, "o máximo de caracteres pra caber SOMENTE na parte do meio"): produto com
+     ALEA.modelos3d[slug].limiteNome (config.js v50, só o Poop Bag) mede o nome na Defante a cada letra e barra a que passar
+     de 38,9 mm (da faixa à borda da tampa, 2 mm de folga), com "Esse é o máximo que cabe na peça.". Ver limiteDoNome(). A v46 é o commit 4f3aeaf da prévia.
+   validado_em: 04/10/2026 (Playwright 390 e 1440: 03_site/_testar_poop_bag_v1_2026-10-04.py)
+   v46 (04/10/2026, áudios 6281-6290 do Cassiano; a v45 está em 03_site/_versoes_anteriores/poop_bag_antes_2026-10-04/js/):
+     nos comedouros de ALEA.extraPoopBag.slugs (config.js v49), fechar o Personalize com tudo escolhido lá dentro mostra,
+     entre o "Personalize agora" e a declaração, a caixinha com a miniatura do Poop Bag nas cores e com o nome do cliente
+     (personalizar3d.js v14). Marcada = + R$ 49 e um item em `extras` (rótulo "Poop Bag Holder, nas mesmas cores e com o
+     mesmo nome", com a miniatura); o "editar" da sacola devolve a caixinha marcada. `data-extra-rotulo` (novo, opcional)
+     = o nome do extra na sacola quando não é o texto da caixinha. Ver mostrarCaixaPoopBag().
+   v45 (04/10/2026, áudios 6269/6271 do Cassiano, "na frente do nome"; a v44 está em
+     03_site/_versoes_anteriores/simbolo_borda_antes_2026-10-04/js/): o símbolo pode ir ANTES ou DEPOIS do nome
+     (ALEA.iconeFormato[slug].lado, config.js v47; ?lado=antes|depois na URL da prévia). Nada mais muda.
+   v44 (04/10/2026, ajuste 2 da lista, print 6227 + áudio 6228 do Cassiano; a v43 está em
+     03_site/_versoes_anteriores/icone_formato_antes_2026-10-04/js/): o botão do Formato ganha um desenho antes do nome,
+     lido de ALEA.iconeFormato[slug] (config.js v46): 'miniatura' (A, imagem do vaso) ou 'simbolo' (B, bolinha/quadrado do
+     CSS v44). Na prévia, ?icone=A ou ?icone=B na URL escolhe a opção pra ele comparar. Nada mais muda.
+   v43 (04/10/2026, ajustes da prévia do Cassiano, msgs 6219-6243; a v42 está em
+     03_site/_versoes_anteriores/ajustes_previa_antes_2026-10-04/js/):
+     (1) vídeo 6219 + áudio 6220, VALE PRA TODOS: sem personalizar, a sacola/Encomendar NÃO abre mais a janela sozinha —
+         treme o "Personalize agora" e aparece "Por favor, selecione a cor da peça."; a declaração NÃO fica vermelha nessa
+         hora (só treme quando a personalização está completa e falta ela);
+     (2) áudios 6228/6229 + "Isso" 6231: o Tamanho só aparece DEPOIS do Formato, com a lista daquele formato
+         (`ALEA.tamanhos[slug]` pode ser { Orbis: ['Mini','Pequeno'], Quadrum: ['Pequeno','Grande'] }); trocar o formato
+         desmarca o tamanho;
+     (3) áudio 6234: `ALEA.precoPorEscolha[slug]` — antes da escolha, "a partir de" (pequenininho) + o menor preço; escolhido,
+         o preço daquela escolha;
+     (4) áudio 6237 + 6243 ("vamos colocar a esquerda e faz essas cores aí, esses tamanhos"): o preço final se repete logo
+         ACIMA de "Encomendar agora" e da sacola, mudando na hora; os dois preços à ESQUERDA (CSS v43), com a linha da
+         parcela embaixo quando houver `ALEA.parcelamento` (null hoje = não aparece).
+   v42 (04/10/2026, ālea Stria Planter, áudios 6127/6135/6136/6138 do Cassiano; a v41 está em
+     03_site/_versoes_anteriores/stria_variantes_antes_2026-10-04/js/):
+     (1) grupo "Formato" (ALEA.formatos[slug], config.js) logo ACIMA do "Tamanho", mesmo desenho e mesma trava (obrigatório,
+         vai no item como personalizacao.formato, volta no "editar" da sacola);
+     (2) "se ela colocou o Orbis pequeno (...) na hora que ela clicar e personalizar, você vai puxar somente aquela escolha
+         dela": com `modelos3d[slug].glbPorEscolha` ({'Orbis|Pequeno': 'modelos/….glb', …}) o "Personalize agora" só abre
+         com Formato e Tamanho escolhidos (senão treme o que falta) e abre a PEÇA daquela escolha, montada;
+     (3) "exterior e interior (...) não vai ter monocromática": `modelos3d[slug].partesCor = {2: ['Exterior', 'Interior']}`
+         troca o nome das caixas de cor (e das frases de falta); `modelos3d[slug].soUmModo` esconde a linha
+         Tricolor/Bicolor/Monocromático (a página só traz o modo que vale, marcado pela capa). As cores vão no item com
+         `partes` (carrinho.js: "Exterior: Mármore, Interior: Cáqui"). Produto sem esses campos = nada muda.
+   v41 (03/10/2026, áudios 5817/5818 do Cassiano, na prévia ef685ac): (1) "nos comedouros também (...) todas as
+     personalizações vão ser Personalize agora" -> o padrão do botão virou "Personalize agora" (rotuloBotao segue
+     valendo pra exceção); (2) "ao invés de 1 disponível (...) aquele mesmo pontinho (...) 1 em estoque, que a pessoa
+     entende que o estoque é comprar agora" + áudio 5822 ("entre o branco e o 1 vai ter o hífen (...) depois o pontinho, depois o Em estoque com o primeiro E
+     maiúsculo") -> a cor com peça pronta mostra "Branco - 1 · Em estoque" (o · é o mesmo U+00B7
+     do menu das categorias). Só isso mudou.
+   v40 (03/10/2026, áudio 5801 do Cassiano: "ao invés de você colocar monocromático, você vai colocar personalize agora";
+     a v39 está em 03_site/_versoes_anteriores/saboneteira_3d_antes_2026-10-03/js/): o botão que abre a janela 3D lê
+     `ALEA.modelos3d[slug].rotuloBotao`; sem ele, continua "Personalize aqui" (os comedouros não mudam). Só isso mudou.
+   v39 (03/10/2026, áudios 5727/5729/5731 do Cassiano; a v38 é o commit 1b4d13f):
+     "os comedouros eu não tenho nenhum pronto (...) ao invés de comprar agora, vai ser encomendar agora" — "na frente
+     da cor específica (...) pequenininho, dois disponíveis. Se a pessoa clicar em outro sem ser ele, vai aparecer
+     encomendar agora". O estoque mora no config.js (`ALEA.estoque[slug]`, por combinação de modo + acabamento + cor).
+     · o botão principal diz "Comprar agora" SÓ quando a combinação escolhida (ou, sem escolha, a da capa) tem estoque;
+       produto sem estoque nenhum = "Encomendar agora" sempre (hoje: todos os comedouros).
+     · na lista de cores, a cor que tem peça pronta ganha " · N disponível(is)" (monocromático; no bi/tricolor a
+       combinação inteira decide o botão). O valor da opção não muda — sacola e pedido seguem iguais.
+     · o item leva `pronta_entrega: true|false` (o pedido mostra se é estoque ou encomenda).
+   v38 (02/10/2026, prints 5272/5275/5278 + áudios 5273/5277/5279 do Cassiano; a v37 é o commit 988aa7b):
+     1. CORES DA PEÇA ABREM MARCADAS NA CAPA (reverte o áudio 2263 de 27/09): "sempre vai começar nas cores do produto"
+        — cada toque em "Personalize aqui" já vem com o modo e cada acabamento + cor de `ALEA.modelos3d[slug].capa`
+        (config.js), as mesmas que a peça 3D mostra (Luke: Tricolor, Laranja Clássico / Branco Fosco / Cinza Fosco,
+        print 5275; áudio 5277 "isso, justamente"). O cliente só troca se quiser. Ver window.aleaAbrirNasCoresDaCapa.
+        Editar da sacola continua trazendo o que o cliente salvou. Produto sem `capa` = como antes (vazio).
+        O "Pronto sem cor = capa" (v37) continua, como rede.
+     2. COR DO NOME DA CAPA APARECE APAGADA (print 5278 + áudio 5279): se a capa tem o NOME PINTADO numa cor
+        (`capa.nome = { acabamento, cor }` no config.js), a Cor do nome já mostra essa cor (acabamento marcado + cor na
+        lista), porém APAGADA e travada, com "Um detalhe que transforma" desmarcado — o cliente vê que, pra ter aquela
+        cor, marca o detalhe; marcando, os campos acendem já nela. Sem `capa.nome` (nome na cor do corpo, como o Luke)
+        = como antes, vazio. Desmarcado, nada vai no pedido (corDoNomeEscolhida olha o detalhe).
+   v37 (28/09/2026, áudios 3030/3031 + vídeo 3029 do Cassiano, 02:43; a v36 está em
+        03_site/_versoes_anteriores/pronto_sem_cor_antes_2026-09-28/js/): "se a pessoa não escolher as cores, é porque ela
+        escolheu a cor do Luke [da foto]. Aí você já deixa pronto, que aí é só colocar na sacola" — e "a mesma coisa para o
+        Matteo, para o Bowl Wave". Ver window.aleaAssumirCorDaCapa (perto do aleaLimparCoresDaPeca). O formulário continua
+        começando VAZIO (áudio 2263); só o "Pronto" sem escolha assume a capa. Áudio 3033: "todos são M e G, não tem P"
+        (config.js ALEA.tamanhos).
+*/
+/* =============================================================================
+   produto.js — o que só a página de produto faz
+   =============================================================================
+   Tudo aqui saiu de pedido do Cassiano em 15/09/2026 (1ª e 2ª rodadas):
+
+   1. A COLMEIA. "Todas as fotos em miniatura, espalhadas, onde você clica na miniatura
+      e ela expande no lugar que ela está, fazendo com que as outras diminuem ao mesmo
+      tempo." Quem cresce e encolhe é o CSS; aqui só mora quem está aberto.
+
+   2. A TELA CHEIA (2ª rodada). "Toque novamente para tela cheia" — o segundo toque no
+      favo já aberto abre a foto grande, com o fundo da página embaçado, e dá pra rolar
+      pros lados. **Passar do fim FECHA, não dá a volta** — foi pedido literal: "quando
+      chegar no final e rodar novamente, fechar a tela cheia e não fazer o loop, pro
+      cliente ver que é a última foto".
+
+   3. O ADICIONAL "Nome Colorido + R$ 30,00". O campo da cor do nome nasce desligado e
+      só abre com o quadrado marcado; o valor entra no preço na hora e vai junto do item
+      no carrinho.
+
+   4. OS BOTÕES. "Comprar agora" e, ao lado, a sacola com um "+" — esse é o adicionar ao
+      carrinho.
+
+   5. A TRAVA DO ACEITE, agora sem recado fixo na tela: "somente quando clicar em comprar
+      agora ou adicionar ao carrinho, tremer os botões e aparecer essa mensagem".
+
+   6. A LUPA NA TELA CHEIA (v26, 25/09/2026, áudio 1904 das 22:00): "quando a foto estiver
+      em tela cheia, deixa a gente dar zoom (...) eu gosto de dar zoom pra ver detalhe".
+      Pinça com dois dedos, toque duplo, roda e duplo clique ampliam SÓ A FOTO (a página
+      nunca). Ampliada, um dedo arrasta a foto; em 1× os gestos de sempre voltam.
+
+   7. O COMPUTADOR (v28, 26/09/2026, vídeo 1981 das 02:19): "aqui no computador só (...) tem
+      que ter os tracinhos pro cliente passar a foto pra frente". Setas ‹ › na tela cheia, só
+      com mouse (o CSS esconde no celular), e a dica da colmeia diz "Clique" no mouse.
+
+   8. A COR DO NOME TRAVADA AVISA (v29, 26/09/2026, vídeo 1991): tocar nela com o "Um detalhe
+      que transforma" desmarcado treme o detalhe e diz "Marque a opção acima para personalizar."
+
+   9. O QUADRADINHO "SEM NOME" (v34, 27/09/2026, áudios 2319-2322): ao lado do título "Nome do pet", em
+      toda página com o campo (dentro da janela Personalize e na página sem 3D). Vazio e desmarcado = a
+      trava de sempre; marcado = passa sem nome (o item vai com sem_nome). Ver quadradinhoSemNome().
+
+   ⚠️ A TRAVA É DE VERDADE, E NÃO SÓ VISUAL. A conferência acontece DENTRO do clique, e
+   é ela que decide se o item entra. Trava que só pinta botão de cinza é trava que o
+   primeiro visitante com teclado atravessa — e o que está do outro lado dela é uma
+   declaração de consumo que vai junto do pedido.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var colmeia = document.querySelector('[data-colmeia]');
+
+  /* ⚠️ ETAPA 59 (3) (23/09/2026, vídeo das 16:40): "o cabeçalho continua mexendo". A 57 resolveu o arrastar pros
+     LADOS; o que sobrou é o QUIQUE vertical do Safari no começo e no fim da página (a página passa do limite e volta,
+     e o cabeçalho vai junto). O `overscroll-behavior: none` não segurou no iPhone dele, então aqui o gesto é
+     cancelado na origem: no começo da página puxando pra baixo, ou no fim puxando pra cima, o toque não rola.
+     Dentro do que rola sozinho (sacola, conta, janela de personalizar) nada muda. Só na página de produto. */
+  (function semQuique() {
+    var y0 = 0;
+    document.addEventListener('touchstart', function (e) { if (e.touches.length === 1) y0 = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchmove', function (e) {
+      if (e.touches.length !== 1) return;
+      for (var el = e.target; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+        var cs = getComputedStyle(el);
+        if ((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return;
+        if (el.tagName === 'CANVAS') return;           // a peça 3D gira pelo dedo
+      }
+      var se = document.scrollingElement || document.documentElement;
+      var dy = e.touches[0].clientY - y0;
+      var noTopo = se.scrollTop <= 0, noFim = se.scrollTop + window.innerHeight >= se.scrollHeight - 1;
+      if ((noTopo && dy > 0) || (noFim && dy < 0)) e.preventDefault();
+    }, { passive: false });
+  })();
+
+  /* ⚠️ ETAPA 58 (1) (23/09/2026, 16:08): "sempre que abrir qualquer produto, a foto do MEIO é a da capa; o resto
+     pode ser em qualquer ordem". Qual favo fica no meio depende da largura (quantos cabem por linha), então é
+     MEDIDO: acha o favo mais perto do centro da colmeia e põe a capa (data-favo=0) naquela posição. Cada favo
+     leva o próprio data-favo, então a tela cheia continua abrindo a foto certa. */
+  function capaNoMeio() {
+    if (!colmeia) return;
+    /* 25/09/2026: os favos-BOTÃO das configurações (.config) não entram na troca — eles são a linha de cima */
+    var favos = Array.prototype.slice.call(colmeia.querySelectorAll('.favo:not(.config):not(.voltar)'));
+    var capa = colmeia.querySelector('.favo[data-favo="0"]');
+    if (!capa || favos.length < 3) return;
+    var cx = colmeia.getBoundingClientRect(), mx = cx.left + cx.width / 2, my = cx.top + cx.height / 2;
+    var melhor = 0, dist = Infinity;
+    favos.forEach(function (f, k) {
+      var r = f.getBoundingClientRect(), d = Math.hypot(r.left + r.width / 2 - mx, r.top + r.height / 2 - my);
+      if (d < dist) { dist = d; melhor = k; }
+    });
+    var alvo = favos[melhor];
+    if (alvo === capa) return;
+    var depoisCapa = capa.nextSibling, depoisAlvo = alvo.nextSibling;
+    colmeia.insertBefore(capa, depoisAlvo === capa ? alvo : depoisAlvo);
+    colmeia.insertBefore(alvo, depoisCapa);
+  }
+  capaNoMeio();
+  var capaEspera = null;
+  window.addEventListener('resize', function () { clearTimeout(capaEspera); capaEspera = setTimeout(capaNoMeio, 200); });
+  var telacheia = document.querySelector('[data-telacheia]');
+  var caixaAceite = document.querySelector('[data-aceite-caixa]');
+  var botaoComprar = document.querySelector('[data-comprar-agora]');
+  /* v49 (áudio 6726): peça "Em breve" — ver o cabeçalho */
+  var emBreve = !!(botaoComprar && (((window.ALEA || {}).emBreve) || []).indexOf(botaoComprar.getAttribute('data-slug')) >= 0);
+
+  /* ⚠️ v34 (27/09/2026, áudios 2319-2322 do Cassiano, print 2321 = o quadradinho do aviso de cor como MODELO): "na
+     frente do nome, vamos colocar a mensagem 'Sem nome' e o quadradinho (...) se o cliente passar sem marcar essa
+     opção, você vai tremer a tela pedindo para colocar o nome do pet (...) vamos TIRAR aquela mensagem de 'não
+     adicionar nome'". O quadradinho NASCE AQUI, por JS, em TODA página que tem o campo Nome do pet (Luke, Matteo,
+     Cláudia dentro da janela Personalize; Ayla e as outras na própria página) — o gerador de páginas (v18) não
+     escreve o campo, então nada muda nele. Monta: <div class="campo-nome"> [o rótulo Nome do pet] [☐ Sem nome] </div>
+     (o quadradinho fica na linha do título "NOME DO PET", à direita — CSS v34).
+     A regra é a de sempre, com um estado só: marcado = o formulário ganha `data-sem-nome` (o mesmo sinal que a
+     pergunta "Deseja mesmo não adicionar nome?" dava, e que oQueFalta, montarItem, carrinho.js e a peça 3D já leem).
+     MARCAR guarda o que estava digitado, esvazia e trava o campo; DESMARCAR devolve o texto e reabre o campo — nada
+     do que o cliente digitou se perde. A v33 está em 03_site/_versoes_anteriores/sem_nome_quadradinho_antes_2026-09-27/. */
+  var semNomeCaixa = null;
+  /* v51: a frase de falta do nome — por produto (config.js modelos3d[slug].textoFaltaNome); sem ela, a de sempre */
+  function textoFaltaNome() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).textoFaltaNome || 'Por favor, digite o nome do pet.';
+  }
+  window.aleaTextoFaltaNome = textoFaltaNome;
+  (function quadradinhoSemNome() {
+    var form = document.querySelector('[data-personalizar]');
+    var campoN = form && form.querySelector('[name="nome_pet"]');
+    var rot = campoN && campoN.closest('label');
+    if (!rot || form.querySelector('[data-sem-nome-caixa]')) return;
+    var bloco = document.createElement('div');
+    bloco.className = 'campo-nome';
+    bloco.setAttribute('data-campo-nome', '');
+    rot.parentNode.insertBefore(bloco, rot);
+    bloco.appendChild(rot);
+    var sn = document.createElement('label');
+    sn.className = 'sem-nome';
+    sn.setAttribute('data-sem-nome-rot', '');
+    sn.innerHTML = '<input type="checkbox" data-sem-nome-caixa> <span>Sem nome</span>';
+    bloco.appendChild(sn);
+    /* v35 (27/09/2026, áudio 2331 do Cassiano: "ficou muito afastado, coloca a caixinha logo depois do nome do pet"):
+       o quadradinho sai do canto direito e encosta logo DEPOIS do texto "NOME DO PET". Mede a largura do texto do
+       título (o nó de texto do label) e posiciona a 14 px dele; refaz ao mudar o tamanho da tela. */
+    var colarNoTitulo = function () {
+      var no = null;
+      for (var i = 0; i < rot.childNodes.length; i++) {
+        if (rot.childNodes[i].nodeType === 3 && rot.childNodes[i].textContent.trim()) { no = rot.childNodes[i]; break; }
+      }
+      if (!no) return;
+      var r = document.createRange(); r.selectNodeContents(no);
+      var larg = r.getBoundingClientRect().right - rot.getBoundingClientRect().left;
+      if (larg > 0) { sn.style.left = Math.ceil(larg + 14) + 'px'; sn.style.right = 'auto'; }
+    };
+    colarNoTitulo();
+    window.addEventListener('resize', colarNoTitulo);
+    if (window.ResizeObserver) new ResizeObserver(colarNoTitulo).observe(rot);   // janela Personalize abre depois (0 px antes)
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(colarNoTitulo);
+    window.aleaColarSemNome = colarNoTitulo;
+    semNomeCaixa = sn.querySelector('input');
+    var guardado = '';
+    window.aleaMarcarSemNome = function (marcar) {
+      if (semNomeCaixa.checked !== !!marcar) semNomeCaixa.checked = !!marcar;
+      if (marcar) {
+        if (campoN.value.trim()) guardado = campoN.value;
+        campoN.value = '';
+        campoN.disabled = true;
+        form.setAttribute('data-sem-nome', '');
+        rot.classList.remove('faltou');
+        var rec = document.querySelector('[data-recado-aceite]');
+        if (rec && rec.textContent === textoFaltaNome()) rec.hidden = true;   // v51
+      } else {
+        campoN.disabled = false;
+        if (!campoN.value && guardado) campoN.value = guardado;
+        guardado = '';
+        form.removeAttribute('data-sem-nome');
+      }
+    };
+    semNomeCaixa.addEventListener('change', function () {
+      window.aleaMarcarSemNome(semNomeCaixa.checked);
+      if (!semNomeCaixa.checked) { try { campoN.focus({ preventScroll: true }); } catch (e) { campoN.focus(); } }
+    });
+  })();
+
+  /* ⚠️ v36 (28/09/2026, áudios do Cassiano ~02:14-02:17: "pra Shih Tzu e pra Golden é diferente o tamanho (...) arrumar uma
+     opção lá no site"; áudio 3019: a janela 3D NÃO troca de tamanho, "é só para ele ter uma noção das cores"). A v35 está em
+     03_site/_versoes_anteriores/tamanhos_antes_2026-09-28/js/.
+     O grupo "Tamanho" NASCE AQUI, por JS (o gerador de páginas não muda), só no produto listado em ALEA.tamanhos (config.js),
+     logo ACIMA do botão "Personalize aqui" — fica na página, à vista, e não entra na janela 3D. Mesmo desenho das bolinhas
+     Tricolor/Bicolor/Monocromático (classes cores-peca/cores-opcoes). Nasce SEM nada marcado: escolher é obrigatório
+     (oQueFalta: "Por favor, escolha o tamanho."), e o tamanho vai no item (personalizacao.tamanho) -> sacola, Resumo do
+     Pedido e mensagem do pedido ("Tamanho: M", carrinho.js). O "editar" da sacola devolve o tamanho marcado. Sem preço
+     por tamanho (decisão do Cassiano/Lázaro; as peças estão "Sob consulta"). */
+  var caixaTamanho = null;
+  var tamanhosPorFormato = null;   // v43: { Orbis: [...], Quadrum: [...] } quando o tamanho depende do formato
+  function opcoesDeTamanho(lista) {
+    return (lista || []).map(function (t) {
+      return '<label><input type="radio" name="tamanho" value="' + String(t).replace(/"/g, '') + '"> ' + t + '</label>';
+    }).join('');
+  }
+  /* v43 (áudios 6228/6229): escolheu o formato -> aparece o Tamanho com a lista dele, nada marcado */
+  function desenharTamanhos(formato) {
+    if (!caixaTamanho || !tamanhosPorFormato) return;
+    var lista = tamanhosPorFormato[formato] || [];
+    caixaTamanho.querySelector('.cores-opcoes').innerHTML = opcoesDeTamanho(lista);
+    caixaTamanho.classList.remove('faltou');
+    var rotT = caixaTamanho.querySelector('.rotulo-grupo'); if (rotT) rotT.classList.remove('faltou', 'treme-falta');
+    caixaTamanho.hidden = !lista.length;
+    var rec = document.querySelector('[data-recado-aceite]');
+    if (rec && rec.textContent === 'Por favor, escolha o tamanho.') rec.hidden = true;
+  }
+  (function grupoTamanho() {
+    var slugT = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lista = slugT && ((window.ALEA || {}).tamanhos || {})[slugT];
+    var formT = document.querySelector('[data-personalizar]');
+    /* v43: lista POR FORMATO (objeto) = o grupo nasce vazio e escondido; quem desenha é o Formato (desenharTamanhos) */
+    if (lista && !Array.isArray(lista)) { tamanhosPorFormato = lista; lista = []; }
+    if ((!lista || !lista.length) && !tamanhosPorFormato) return;
+    if (!formT) return;
+    caixaTamanho = document.createElement('div');
+    caixaTamanho.className = 'cores-peca tamanho-peca';
+    caixaTamanho.setAttribute('data-tamanho-peca', '');
+    caixaTamanho.innerHTML = '<span class="rotulo-grupo">Tamanho</span><div class="cores-opcoes">' + opcoesDeTamanho(lista) + '</div>';
+    if (tamanhosPorFormato) caixaTamanho.hidden = true;
+    formT.parentNode.insertBefore(caixaTamanho, formT);   // o botão Personalize (abaixo) entra entre este grupo e o formulário
+    caixaTamanho.addEventListener('change', function () {
+      Array.prototype.forEach.call(caixaTamanho.querySelectorAll('.rotulo-grupo, .cores-opcoes label, .faltou'),
+        function (x) { x.classList.remove('faltou'); });
+      caixaTamanho.classList.remove('faltou');
+      var rec = document.querySelector('[data-recado-aceite]');
+      if (rec && rec.textContent === 'Por favor, escolha o tamanho.') rec.hidden = true;
+      if (window.aleaRepintarPreco) window.aleaRepintarPreco();   // v43: o preço da escolha
+    });
+  })();
+  function tamanhoEscolhido() {
+    var r = caixaTamanho && caixaTamanho.querySelector('input[name="tamanho"]:checked');
+    return r ? r.value : '';
+  }
+
+  /* v42 (04/10/2026, Stria Planter: Orbis | Quadrum): o grupo "Formato", igual ao Tamanho e logo ACIMA dele (ou do
+     formulário, se o produto não tiver tamanho). Só no produto listado em ALEA.formatos (config.js). */
+  var caixaFormato = null;
+  (function grupoFormato() {
+    var slugF = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lista = slugF && ((window.ALEA || {}).formatos || {})[slugF];
+    var formF = document.querySelector('[data-personalizar]');
+    if (!lista || !lista.length || !formF) return;
+    /* v44 (áudio 6228): o desenho do formato — A miniatura do vaso ou B símbolo; ?icone=A|B na URL troca (prévia) */
+    var cfgI = ((window.ALEA || {}).iconeFormato || {})[slugF] || null;
+    var modoIcone = cfgI && cfgI.modo;
+    var pedido = (location.search.match(/[?&]icone=([ab])/i) || [])[1];
+    if (cfgI && pedido) modoIcone = pedido.toUpperCase() === 'A' ? 'miniatura' : 'simbolo';
+    var ladoIcone = (cfgI && cfgI.lado) || 'antes';   // v45
+    var pedLado = (location.search.match(/[?&]lado=(antes|depois)/i) || [])[1];
+    if (pedLado) ladoIcone = pedLado.toLowerCase();
+    function iconeDoFormato(t) {
+      if (!cfgI || !modoIcone) return '';
+      if (modoIcone === 'miniatura' && cfgI.miniatura && cfgI.miniatura[t])
+        return '<img class="formato-icone" src="' + cfgI.miniatura[t] + '" alt="" width="40" height="40" loading="lazy">';
+      if (modoIcone === 'simbolo' && cfgI.simbolo && cfgI.simbolo[t])
+        return '<span class="formato-icone formato-' + cfgI.simbolo[t] + '" aria-hidden="true"></span>';
+      return '';
+    }
+    caixaFormato = document.createElement('div');
+    caixaFormato.className = 'cores-peca tamanho-peca formato-peca';
+    caixaFormato.setAttribute('data-formato-peca', '');
+    caixaFormato.innerHTML = '<span class="rotulo-grupo">Formato</span><div class="cores-opcoes">' +
+      lista.map(function (t) {
+        var ic = iconeDoFormato(t), nm = '<span class="formato-nome">' + t + '</span>';
+        return '<label><input type="radio" name="formato" value="' + String(t).replace(/"/g, '') + '"> ' +
+          (ladoIcone === 'depois' ? nm + ic : ic + nm) + '</label>';
+      }).join('') + '</div>';
+    if (modoIcone) caixaFormato.classList.add('com-icone', 'icone-' + modoIcone);
+    var antes = caixaTamanho || formF;
+    antes.parentNode.insertBefore(caixaFormato, antes);
+    caixaFormato.addEventListener('change', function () {
+      Array.prototype.forEach.call(caixaFormato.querySelectorAll('.rotulo-grupo, .cores-opcoes label, .faltou'),
+        function (x) { x.classList.remove('faltou'); });
+      caixaFormato.classList.remove('faltou');
+      var rec = document.querySelector('[data-recado-aceite]');
+      if (rec && rec.textContent === 'Por favor, escolha o formato.') rec.hidden = true;
+      desenharTamanhos(formatoEscolhido());   // v43: o Tamanho aparece só agora, com a lista do formato
+      if (window.aleaRepintarPreco) window.aleaRepintarPreco();
+    });
+  })();
+  function formatoEscolhido() {
+    var r = caixaFormato && caixaFormato.querySelector('input[name="formato"]:checked');
+    return r ? r.value : '';
+  }
+  /* v42: as faltas de Formato e Tamanho (na página, acima do Personalize), na ordem da página */
+  function faltasDeEscolha() {
+    var f = [];
+    [[caixaFormato, formatoEscolhido, 'Por favor, escolha o formato.'],
+     [caixaTamanho, tamanhoEscolhido, 'Por favor, escolha o tamanho.']].forEach(function (g) {
+      if (g[0] && !g[0].hidden && !g[1]()) {   // v43: Tamanho escondido (sem formato) não é cobrado — o Formato é
+        f.push({ el: g[0].querySelector('.rotulo-grupo') || g[0], texto: g[2] });
+        Array.prototype.forEach.call(g[0].querySelectorAll('.cores-opcoes label'), function (l) { f.push({ el: l, texto: null }); });
+      }
+    });
+    return f;
+  }
+
+  /* ⚠️ ETAPA 53 (23/09/2026, 14:27, protótipo): botão "Personalize aqui" -> janela com a peça em 3D, nome
+     gravado ao vivo e cores trocando na hora (js/personalizar3d.js). Só aparece no produto que tem modelo 3D
+     no config.js; o three.js só é baixado no clique. */
+  (function botaoPersonalizar3D() {
+    var slug = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var cfg3d = slug && ((window.ALEA || {}).modelos3d || {})[slug];
+    var form = document.querySelector('[data-personalizar]');
+    if (!cfg3d || !form) return;
+    var im = document.createElement('script');
+    im.type = 'importmap';
+    im.setAttribute('data-alea', '');
+    im.textContent = JSON.stringify({ imports: {
+      'three': 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+      'three/addons/': 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/',
+      'three-mesh-bvh': 'https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.8.3/build/index.module.js',
+      'three-bvh-csg': 'https://cdn.jsdelivr.net/npm/three-bvh-csg@0.0.17/build/index.module.js' } });
+    document.head.appendChild(im);
+    /* ETAPA 55 (15:12, "essa parte a gente não vai mais precisar (...) vai estar inteira no Personalize aqui"):
+       o formulário some da página e só aparece DENTRO da janela (o personalizar3d.js o move pra lá). O botão fica
+       FORA do formulário, no lugar onde o formulário estava. */
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'botao personalizar-3d';
+    b.textContent = cfg3d.rotuloBotao || 'Personalize agora';   // v41: todos dizem 'agora' (áudio 5818)   // v40: a saboneteira diz "Personalize agora" (áudio 5801)
+    form.parentNode.insertBefore(b, form);
+    form.classList.add('mora-na-janela');
+    var aberto = false;
+    /* v42: produto com uma peça 3D por escolha (Stria: formato + tamanho) — sem as duas, não abre: treme o que falta */
+    function cfgDaEscolha() {
+      if (!cfg3d.glbPorEscolha) return cfg3d;
+      var chave = [formatoEscolhido(), tamanhoEscolhido()].filter(Boolean).join('|');
+      var glb = cfg3d.glbPorEscolha[chave];
+      if (!glb) return null;
+      var c = {}; for (var k in cfg3d) c[k] = cfg3d[k];
+      c.glb = glb;
+      /* v54: acessório fixo que muda com a escolha (o tubo PETG do Una 15 / 22 cm) */
+      var ac = (cfg3d.acessoriosPorEscolha || {})[chave];
+      if (ac && cfg3d.acessorios) c.acessorios = { glb: ac, materiais: cfg3d.acessorios.materiais };
+      return c;
+    }
+    function abrir(depoisDeMontar, opcoes) {
+      if (aberto) { if (depoisDeMontar) depoisDeMontar(); return; }
+      var faltam = faltasDeEscolha();   // v56: Formato/Tamanho primeiro, em todo produto (ofício 3.1.32)
+      if (faltam.length) { reclamarDoQueFalta(faltam); return; }
+      var cfgAgora = cfgDaEscolha();
+      if (!cfgAgora) { reclamarDoQueFalta(faltasDeEscolha()); return; }
+      aberto = true;
+      b.classList.add('carregando');
+      import('./personalizar3d.js').then(function (m) {
+        return m.abrirJanela3D(cfgAgora, function () {
+          aberto = false;
+          if (window.aleaDepoisDoPersonalize) window.aleaDepoisDoPersonalize();   // v46: a caixinha do Poop Bag
+        }, depoisDeMontar, opcoes || {});
+      }).catch(function (e) { aberto = false; console.warn('janela 3D', e); })
+        .then(function () { b.classList.remove('carregando'); });
+    }
+    /* v38 (print 5275 + áudio 5277, 02/10/2026 — substitui o "começa vazio" da v31, áudio 2263): cada toque em
+       "Personalize aqui" começa com as Cores da peça MARCADAS nas cores da capa (ver aleaAbrirNasCoresDaCapa) */
+    b.addEventListener('click', function () {
+      var faltam = faltasDeEscolha();   // v56: vale em todo produto, não só no que tem um 3D por escolha
+      if (faltam.length || !cfgDaEscolha()) { reclamarDoQueFalta(faltam); return; }   // v42: antes de limpar as cores
+      if (!aberto && window.aleaAbrirNasCoresDaCapa) window.aleaAbrirNasCoresDaCapa(); abrir();
+    });
+    window.aleaAbrirPersonalizar = abrir;
+  })();
+  var botaoSacola = document.querySelector('[data-add-carrinho]');
+  if (!colmeia && !botaoComprar) return;
+
+  function favos() {
+    return colmeia ? Array.prototype.slice.call(colmeia.querySelectorAll('.favo')) : [];
+  }
+  function fecharFavos() {
+    favos().forEach(function (f) {
+      f.classList.remove('aberto');
+      f.setAttribute('aria-expanded', 'false');
+    });
+    if (colmeia) colmeia.classList.remove('tem-aberto');
+  }
+
+  /* ===================================================================== colmeia */
+  /* ⚠️ OS ÁLBUNS (Cassiano, áudios 25/09/2026 11:19, 11:30 e 11:31 — msgs 1493, 1517, 1518). A colmeia das 7 fica
+     como está ("tá muito lindo, não quero que mexa nelas"). Embaixo dela, 3 favos menores são os álbuns —
+     tricolor, bicolor e monocromático — com o nome escrito em cima. "Se ele clicar em qualquer um dos álbuns, a
+     gente abre outra tela pra ele, não tela cheia, mas quase cheia, só pra ele ver que tem muitas fotos e ali é um
+     álbum. Se ele clicar na foto, ela expande num tamanho legal, mas com ele podendo clicar em qualquer lugar da
+     tela ali fora pra voltar pras miniaturas." Não usa a tela cheia de carrossel. Os conjuntos vêm do
+     `data-albuns` que o gerador v15 escreve a partir do produtos.js. */
+  function topo(q, c) { if (window.aleaCorDoTopo) window.aleaCorDoTopo(q, c); }
+  (function albuns() {
+    var caixaAlbuns = document.querySelector('[data-albuns]');
+    var tela = document.querySelector('[data-album-tela]');
+    if (!caixaAlbuns || !tela) return;
+    var albuns = {};
+    try { albuns = JSON.parse(caixaAlbuns.getAttribute('data-albuns') || '{}'); } catch (e) { albuns = {}; }
+    var grade = tela.querySelector('[data-album-grade]');
+    var grande = tela.querySelector('[data-album-grande]');
+    var nome = tela.querySelector('[data-album-nome]');
+    var conta = tela.querySelector('[data-album-conta]');
+    var h1 = document.querySelector('.produto-topo h1');
+    var peca = h1 ? h1.textContent.trim() : 'a peça';
+    var aberto = null, abertoId = null, gAtual = -1, gOrdem = [], carregadas = {};
+    /* v17: o contador "2 / 6" da foto ampliada (criado aqui pra não mexer no HTML gerado) */
+    var contaG = document.createElement('span');
+    contaG.className = 'album-conta-grande';
+    grande.appendChild(contaG);
+    /* v18 (áudios 1623-1624 do Cassiano, vídeo 1622): a foto ampliada vira TELA CHEIA DE VERDADE — sai de dentro da caixa
+       do álbum e mora direto no <body>, fixa na tela, com fundo liso que não mexe. Sem X e sem texto: só o "3 / 6"
+       suave embaixo. Sai ARRASTANDO pra baixo ou pra cima, "igual o iPhone, o Android"; passa DESLIZANDO pro lado. */
+    document.body.appendChild(grande);
+    var gImg = grande.querySelector('img');
+    /* v20 (áudios 1671/1673): um X bem discreto, só o traço, branco fraco — o arrastar pra cima/baixo continua fechando */
+    var gX = document.createElement('button');
+    gX.type = 'button'; gX.className = 'x-discreto album-grande-x'; gX.setAttribute('aria-label', 'Fechar a foto');
+    gX.textContent = '\u00d7';
+    gX.addEventListener('click', function (e) { e.stopPropagation(); fecharGrande(); });
+    grande.appendChild(gX);
+    var mouse = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+
+    function abrirAlbum(id) {
+      var a = albuns[id];
+      if (!a || !a.fotos || !a.fotos.length) return;
+      aberto = a; abertoId = id;
+      nome.textContent = a.nome;
+      conta.textContent = a.fotos.length + (a.fotos.length === 1 ? ' foto' : ' fotos');
+      grade.classList.remove('tem-aberto');
+      grade.innerHTML = a.fotos.map(function (f, n) {
+        return '<button class="favo" type="button" data-album-foto="' + n + '" aria-label="Ampliar foto ' + (n + 1) + ' do álbum ' + a.nome + '">' +
+          '<img src="img/produtos/' + f + '_m.jpg" width="700" height="700" loading="lazy" decoding="async" alt="' + peca + ' ' + a.nome + ' — foto ' + (n + 1) + '"></button>';
+      }).join('');
+      fecharGrande();
+      tela.classList.add('aberta');
+      tela.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('travado');
+      /* v21 (áudios 1685/1689/1691): janela NÃO troca a cor do topo — "prevalece esse sombreamento bonito"; só a tela cheia emenda */
+    }
+    function fecharAlbum() {
+      tela.classList.remove('aberta');
+      tela.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('travado');
+      aberto = null;
+    }
+    /* v19 (áudios 1632-1634): "qualquer foto que ele clicar vai ser a número 1; depois segue a ordem normal, da
+       esquerda pra direita, de cima pra baixo" — pra quem toca na 7ª não chegar no fim logo e achar que fechou. */
+    function comecarEm(n) {
+      gOrdem = [n];
+      for (var k = 0; k < aberto.fotos.length; k++) if (k !== n) gOrdem.push(k);
+      if (window.aleaAbrirTelaCheia) {
+        var lista = aberto.fotos.map(function (f) { return 'img/produtos/' + f + '.jpg'; });
+        /* v24 (áudios 1725/1727, ar 16:18): com a janela do álbum por baixo, o iPhone não emendava o topo — na colmeia
+           (sem janela por baixo) emendava. Então a janela do álbum SAI enquanto a tela cheia está aberta e VOLTA ao fechar:
+           a página fica exatamente como na colmeia. */
+        var volta = abertoId, ordem = gOrdem.slice();
+        /* v25 (vídeo 1731, cores medidas no Safari: topo #E5DCD3 = o bege do cabeçalho): o álbum saía ESMAECENDO em .3s
+           enquanto a tela cheia entrava — o Safari lia a cor nesse meio-tempo. Agora ele some NA HORA (sem transição),
+           e só então a tela cheia abre: a mesma sequência da colmeia. */
+        tela.style.transition = 'none';
+        fecharAlbum();
+        void tela.offsetHeight;
+        tela.style.transition = '';
+        window.aleaAbrirTelaCheia(n, lista, ordem, function () { abrirAlbum(volta); });
+        return;
+      }
+      mostrarGrande(0);
+    }
+    function preparar(f) {
+      if (carregadas[f]) return;
+      var i = new Image();
+      i.onload = function () { carregadas[f] = true; };
+      i.src = 'img/produtos/' + f + '.jpg';
+    }
+    function mostrarGrande(pos) {
+      if (!aberto) return;
+      gAtual = pos;
+      var n = gOrdem[pos];
+      contaG.textContent = aberto.fotos.length > 1 ? (pos + 1) + ' / ' + aberto.fotos.length : '';
+      /* v19: foto já baixada entra direto (sem piscar a miniatura); as vizinhas ficam baixando por trás */
+      if (gOrdem[pos + 1] !== undefined) preparar(aberto.fotos[gOrdem[pos + 1]]);
+      if (gOrdem[pos - 1] !== undefined) preparar(aberto.fotos[gOrdem[pos - 1]]);
+      if (carregadas[aberto.fotos[n]]) { gImg.setAttribute('data-foto', aberto.fotos[n]); gImg.src = 'img/produtos/' + aberto.fotos[n] + '.jpg'; mostrarCamada(); return; }
+      /* v16: a miniatura (_m, já carregada) aparece NA HORA e a foto inteira entra por cima quando chegar —
+         no 4G a tela ficava só esmaecida por um instante e parecia que o clique não pegou */
+      var img = gImg, f = aberto.fotos[n], cheia = new Image();
+      img.setAttribute('data-foto', f);
+      img.src = 'img/produtos/' + f + '_m.jpg';
+      cheia.onload = function () { carregadas[f] = true; if (img.getAttribute('data-foto') === f) img.src = cheia.src; };
+      cheia.src = 'img/produtos/' + f + '.jpg';
+      mostrarCamada();
+    }
+    /* v19 (áudio 1628, "gostei mais dessa primeira transição, mais suave, mais elegante"): a camada entra e sai
+       esmaecendo em .28s, igual à tela cheia da colmeia */
+    var saida = null;
+    function mostrarCamada() {
+      clearTimeout(saida);
+      grande.classList.remove('saindo');
+      if (grande.hidden) { grande.hidden = false; tela.classList.add('com-grande'); topo('foto', '#F4F0EB'); }
+    }
+    function fecharGrande() {
+      if (grande.hidden) return;
+      gAtual = -1;
+      topo('foto', null);
+      grande.classList.add('saindo');
+      clearTimeout(saida);
+      saida = setTimeout(function () { grande.hidden = true; grande.classList.remove('saindo'); tela.classList.remove('com-grande'); }, 280);
+    }
+    /* v17 (áudios 1613-1614 do Cassiano): a foto ampliada do álbum PASSA pro lado, e "chegou na última foto, o cliente
+       apertou de novo pra rolar ou clicou pra passar, aí fecha" — SEM VOLTA, o mesmo esquema da tela cheia da colmeia.
+       Fechar aqui é voltar pras miniaturas do álbum, não sair do álbum. */
+    function andarGrande(dir) {
+      if (!aberto || gAtual < 0) return;
+      var pos = gAtual + dir;
+      if (pos < 0 || pos >= gOrdem.length) { fecharGrande(); return; }
+      mostrarGrande(pos);
+    }
+    var toque = null;
+    function soltar() {
+      gImg.style.transition = ''; gImg.style.transform = ''; grande.style.backgroundColor = '';
+    }
+    grande.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { toque = null; return; }
+      toque = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, dy: 0, eixo: null };
+      gImg.style.transition = 'none';
+    }, { passive: true });
+    /* passive:false + preventDefault: é isto que segura a página de trás parada enquanto o dedo mexe na foto */
+    grande.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+      if (!toque) return;
+      var t = e.touches[0];
+      toque.dx = t.clientX - toque.x; toque.dy = t.clientY - toque.y;
+      if (!toque.eixo && (Math.abs(toque.dx) > 8 || Math.abs(toque.dy) > 8)) toque.eixo = Math.abs(toque.dx) > Math.abs(toque.dy) ? 'x' : 'y';
+      if (toque.eixo === 'y') {
+        var k = Math.min(Math.abs(toque.dy) / 400, 1);
+        gImg.style.transform = 'translateY(' + toque.dy + 'px) scale(' + (1 - k * .15) + ')';
+        grande.style.backgroundColor = 'rgba(246, 243, 238, ' + (1 - k * .6) + ')';
+      } else if (toque.eixo === 'x' && Math.abs(toque.dx) >= 40) {
+        var dir = toque.dx < 0 ? 1 : -1;
+        toque = null; soltar();
+        andarGrande(dir);
+      }
+    }, { passive: false });
+    grande.addEventListener('touchend', function () {
+      if (!toque) return;
+      var t = toque; toque = null;
+      soltar();
+      if (t.eixo === 'y' && Math.abs(t.dy) > 90) fecharGrande();
+    }, { passive: true });
+    grande.addEventListener('touchcancel', function () { toque = null; soltar(); }, { passive: true });
+    /* no computador não há arrastar: clique na foto ou Esc volta pras miniaturas; rodinha e setas passam */
+    grande.addEventListener('click', function () { if (mouse) fecharGrande(); });
+    grande.addEventListener('wheel', function (e) {
+      if (grande.hidden) return;
+      var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(d) < 8) return;
+      e.preventDefault();
+      andarGrande(d > 0 ? 1 : -1);
+    }, { passive: false });
+
+    /* v20 (áudios 1668-1669): "a tela de trás nunca pode rolar"; "toda janela que só envolva foto, se eu arrastar pra
+       cima ou pra baixo, fecha". Nas MINIATURAS do álbum: se a caixa não precisa rolar, o dedo não rola nada e o
+       arrasto vertical fecha o álbum; se precisa (álbum grande), ela rola por dentro e só o excesso é segurado. */
+    var tt = null;
+    var caixa = tela.querySelector('.album-caixa');
+    tela.addEventListener('touchstart', function (e) {
+      tt = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+    }, { passive: true });
+    tela.addEventListener('touchmove', function (e) {
+      var rola = caixa && caixa.scrollHeight > caixa.clientHeight + 1 && caixa.contains(e.target);
+      if (!rola) e.preventDefault();
+      /* v21 (áudio 1687): "em janela que não seja tela cheia, não vai poder fechar rolando; vai prevalecer o X" — o
+         álbum vai ter muitas fotos e a pessoa vai rolar pra ver. O arrasto só rola a caixa; a página de trás nunca. */
+    }, { passive: false });
+    tela.addEventListener('touchend', function () { tt = null; }, { passive: true });
+
+    caixaAlbuns.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-album]');
+      if (b) abrirAlbum(b.getAttribute('data-album'));
+    });
+    tela.addEventListener('click', function (ev) {
+      if (ev.target.closest('[data-fechar-album]')) { if (!grande.hidden) fecharGrande(); else fecharAlbum(); return; }
+      /* v21 (áudios 1683-1684): "clicar uma vez amplia a foto um pouco, do mesmo tamanho das colmeias da outra página;
+         clicar de novo vai pra tela cheia". E com uma ampliada, o próximo toque só devolve ela pro lugar. */
+      var ampliada = grade.querySelector('.favo.aberto');
+      var f = ev.target.closest('[data-album-foto]');
+      if (ampliada) {
+        if (f === ampliada) { comecarEm(parseInt(f.getAttribute('data-album-foto'), 10)); return; }
+        ampliada.classList.remove('aberto');
+        /* v22 (áudio 1699): outra foto do álbum = a ampliação troca direto pra ela; fora das fotos = só devolve */
+        if (f) { f.classList.add('aberto'); return; }
+        grade.classList.remove('tem-aberto');
+        return;
+      }
+      if (f) { f.classList.add('aberto'); grade.classList.add('tem-aberto'); return; }
+      /* clicar fora da caixa (no escuro) fecha o álbum */
+      if (!ev.target.closest('.album-caixa')) fecharAlbum();
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (!tela.classList.contains('aberta')) return;
+      var tc = document.querySelector('[data-telacheia]');
+      if (tc && tc.classList.contains('aberta')) return;
+      if (!grande.hidden && (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft')) { ev.preventDefault(); andarGrande(ev.key === 'ArrowRight' ? 1 : -1); return; }
+      if (ev.key !== 'Escape') return;
+      ev.preventDefault();
+      if (!grande.hidden) fecharGrande(); else fecharAlbum();
+    });
+  })();
+
+  if (colmeia) {
+    colmeia.addEventListener('click', function (ev) {
+      var favo = ev.target.closest('[data-favo]');
+      if (!favo) return;
+      var n = parseInt(favo.getAttribute('data-favo'), 10);
+      /* segundo toque no MESMO favo = tela cheia. Primeiro toque = só expande. */
+      if (favo.classList.contains('aberto')) { abrirTelaCheia(n); return; }
+      fecharFavos();
+      favo.classList.add('aberto');
+      favo.setAttribute('aria-expanded', 'true');
+      colmeia.classList.add('tem-aberto');
+    });
+  }
+
+  /* ⚠️ CLICAR EM QUALQUER LUGAR FECHA A MINIATURA AMPLIADA (3ª rodada de 15/09/2026).
+     Ele notou a assimetria: na tela cheia, clicar fora fechava; na colmeia, a foto
+     ampliada só voltava ao tamanho se clicasse nela de novo — e ninguém adivinha isso.
+     O ouvinte é no documento, e sai de cena quando o clique foi DENTRO da colmeia (lá
+     o primeiro clique expande e o segundo abre a tela cheia) ou na tela cheia. */
+  /* v19 (vídeo 1630 + áudio 1631, 25/09/2026): "sempre que tiver uma imagem na ampliação 1, você só vai conseguir
+     acessar outras coisas depois que ela voltar pro lugar dela". Ouvinte em CAPTURA: o toque fora do favo aberto
+     (inclusive no espaço vazio da colmeia, no canto de baixo, num álbum ou num botão) é ENGOLIDO e só fecha a
+     ampliação; o próximo toque é que faz a coisa. Tocar no próprio favo aberto continua abrindo a tela cheia. */
+  document.addEventListener('click', function (ev) {
+    if (!colmeia || !colmeia.classList.contains('tem-aberto')) return;
+    if (ev.target.closest('[data-telacheia]')) return;
+    var ab = colmeia.querySelector('.favo.aberto');
+    if (ab && ab.contains(ev.target)) return;
+    /* v22 (áudio 1699): tocar em OUTRA foto da colmeia troca a ampliação direto pra ela (o clique segue pro ouvinte
+       da colmeia, que fecha a antiga e amplia a nova); só o toque FORA das fotos é engolido e apenas devolve. */
+    if (ev.target.closest('[data-colmeia] [data-favo]')) return;
+    /* v30 (26/09/2026, pedido do Cassiano; a v29 está em 03_site/_versoes_anteriores/personalizar_matteo_claudia_antes_2026-09-26/js/):
+       com a miniatura aberta, o "← voltar para o feed" é a ÚNICA saída que funciona no 1º toque e volta NA HORA.
+       Antes ele também era engolido (o 1º toque só fechava a ampliação e era preciso tocar de novo). O resto da página
+       continua como na v19: o 1º toque fora só devolve a miniatura. Vale no celular e no computador. */
+    if (ev.target.closest('a.voltar')) { fecharFavos(); return; }
+    ev.preventDefault();
+    ev.stopPropagation();
+    fecharFavos();
+  }, true);
+
+  /* =================================================================== tela cheia */
+  var fotosGrandes = [];
+  try { fotosGrandes = JSON.parse(colmeia && colmeia.getAttribute('data-grandes') || '[]'); }
+  catch (e) { fotosGrandes = []; }
+  var tcAtual = -1, tcOrdem = [], tcLista = fotosGrandes;
+  /* v19 (áudios 1632-1634): a foto tocada é a nº 1; depois vem a ordem de leitura da colmeia (a ordem dos favos na
+     página — esquerda pra direita, de cima pra baixo), pulando a que já foi. */
+  function ordemDaColmeia(n) {
+    var seq = [n];
+    favos().forEach(function (f) {
+      var k = parseInt(f.getAttribute('data-favo'), 10);
+      if (!isNaN(k) && k !== n && k < fotosGrandes.length) seq.push(k);
+    });
+    for (var k = 0; k < fotosGrandes.length; k++) if (seq.indexOf(k) < 0) seq.push(k);
+    return seq;
+  }
+
+  /* v23 (vídeo 1714 + áudio 1713): as fotos do ÁLBUM abrem NESTA tela cheia (a da colmeia, a que emendou o topo e o
+     rodapé no iPhone dele) — com a lista e a ordem do álbum. `lista`/`ordem` vazios = a colmeia, como antes. */
+  var tcAoFechar = null;
+  function abrirTelaCheia(n, lista, ordem, aoFechar) {
+    tcAoFechar = aoFechar || null;
+    tcLista = lista || fotosGrandes;
+    telacheia && telacheia.classList.toggle('sobre-album', !!lista);
+    if (!telacheia || !tcLista.length) return;
+    tcOrdem = ordem || ordemDaColmeia(n);
+    tcAtual = 0;
+    pintarTelaCheia();
+    telacheia.classList.add('aberta');
+    telacheia.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('travado');
+    topo('telacheia', '#F4F0EB');        /* papel a 82% sobre o bege: a cor que o fundo embaçado mostra */
+  }
+
+  function fecharTelaCheia() {
+    if (!telacheia) return;
+    telacheia.classList.remove('aberta');
+    telacheia.setAttribute('aria-hidden', 'true');
+    topo('telacheia', null);
+    /* v23: se veio de um álbum, o álbum continua aberto — a página de trás continua travada */
+    var alb = document.querySelector('[data-album-tela]');
+    if (!(alb && alb.classList.contains('aberta'))) document.body.classList.remove('travado');
+    if (tcAoFechar) { var f = tcAoFechar; tcAoFechar = null; f(); }
+  }
+
+  function pintarTelaCheia() {
+    var palco = telacheia.querySelector('[data-palco-tc]');
+    var pontos = telacheia.querySelector('[data-pontos-tc]');
+    var conta = telacheia.querySelector('[data-conta-tc]');
+    /* v26: trocar de foto SEMPRE volta a 1× (a foto nova nasce sem transform); draggable=false tira o "arrastar a
+       imagem" nativo do computador, que brigava com o arrasto da lupa */
+    zoom.zerar();
+    palco.innerHTML = '<img src="' + tcLista[tcOrdem[tcAtual]] + '" alt="Foto ' +
+      (tcAtual + 1) + ' de ' + tcLista.length + '" draggable="false">';
+    pontos.innerHTML = tcLista.map(function (_, k) {
+      return '<i class="' + (k === tcAtual ? 'on' : '') + '"></i>';
+    }).join('');
+    conta.textContent = (tcAtual + 1) + ' / ' + tcLista.length;
+    /* v28: na 1ª foto a seta de voltar some; com uma foto só, somem as duas */
+    telacheia.classList.toggle('na-primeira', tcAtual === 0);
+    telacheia.classList.toggle('uma-so', tcLista.length < 2);
+    pintarFilamentos(palco.querySelector('img'), tcLista[tcOrdem[tcAtual]]);
+  }
+
+  /* ⚠️ v32 — OS FILAMENTOS DA FOTO, SÓ NA TELA CHEIA (27/09/2026). A frase das cores da peça (msg 2268 do Cassiano)
+     promete: "nas fotos em tela cheia, você encontra os nomes e as tonalidades reais de cada cor". Então, com a foto em
+     tela cheia, o canto de baixo à direita DA FOTO mostra os filamentos dela, um por linha, de cima pra baixo na peça.
+     - A lista vem de ALEA.filamentosPorFoto (config.js), pela MESMA chave que a tela cheia usa ("img/produtos/x.jpg"),
+       então vale igual pra foto da colmeia e pra foto do álbum. Foto sem entrada (ou lista vazia) = nada aparece.
+     - A caixa mora direto na .telacheia (não dentro do palco): a lupa mede a foto por offsetLeft/offsetTop contra a
+       .telacheia, e um invólucro posicionado em volta da foto quebraria essa conta. Por isso ela é posta no lugar
+       MEDINDO a foto (quando ela carrega, a cada troca de foto e quando a janela muda de tamanho).
+     - Some com a foto ampliada (CSS .com-zoom) e não pega clique (pointer-events: none): tocar nela é tocar na foto. */
+  /* v33 (27/09/2026, áudio 2295): o cliente lê o NOME DA PERSONALIZAÇÃO ("Cinza Fosco"), nunca o código do filamento.
+     Procura o original em ALEA.filamentos (cor + sufixo do acabamento); fora da venda, em ALEA.filamentosNomeCliente.
+     Sem tradução = a linha NÃO aparece (código não vai pro cliente). */
+  function nomeDoCliente(original) {
+    var A = window.ALEA || {};
+    var extra = (A.filamentosNomeCliente || {})[original];
+    if (extra) return extra;
+    var acabs = A.acabamentos || [];
+    for (var i = 0; i < acabs.length; i++) {
+      var cores = (A.filamentos || {})[acabs[i].id] || [];
+      for (var j = 0; j < cores.length; j++) {
+        if (cores[j].copiaDe) continue;   // v55: a cópia (Branco do Clássico = o do Fosco) não vira legenda
+        if (cores[j].original === original) return cores[j].site + (acabs[i].sufixo || '');
+      }
+    }
+    return '';
+  }
+  var caixaFil = null;
+  function pintarFilamentos(img, chave) {
+    if (!telacheia) return;
+    var lista = (((window.ALEA || {}).filamentosPorFoto || {})[chave] || []).map(nomeDoCliente).filter(Boolean);
+    if (!caixaFil) {
+      caixaFil = document.createElement('ul');
+      caixaFil.className = 'filamentos-tc';
+      caixaFil.setAttribute('aria-label', 'Filamentos desta foto, de cima para baixo');
+      telacheia.appendChild(caixaFil);
+    }
+    caixaFil.hidden = true;
+    if (!img || !lista.length) { caixaFil.innerHTML = ''; return; }
+    caixaFil.innerHTML = lista.map(function (f) {
+      return '<li>' + String(f).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }) + '</li>';
+    }).join('');
+    var posicionar = function () { if (palcoImgAtual() === img) colocarFilamentos(img); };
+    if (img.complete && img.naturalWidth) posicionar();
+    else img.addEventListener('load', posicionar, { once: true });
+  }
+  function palcoImgAtual() { return telacheia && telacheia.querySelector('[data-palco-tc] img'); }
+  function colocarFilamentos(img) {
+    if (!caixaFil || !caixaFil.innerHTML || !img || img.offsetWidth < 2) return;
+    var folga = img.offsetWidth < 500 ? 8 : 12;
+    caixaFil.style.maxWidth = Math.max(120, img.offsetWidth - 2 * folga) + 'px';
+    caixaFil.style.right = Math.max(0, telacheia.clientWidth - (img.offsetLeft + img.offsetWidth)) + folga + 'px';
+    caixaFil.style.bottom = Math.max(0, telacheia.clientHeight - (img.offsetTop + img.offsetHeight)) + folga + 'px';
+    caixaFil.hidden = false;
+  }
+  window.addEventListener('resize', function () { if (caixaFil && !caixaFil.hidden) colocarFilamentos(palcoImgAtual()); });
+
+  /* ⚠️ SEM VOLTA: passar do fim (ou do começo) FECHA em vez de dar a volta. É o pedido
+     dele, e a razão é boa — carrossel que gira pra sempre não deixa o visitante saber
+     que já viu tudo, e ele fica rodando achando que falta foto. */
+  function andarTelaCheia(dir) {
+    var n = tcAtual + dir;
+    if (n < 0 || n >= tcLista.length) { fecharTelaCheia(); return; }
+    tcAtual = n;
+    pintarTelaCheia();
+  }
+
+  /* ⚠️ v26 — A LUPA NA TELA CHEIA (Cassiano, áudio 1904, 25/09/2026 22:00): "quando a foto estiver em tela cheia,
+     deixa a gente dar zoom. Porque tem muita gente que gosta de dar zoom, eu inclusive, eu gosto de dar zoom pra ver
+     detalhe (...) e se eu vou dar zoom, não tem essa opção."
+     - Quem amplia é SÓ A FOTO: transform (translate + scale) na <img>, sem recarregar nada. A página nunca dá zoom (o
+       viewport não muda): `touch-action: none` no CSS, `preventDefault` no touchmove (já existia, v20) e os eventos
+       gesture* do Safari cancelados enquanto a tela cheia está aberta.
+     - Celular: pinça com 2 dedos até 4×, centrada entre os dedos; toque duplo alterna 1× ↔ 2,5× no ponto tocado.
+       AMPLIADA, um dedo ARRASTA a foto, sem deixar aparecer vazio além da borda — e aí arrastar pra cima/baixo NÃO
+       fecha e pro lado NÃO passa. De volta a 1×, os gestos da v20 valem de novo. Trocar de foto sempre volta a 1×.
+     - Computador: a roda amplia no cursor, arrastar com o mouse move a foto ampliada, duplo clique alterna 1× ↔ 2,5×,
+       Esc fecha. Como a roda agora é a lupa, quem passa foto com o mouse é a roda de LADO (touchpad), o arrastar pro
+       lado em 1× (o mesmo gesto do dedo) e as setas do teclado.
+     - Com a foto ampliada, tocar fora dela NÃO fecha (o dedo erra fácil quando a foto cobre a tela): sai pelo X, pelo
+       Esc, ou voltando a 1×. */
+  var ZOOM_MAX = 4, ZOOM_DUPLO = 2.5;
+  var zoom = (function () {
+    var z = 1, px = 0, py = 0;           // escala e deslocamento (px de tela) da foto; a origem é o canto de cima-esquerdo
+    var ax = 0, ay = 0, apx = 0, apy = 0; // início do arrasto
+    var pinca = null;                     // início da pinça: distância, escala e o ponto da foto sob os dedos
+    var ultimoArrasto = 0;
+    function foto() { return telacheia && telacheia.querySelector('[data-palco-tc] img'); }
+    /* o retângulo da foto em 1× — offset* ignoram o transform, então vale mesmo no meio de uma animação */
+    function base() {
+      var i = foto();
+      if (!i || i.offsetWidth < 2) return null;
+      var r = telacheia.getBoundingClientRect();
+      return { l: r.left + i.offsetLeft, t: r.top + i.offsetTop, w: i.offsetWidth, h: i.offsetHeight };
+    }
+    /* nunca mostra vazio além da borda: foto maior que a tela = a borda dela não entra na tela; menor = centrada no
+       lugar de sempre (e dentro da tela) */
+    function limitar(b) {
+      var V = telacheia.clientWidth, H = telacheia.clientHeight, W = b.w * z, A = b.h * z;
+      if (W <= V) px = Math.min(V - W - b.l, Math.max(-b.l, (b.w - W) / 2));
+      else px = Math.min(-b.l, Math.max(V - W - b.l, px));
+      if (A <= H) py = Math.min(H - A - b.t, Math.max(-b.t, (b.h - A) / 2));
+      else py = Math.min(-b.t, Math.max(H - A - b.t, py));
+    }
+    function pintar(animar) {
+      var i = foto();
+      if (!i) return;
+      i.style.transition = animar ? 'transform .26s cubic-bezier(.2, .7, .2, 1)' : 'none';
+      i.style.transform = z === 1 ? '' : 'translate(' + px + 'px, ' + py + 'px) scale(' + z + ')';
+      telacheia.classList.toggle('com-zoom', z > 1);
+    }
+    /* amplia pra `nz` deixando PARADO o ponto de tela (sx, sy) — é o "centrado entre os dedos / no cursor" */
+    function para(nz, sx, sy, animar) {
+      var b = base();
+      if (!b) return;
+      var u = (sx - b.l - px) / z, v = (sy - b.t - py) / z;
+      z = Math.max(1, Math.min(ZOOM_MAX, nz));
+      if (z < 1.02) z = 1;
+      px = sx - b.l - z * u; py = sy - b.t - z * v;
+      limitar(b); pintar(animar);
+    }
+    function meio(t1, t2) { return { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2, d: Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY) }; }
+    return {
+      ampliada: function () { return z > 1; },
+      zerar: function () { z = 1; px = 0; py = 0; pinca = null; if (telacheia) telacheia.classList.remove('com-zoom', 'mexendo', 'arrastando'); },
+      alternar: function (sx, sy) { if (z > 1) para(1, sx, sy, true); else para(ZOOM_DUPLO, sx, sy, true); },
+      roda: function (fator, sx, sy, animar) { para(z * fator, sx, sy, animar); },
+      comecarPinca: function (t1, t2) {
+        var b = base();
+        if (!b) { pinca = null; return; }
+        var m = meio(t1, t2);
+        pinca = { d0: Math.max(m.d, 1), z0: z, u: (m.x - b.l - px) / z, v: (m.y - b.t - py) / z };
+        telacheia.classList.add('mexendo');
+      },
+      moverPinca: function (t1, t2) {
+        var b = base();
+        if (!pinca || !b) return;
+        var m = meio(t1, t2);
+        z = Math.max(1, Math.min(ZOOM_MAX, pinca.z0 * m.d / pinca.d0));
+        px = m.x - b.l - z * pinca.u; py = m.y - b.t - z * pinca.v;
+        limitar(b); pintar(false);
+      },
+      comecarArrasto: function (x, y) { ax = x; ay = y; apx = px; apy = py; telacheia.classList.add('mexendo'); },
+      moverArrasto: function (x, y) {
+        var b = base();
+        if (!b) return;
+        px = apx + (x - ax); py = apy + (y - ay);
+        limitar(b); pintar(false);
+      },
+      /* soltou todos os dedos (ou o mouse): quase 1× vira 1× exato, e sai o will-change pra foto ser redesenhada nítida */
+      soltar: function () {
+        pinca = null;
+        telacheia.classList.remove('mexendo');
+        if (z > 1 && z < 1.05) { var b = base(); z = 1; if (b) limitar(b); pintar(true); }
+      },
+      relimitar: function () { var b = base(); if (b && z > 1) { limitar(b); pintar(false); } },
+      marcarArrasto: function () { ultimoArrasto = Date.now(); },
+      /* o clique que termina um arrasto do mouse não é clique; e com a foto ampliada, tocar fora dela não fecha */
+      engoleClique: function () { return z > 1 || Date.now() - ultimoArrasto < 400; }
+    };
+  })();
+
+  /* v28 (26/09/2026, varredura do computador): no mouse não existe "toque" — a 2ª dica da colmeia diz "Clique
+     novamente". Só com mouse de verdade E tela de computador (a mesma régua do CSS v28); no celular o texto fica
+     exatamente o de sempre. */
+  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)').matches) {
+    Array.prototype.forEach.call(document.querySelectorAll('.colmeia-dica2'), function (p) {
+      p.textContent = p.textContent.replace(/^Toque/, 'Clique');
+    });
+  }
+
+  window.aleaAbrirTelaCheia = abrirTelaCheia;
+  if (telacheia) {
+    /* ⚠️ v28 — AS SETAS DO COMPUTADOR (Cassiano, vídeo 1981, 26/09/2026 02:19): "aqui no computador só, viu? No celular
+       não, pelo amor de Deus. Tem que ter os tracinhos aqui pro cliente passar a foto pra frente." Desde a lupa (v26) a
+       roda do mouse amplia, e quem passava foto no mouse era só o teclado e o arrastar — ninguém descobre isso sozinho.
+       As duas setas nascem SEMPRE no HTML, mas o CSS só as mostra com mouse de verdade (hover: hover e pointer: fine):
+       no celular elas não existem pra tela. Mesmo traço branco e discreto do X (etapa 109). A regra do "sem volta"
+       continua: a › na última foto FECHA, igual ao arrastar e à seta do teclado. Na primeira foto a ‹ some. */
+    [[-1, 'Foto anterior', '15 5 8 12 15 19'], [1, 'Próxima foto', '9 5 16 12 9 19']].forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'seta-tc ' + (s[0] < 0 ? 'seta-tc-ant' : 'seta-tc-prox');
+      b.setAttribute('data-seta-tc', String(s[0]));
+      b.setAttribute('aria-label', s[1]);
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="' + s[2] + '"></polyline></svg>';
+      telacheia.appendChild(b);
+    });
+    telacheia.addEventListener('click', function (ev) {
+      if (ev.target.closest('[data-fechar-tc]')) { fecharTelaCheia(); return; }
+      var seta = ev.target.closest('[data-seta-tc]');
+      if (seta) { andarTelaCheia(parseInt(seta.getAttribute('data-seta-tc'), 10)); return; }   // v28
+      if (zoom.engoleClique()) return;   // v26
+      /* clicar em qualquer lugar que não seja a foto fecha — ele pediu essa saída pra
+         quem abriu a tela cheia sem querer */
+      if (!ev.target.closest('img')) fecharTelaCheia();
+    });
+
+    /* v20 (áudios 1668-1669): passive:false + preventDefault = a página de trás NUNCA rola com a tela cheia aberta;
+       arrastar pro lado passa (como antes); arrastar pra cima ou pra baixo FECHA.
+       v26: esses dois gestos só valem com a foto em 1× e UM dedo. Dois dedos = pinça; foto ampliada = um dedo arrasta a
+       foto. O dedo que sobra de uma pinça não passa nem fecha até soltar tudo (senão a pinça terminava fechando). */
+    var tx = null, ty = null;
+    var gz = null;                       // gesto da lupa em curso: 'pinca' | 'arrasto' | 'resto' (dedo que sobrou)
+    var toqueIni = null, ultimoToque = null, ultimoTouch = 0;
+    telacheia.addEventListener('touchstart', function (e) {
+      ultimoTouch = Date.now();
+      if (e.touches.length >= 2) {
+        tx = null; toqueIni = null; ultimoToque = null;
+        gz = 'pinca'; zoom.comecarPinca(e.touches[0], e.touches[1]);
+        return;
+      }
+      var t = e.touches[0];
+      toqueIni = { x: t.clientX, y: t.clientY, quando: Date.now(), longe: false };
+      if (zoom.ampliada()) { tx = null; gz = 'arrasto'; zoom.comecarArrasto(t.clientX, t.clientY); return; }
+      gz = null;
+      tx = t.clientX; ty = t.clientY;
+    }, { passive: true });
+    telacheia.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+      ultimoTouch = Date.now();
+      var t = e.touches[0];
+      if (toqueIni && Math.hypot(t.clientX - toqueIni.x, t.clientY - toqueIni.y) > 10) toqueIni.longe = true;
+      if (e.touches.length >= 2) {
+        if (gz !== 'pinca') { tx = null; toqueIni = null; gz = 'pinca'; zoom.comecarPinca(e.touches[0], e.touches[1]); }
+        zoom.moverPinca(e.touches[0], e.touches[1]);
+        return;
+      }
+      if (gz === 'arrasto') { zoom.moverArrasto(t.clientX, t.clientY); return; }
+      if (gz || tx === null) return;
+      var dx = tx - t.clientX, dy = t.clientY - ty;
+      if (Math.abs(dy) > 70 && Math.abs(dy) > Math.abs(dx)) { tx = null; fecharTelaCheia(); return; }
+      if (Math.abs(dx) < 40) return;
+      tx = null;
+      andarTelaCheia(dx > 0 ? 1 : -1);
+    }, { passive: false });
+    telacheia.addEventListener('touchend', function (e) {
+      ultimoTouch = Date.now();
+      tx = null;
+      if (e.touches.length >= 2) { zoom.comecarPinca(e.touches[0], e.touches[1]); return; }
+      if (e.touches.length === 1) {
+        /* saiu um dedo da pinça: com a foto ampliada o que ficou continua ARRASTANDO; em 1× ele não faz nada */
+        var r = e.touches[0];
+        toqueIni = null;
+        if (zoom.ampliada()) { gz = 'arrasto'; zoom.comecarArrasto(r.clientX, r.clientY); } else gz = 'resto';
+        return;
+      }
+      gz = null;
+      zoom.soltar();
+      /* o TOQUE DUPLO: dois toques curtos (sem arrastar) em até 320 ms, no mesmo lugar */
+      var ti = toqueIni; toqueIni = null;
+      if (!ti || ti.longe || Date.now() - ti.quando > 350) { ultimoToque = null; return; }
+      var agora = Date.now();
+      if (ultimoToque && agora - ultimoToque.quando < 320 && Math.hypot(ti.x - ultimoToque.x, ti.y - ultimoToque.y) < 40) {
+        ultimoToque = null;
+        if (!telacheia.classList.contains('aberta')) return;
+        if (e.cancelable) e.preventDefault();   // sem clique fantasma e sem o zoom de página do Safari
+        zoom.alternar(ti.x, ti.y);
+        return;
+      }
+      ultimoToque = { x: ti.x, y: ti.y, quando: agora };
+    }, { passive: false });
+    telacheia.addEventListener('touchcancel', function () { tx = null; gz = null; toqueIni = null; zoom.soltar(); }, { passive: true });
+
+    /* v26: o Safari do iPhone tem os eventos próprios de pinça (gesture*) — cancelados, pra ele não ampliar a PÁGINA */
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (nome) {
+      document.addEventListener(nome, function (e) {
+        if (telacheia.classList.contains('aberta')) e.preventDefault();
+      }, { passive: false });
+    });
+
+    /* v26: a roda (vertical) é a LUPA, ampliando no ponto do cursor; a pinça do touchpad chega como roda + Ctrl.
+       A roda de LADO (touchpad, Shift+roda) passa foto em 1× — uma por gesto — e move a foto quando ampliada. */
+    var rodaLado = 0;
+    telacheia.addEventListener('wheel', function (e) {
+      if (!telacheia.classList.contains('aberta')) return;
+      e.preventDefault();
+      var escala = e.deltaMode === 1 ? 16 : (e.deltaMode === 2 ? 400 : 1);
+      var dx = e.deltaX * escala, dy = e.deltaY * escala;
+      if (e.shiftKey && !dx) { dx = dy; dy = 0; }
+      if (!e.ctrlKey && Math.abs(dx) > Math.abs(dy)) {
+        if (zoom.ampliada()) { zoom.comecarArrasto(0, 0); zoom.moverArrasto(-dx, 0); zoom.soltar(); return; }
+        if (Math.abs(dx) < 8 || Date.now() - rodaLado < 450) return;
+        rodaLado = Date.now();
+        andarTelaCheia(dx > 0 ? 1 : -1);
+        return;
+      }
+      if (!dy) return;
+      var fator = Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0025));
+      zoom.roda(fator, e.clientX, e.clientY, Math.abs(dy) >= 50);
+    }, { passive: false });
+
+    /* v26: duplo clique alterna 1× ↔ 2,5× no ponto clicado (só na foto, ou em qualquer lugar se já estiver ampliada) */
+    telacheia.addEventListener('dblclick', function (e) {
+      if (Date.now() - ultimoTouch < 800) return;          // o toque duplo do celular já foi tratado acima
+      if (e.target.closest('[data-fechar-tc], [data-seta-tc]')) return;   // v28: clicar rápido na seta não é lupa
+      if (!zoom.ampliada() && !e.target.closest('img')) return;
+      e.preventDefault();
+      zoom.alternar(e.clientX, e.clientY);
+    });
+
+    /* v26: ARRASTAR COM O MOUSE — ampliada, move a foto; em 1×, arrastar pro lado passa (o mesmo gesto do dedo) */
+    var rato = null;
+    telacheia.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('[data-fechar-tc], [data-seta-tc]')) return;
+      rato = { x: e.clientX, y: e.clientY, movido: false, ampliada: zoom.ampliada() };
+      if (rato.ampliada) zoom.comecarArrasto(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!rato || e.pointerType !== 'mouse') return;
+      if (!rato.movido && Math.hypot(e.clientX - rato.x, e.clientY - rato.y) > 5) { rato.movido = true; telacheia.classList.add('arrastando'); }
+      if (rato.movido && rato.ampliada) zoom.moverArrasto(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointerup', function (e) {
+      if (!rato || e.pointerType !== 'mouse') return;
+      var r = rato; rato = null;
+      telacheia.classList.remove('arrastando');
+      if (r.ampliada) zoom.soltar();
+      if (!r.movido) return;
+      zoom.marcarArrasto();
+      var dx = e.clientX - r.x, dy = e.clientY - r.y;
+      if (!r.ampliada && Math.abs(dx) >= 60 && Math.abs(dx) > Math.abs(dy)) andarTelaCheia(dx < 0 ? 1 : -1);
+    });
+    telacheia.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+    /* v26: girou o celular ou mudou a janela com a foto ampliada — ela continua ampliada, só volta pra dentro da borda */
+    window.addEventListener('resize', function () { if (telacheia.classList.contains('aberta')) zoom.relimitar(); });
+  }
+
+  document.addEventListener('keydown', function (ev) {
+    if (telacheia && telacheia.classList.contains('aberta')) {
+      if (ev.key === 'Escape') { ev.preventDefault(); fecharTelaCheia(); }
+      else if (ev.key === 'ArrowRight') { ev.preventDefault(); andarTelaCheia(1); }
+      else if (ev.key === 'ArrowLeft') { ev.preventDefault(); andarTelaCheia(-1); }
+      return;
+    }
+    /* fechar a foto aberta da colmeia com Esc é o reflexo de todo mundo */
+    if (ev.key === 'Escape' && colmeia && colmeia.classList.contains('tem-aberto')) fecharFavos();
+  });
+
+  /* ============================================== o adicional e o preço que muda */
+  var alvoValor = document.querySelector('[data-valor]');
+  var precoBase = alvoValor && alvoValor.getAttribute('data-preco-base');
+  precoBase = (precoBase === null || precoBase === '') ? null : parseFloat(precoBase);
+
+  function extrasMarcados() {
+    return Array.prototype.slice.call(document.querySelectorAll('[data-extra]'))
+      .filter(function (l) { return l.querySelector('[data-extra-caixa]').checked; })
+      .map(function (l) {
+        var x = {
+          id: l.getAttribute('data-extra-id'),
+          /* v46: `data-extra-rotulo` = o nome que vai pra sacola/pedido quando não é o texto da caixinha (Poop Bag) */
+          rotulo: l.getAttribute('data-extra-rotulo') ||
+            l.querySelector('.titulo-extra').firstChild.nodeValue.trim().replace(/\s*\+\s*R\$.*$/, ''),
+          preco: parseFloat(l.getAttribute('data-extra-preco')) || 0
+        };
+        var mi = l.querySelector('img[data-mini]');   // v46: a miniatura do Poop Bag vai junto (sacola e "editar")
+        if (mi && mi.getAttribute('src')) x.miniatura = mi.getAttribute('src');
+        return x;
+      });
+  }
+
+  /* v43 (áudio 6234): preço por Formato|Tamanho (ALEA.precoPorEscolha, config.js). null = produto sem isso. */
+  var precosEscolha = (function () {
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return sl ? (((window.ALEA || {}).precoPorEscolha || {})[sl] || null) : null;
+  })();
+  function precoDaEscolha() {
+    var chave = [formatoEscolhido(), tamanhoEscolhido()].filter(Boolean).join('|');
+    var v = precosEscolha[chave];
+    return (typeof v === 'number') ? v : null;
+  }
+  function escolhaCompleta() {
+    return (!caixaFormato || !!formatoEscolhido()) && (!caixaTamanho || !!tamanhoEscolhido());
+  }
+  function menorPrecoDaEscolha() {
+    var vs = Object.keys(precosEscolha).map(function (k) { return precosEscolha[k]; })
+      .filter(function (v) { return typeof v === 'number'; });
+    return vs.length ? Math.min.apply(null, vs) : null;
+  }
+
+  function precoTotal() {
+    var base = precosEscolha ? (escolhaCompleta() ? precoDaEscolha() : null) : precoBase;
+    if (base === null) return null;
+    return extrasMarcados().reduce(function (s, x) { return s + x.preco; }, base);
+  }
+
+  /* v43 (áudio 6237): o preço final se repete logo ACIMA dos botões ("quanto ficou o preço final pra colocar na sacola"),
+     com a linha da parcela embaixo dos DOIS preços quando houver ALEA.parcelamento ({ vezes, minimo }). */
+  var alvoFinal = null, parcelaTopo = null;
+  (function precoAcimaDosBotoes() {
+    var botoesF = document.querySelector('[data-botoes]');
+    if (!alvoValor || !botoesF) return;
+    alvoFinal = document.createElement('div');
+    alvoFinal.className = 'valor-final';
+    alvoFinal.setAttribute('data-valor-final', '');
+    alvoFinal.setAttribute('aria-live', 'polite');
+    alvoFinal.innerHTML = '<p class="valor-final-preco"></p><p class="parcela" hidden></p>';
+    botoesF.parentNode.insertBefore(alvoFinal, botoesF);
+    parcelaTopo = document.createElement('p');
+    parcelaTopo.className = 'parcela parcela-topo';
+    parcelaTopo.hidden = true;
+    alvoValor.parentNode.insertBefore(parcelaTopo, alvoValor.nextSibling);
+  })();
+  function textoParcela(t) {
+    var pc = (window.ALEA || {}).parcelamento;
+    if (!pc || !(pc.vezes > 1) || t === null || !(t > 0)) return '';
+    /* v50 (13/10/2026, áudios 9616-9618 do Cassiano): `texto` fixo = a linha sai sem o valor da parcela ("eu não quero que
+       tenha centavos"). Sem `texto`, a conta de antes ("ou até Nx de R$ X sem juros"). */
+    if (pc.texto) return pc.texto;
+    var n = Math.min(pc.vezes, pc.minimo > 0 ? Math.floor(t / pc.minimo) : pc.vezes);
+    if (n < 2) return '';
+    return 'ou até ' + n + 'x de ' + window.aleaDinheiro(t / n) + ' sem juros';
+  }
+
+  function repintarPreco() {
+    if (!alvoValor) return;
+    var t = emBreve ? null : precoTotal();
+    var html, valorParcela = t;
+    if (emBreve) html = '<small>Em breve</small>';   // v49
+    else if (t !== null) html = window.aleaDinheiroHTML(t);
+    else if (precosEscolha && !escolhaCompleta() && menorPrecoDaEscolha() !== null) {
+      valorParcela = menorPrecoDaEscolha();
+      html = '<small class="a-partir">a partir de</small> ' + window.aleaDinheiroHTML(valorParcela);
+    } else html = '<small>Sob consulta</small>';
+    alvoValor.innerHTML = html;
+    var par = textoParcela(valorParcela);
+    if (parcelaTopo) { parcelaTopo.textContent = par; parcelaTopo.hidden = !par; }
+    if (alvoFinal) {
+      alvoFinal.querySelector('.valor-final-preco').innerHTML = html;
+      var pf = alvoFinal.querySelector('.parcela'); pf.textContent = par; pf.hidden = !par;
+    }
+  }
+  window.aleaRepintarPreco = repintarPreco;
+
+  /* ⚠️ ETAPA 52 (23/09/2026, 14:03, áudio dele): a COR DO NOME ganha a mesma janelinha das cores da
+     peça — Básico · Fosco · Perolizado e, depois, a lista de cores daquele acabamento. O campo de texto
+     que o gerador escreve é TROCADO aqui (o gerador segue igual; a troca vive no JS, num lugar só). */
+  var FIL_ = (window.ALEA || {}).filamentos || {};
+  var ACAB_ = (window.ALEA || {}).acabamentos || [];
+  var corNomeBox = null;
+  (function trocarCorDoNome() {
+    var velho = document.querySelector('[data-personalizar] input[name="cor_nome"]');
+    if (!velho) return;
+    var caixa = document.createElement('div');
+    caixa.className = 'campo-cor campo-cor-nome';
+    caixa.setAttribute('data-parte', 'nome');
+    caixa.innerHTML = '<div class="acabamentos">' + ACAB_.map(function (ac) {
+        return '<label class="acabamento"><input type="radio" name="acab_nome" value="' + ac.id + '" disabled> ' +
+          ac.rotulo + '</label>';
+      }).join('') + '</div>' +
+      '<select name="cor_nome" disabled aria-label="Cor do nome"><option value=""></option></select>';   /* ETAPA 59: travada = sem frase */
+    velho.parentNode.replaceChild(caixa, velho);
+    corNomeBox = caixa;
+    caixa.addEventListener('change', function (ev) {
+      var rad = ev.target.closest && ev.target.closest('.acabamento input');
+      if (!rad) return;
+      var sel = caixa.querySelector('select');
+      sel.innerHTML = '<option value="">Escolha a cor</option>' + (FIL_[rad.value] || []).map(function (f) {
+        return '<option value="' + f.site + '">' + f.site + '</option>'; }).join('');
+      sel.disabled = false;
+      var rot = caixa.closest('label'); if (rot) rot.classList.remove('faltou');
+      /* v50 (vídeo 6790 + áudio 6791): NÃO focar o select — no iPhone o foco ABRE a lista sozinha; ele toca quando quiser */
+    });
+  })();
+
+  /* v38 (print 5278 + áudio 5279 do Cassiano, 02/10/2026): a COR DO NOME DA CAPA. Quando o nome da peça da capa está
+     PINTADO numa cor, o config.js registra `ALEA.modelos3d[slug].capa.nome = { acabamento: 'fosco', cor: 'Azul' }`
+     (acabamento = id de ALEA.acabamentos; cor = o nome simples da lista ALEA.filamentos daquele acabamento). Sem o
+     campo, ou com acabamento/cor que não existem mais na lista do site, devolve null e tudo fica como antes. */
+  function corDoNomeDaCapa() {
+    var slugN = botaoComprar ? botaoComprar.getAttribute('data-slug') : '';
+    var n = (((((window.ALEA || {}).modelos3d || {})[slugN]) || {}).capa || {}).nome;
+    if (!n || !n.acabamento || !n.cor) return null;
+    var existe = (FIL_[n.acabamento] || []).some(function (f) { return f.site === n.cor; });
+    return existe ? { acabamento: n.acabamento, cor: n.cor } : null;
+  }
+  function listaDeCoresDoNome(acab, primeira) {
+    return '<option value="">' + primeira + '</option>' + (FIL_[acab] || []).map(function (f) {
+      return '<option value="' + f.site + '">' + f.site + '</option>'; }).join('');
+  }
+
+  function travarCorDoNome(liberar) {
+    if (!corNomeBox) return;
+    var sel = corNomeBox.querySelector('select');
+    var daCapa = corDoNomeDaCapa();
+    Array.prototype.forEach.call(corNomeBox.querySelectorAll('.acabamento input'), function (r) {
+      r.disabled = !liberar;
+      /* v38: travada, fica marcada só a bolinha da capa (apagada); sem cor de capa, nenhuma (como antes) */
+      if (!liberar) r.checked = !!(daCapa && r.value === daCapa.acabamento);
+    });
+    var marcada = corNomeBox.querySelector('.acabamento input:checked');
+    if (daCapa && marcada) {
+      /* v38: a lista já vem com a cor da capa escolhida — apagada se travada, acesa se o detalhe foi marcado */
+      sel.innerHTML = listaDeCoresDoNome(marcada.value, 'Escolha a cor');
+      if (!liberar || marcada.value === daCapa.acabamento) sel.value = daCapa.cor;
+      sel.disabled = !liberar;
+    } else {
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">' + (liberar ? 'Escolha o acabamento acima' : '') + '</option>';
+    }
+    acertarTravaDaPagina();
+  }
+
+  /* ⚠️ v29 — A COR DO NOME TRAVADA AVISA O QUE FALTA (Cassiano, vídeo 1991, 26/09/2026 03:07). Na página do produto
+     sem janela 3D (Matteo, Cláudia), ele clicava em Básico/Fosco/Perolizado com o "Um detalhe que transforma"
+     desmarcado: aparecia o cursor de proibido e nada acontecia. "Se eu clicar, você consegue tremer a tela e mandar
+     eu clicar aqui, pra dar certo." Agora uma película transparente fica por cima da cor do nome enquanto ela está
+     travada (a mesma da janela 3D, que já fazia isso lá dentro): o clique/toque TREME o "Um detalhe que transforma"
+     e a cor do nome, mostra por 3,5 s "Marque a opção acima para personalizar." (a frase da janela 3D) e, se o
+     quadrinho estiver fora da tela, rola até ele. A tremida é a `.treme-falta` de sempre, que já respeita o
+     "reduzir movimento". SÓ NO COMPUTADOR (v29b, áudios 2000/2004: "no celular não mexe"). No produto com janela 3D (Luke) quem cuida é a janela — aqui não entra. */
+  var travaPagina = null, recadoTrava = null, recadoTimer = null;
+  function acertarTravaDaPagina() {
+    if (!corNomeBox) return;
+    /* v29b (áudios 2000/2004, 03:41-03:43): "no celular não mexe" — só com mouse de verdade e tela de computador */
+    if (!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)').matches)) return;
+    var form = corNomeBox.closest('[data-personalizar]');
+    if (!form || form.classList.contains('mora-na-janela')) { if (travaPagina) travaPagina.hidden = true; return; }
+    if (!travaPagina) {
+      travaPagina = document.createElement('div');
+      travaPagina.className = 'trava-toque trava-da-pagina';
+      travaPagina.setAttribute('aria-hidden', 'true');
+      corNomeBox.appendChild(travaPagina);
+      travaPagina.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        avisarCorDoNomeTravada(form);
+      });
+    }
+    var primeiro = corNomeBox.querySelector('.acabamento input');
+    travaPagina.hidden = !(primeiro && primeiro.disabled);
+  }
+  function avisarCorDoNomeTravada(form) {
+    var extra = form.querySelector('[data-extra]');
+    var rotulo = corNomeBox.closest('label') || corNomeBox;
+    if (!recadoTrava) {
+      recadoTrava = document.createElement('p');
+      recadoTrava.className = 'recado-trava';
+      recadoTrava.setAttribute('role', 'status');
+      recadoTrava.hidden = true;
+      rotulo.parentNode.insertBefore(recadoTrava, rotulo.nextSibling);
+    }
+    recadoTrava.textContent = 'Marque a opção acima para personalizar.';
+    recadoTrava.hidden = false;
+    requestAnimationFrame(function () { recadoTrava.classList.add('visivel'); });
+    clearTimeout(recadoTimer);
+    recadoTimer = setTimeout(function () {
+      recadoTrava.classList.remove('visivel');
+      setTimeout(function () { if (!recadoTrava.classList.contains('visivel')) recadoTrava.hidden = true; }, 300);
+    }, 3500);
+    [extra, rotulo].forEach(function (el) {
+      if (!el) return; el.classList.remove('treme-falta'); void el.offsetWidth; el.classList.add('treme-falta');
+    });
+    if (extra) {
+      var r = extra.getBoundingClientRect();
+      var topo = document.querySelector('.topo');
+      var cima = topo ? Math.max(0, topo.getBoundingClientRect().bottom) : 0;
+      if (r.top < cima + 8 || r.bottom > window.innerHeight - 8) {
+        var querMenos = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: Math.max(0, window.scrollY + r.top - cima - 24), behavior: querMenos ? 'auto' : 'smooth' });
+      }
+    }
+  }
+  travarCorDoNome(false);   // a cor do nome já nasce travada (o detalhe nasce desmarcado); v38: com a cor da capa, se houver
+
+  function corDoNomeEscolhida() {
+    if (!corNomeBox) return { texto: '', original: '', escolha: null };
+    /* v38: a cor da capa aparece marcada (apagada) com o detalhe desmarcado — sem o detalhe, não há cor do nome no pedido */
+    var formN = corNomeBox.closest('[data-personalizar]');
+    var cxN = formN && formN.querySelector('[data-extra-caixa]');
+    if (cxN && !cxN.checked) return { texto: '', original: '', escolha: null };
+    var ac = corNomeBox.querySelector('.acabamento input:checked');
+    var sel = corNomeBox.querySelector('select');
+    if (!ac || !sel.value) return { texto: '', original: '', escolha: null };
+    var def = ACAB_.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
+    var fil = (FIL_[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
+    return { texto: sel.value + def.sufixo, original: fil ? fil.original : sel.value + def.sufixo,
+             escolha: { acabamento: ac.value, cor: sel.value } };
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-extra]'), function (rot) {
+    var caixa = rot.querySelector('[data-extra-caixa]');
+    caixa.addEventListener('change', function () {
+      rot.classList.toggle('marcado', caixa.checked);
+      travarCorDoNome(caixa.checked);
+      repintarPreco();
+    });
+  });
+
+  /* ⚠️ v46 — A CAIXINHA DO POOP BAG NOS COMEDOUROS (áudios 6281-6290 do Cassiano, 04/10/2026; config.js ALEA.extraPoopBag).
+     Depois que o cliente fecha o Personalize com tudo escolhido lá dentro (nome ou "sem nome", cores), aparece entre o
+     "Personalize agora" e a declaração: [caixinha] [miniatura do Poop Bag nas cores e com o nome dele] "Adicionar Poop Bag
+     Holder + R$ 49,00". Marcou = + R$ 49 no preço (é um `data-extra` como o nome colorido: extrasMarcados/precoTotal já
+     somam, e o item leva `extras` com a miniatura). Ela NÃO passa pelo forEach acima (nasce depois dele, com handler
+     próprio): não pode travar/destravar a cor do nome. Fica FORA do formulário (o formulário mora na janela 3D).
+     Faltando algo lá dentro, ela não aparece; se já estava marcada, fica (o cliente decidiu, e a trava de compra cobra
+     o que falta). A miniatura vem do personalizar3d.js v14 (evento 'alea-mini-poopbag'); até chegar, a caixa pulsa. */
+  var caixaPoopBag = null;
+  function extraPoopBagDaPagina() {
+    var ex = (window.ALEA || {}).extraPoopBag;
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (ex && sl && (ex.slugs || []).indexOf(sl) >= 0) ? ex : null;
+  }
+  function pintarMiniPoopBag(url) {
+    if (!caixaPoopBag || !url) return;
+    var img = caixaPoopBag.querySelector('img[data-mini]');
+    img.setAttribute('src', url);
+    caixaPoopBag.querySelector('.mini-poopbag').classList.remove('carregando');
+  }
+  function mostrarCaixaPoopBag(miniatura) {
+    var ex = extraPoopBagDaPagina();
+    if (!ex) return null;
+    if (!caixaPoopBag) {
+      var aceiteP = document.querySelector('[data-aceite]');
+      if (!aceiteP) return null;
+      /* v48 (print 6401 + áudio 6402 do Cassiano): SÓ o quadradinho marca. A miniatura e o texto são LINK pra página do Poop
+         Bag (mesma aba: "pra ver que o preço normal é 79 e do que se trata a peça") — por isso a caixa é um <div>, não um
+         <label> (o label marcava com qualquer toque). Ao sair por esse link, a escolha é guardada e volta no "voltar". */
+      caixaPoopBag = document.createElement('div');
+      caixaPoopBag.className = 'extra extra-poopbag';
+      caixaPoopBag.setAttribute('data-extra', '');
+      caixaPoopBag.setAttribute('data-extra-id', 'poop_bag');
+      caixaPoopBag.setAttribute('data-extra-preco', String(ex.preco));
+      caixaPoopBag.setAttribute('data-extra-rotulo', ex.rotulo + ', nas mesmas cores e com o mesmo nome');
+      var txt = ex.texto + ' + ' + window.aleaDinheiro(ex.preco);
+      caixaPoopBag.innerHTML = '<label class="marca-poopbag"><input type="checkbox" data-extra-caixa aria-label="' + txt + '"></label>' +
+        '<a class="mini-poopbag carregando" href="' + ex.pagina + '" data-ir-poopbag aria-label="Ver o Poop Bag Holder">' +
+        '<img data-mini alt="Poop Bag Holder nas cores escolhidas" width="240" height="240"></a>' +
+        '<a class="titulo-extra" href="' + ex.pagina + '" data-ir-poopbag>' + txt + '</a>';
+      aceiteP.parentNode.insertBefore(caixaPoopBag, aceiteP);
+      Array.prototype.forEach.call(caixaPoopBag.querySelectorAll('[data-ir-poopbag]'), function (a) {
+        a.addEventListener('click', guardarParaVoltar);
+      });
+      var cxP = caixaPoopBag.querySelector('[data-extra-caixa]');
+      cxP.addEventListener('change', function () {
+        caixaPoopBag.classList.toggle('marcado', cxP.checked);
+        repintarPreco();
+      });
+    }
+    caixaPoopBag.hidden = false;
+    pintarMiniPoopBag(miniatura || window.aleaMiniaturaPoopBag);
+    return caixaPoopBag;
+  }
+  /* ⚠️ v47 — O NOME CABE SÓ NO CORPO (msg 6399 do Cassiano: "o máximo de caracteres pra caber SOMENTE na parte do meio").
+     Produto com `ALEA.modelos3d[slug].limiteNome` (hoje só o Poop Bag; config.js v50): cada letra digitada é MEDIDA na
+     Defante, na escala do arquivo; se o nome passar do comprimento útil do corpo, a letra a mais não entra e aparece
+     "Esse é o máximo que cabe na peça." por 3 s. Este ouvinte fica no PRÓPRIO campo, então roda antes da janela 3D
+     (que ouve no formulário) — a peça nunca chega a desenhar o nome cortado. Comedouros: sem limiteNome, nada muda. */
+  (function limiteDoNome() {
+    var sl = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lim = (((window.ALEA || {}).modelos3d || {})[sl] || {}).limiteNome;
+    var campoN = document.querySelector('[data-personalizar] [name="nome_pet"]');
+    if (!lim || !campoN) return;
+    var W = lim.larguras['W'] || [10, 0, 10];
+    function medir(t) {
+      var x = 0, ini = null, fim = null;
+      Array.prototype.forEach.call(t, function (ch) {
+        var g = lim.larguras[ch] || W;
+        if (g[2] > g[1]) { ini = ini === null ? x + g[1] : Math.min(ini, x + g[1]); fim = fim === null ? x + g[2] : Math.max(fim, x + g[2]); }
+        x += g[0];
+      });
+      return ini === null ? 0 : fim - ini;
+    }
+    window.aleaMedirNome = medir;
+    var bom = campoN.value, recado = null, timer = null, vezes = 0;
+    function avisar() {
+      var rot = campoN.closest('label') || campoN;
+      if (!recado) {
+        recado = document.createElement('p');
+        recado.className = 'recado-trava recado-limite-nome';
+        recado.setAttribute('role', 'status');
+        recado.setAttribute('data-limite-nome', '');
+        rot.parentNode.insertBefore(recado, rot.nextSibling);
+      }
+      recado.textContent = 'Esse é o máximo que cabe na peça.';
+      recado.hidden = false;
+      var vez = ++vezes;   // um aviso novo cancela o "esconder" do anterior (sem isso, 2 avisos seguidos sumiam)
+      requestAnimationFrame(function () { recado.classList.add('visivel'); });
+      rot.classList.remove('treme-falta'); void rot.offsetWidth; rot.classList.add('treme-falta');
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        recado.classList.remove('visivel');
+        setTimeout(function () { if (vez === vezes) recado.hidden = true; }, 300);
+      }, 3000);
+    }
+    campoN.addEventListener('input', function () {
+      if (medir(campoN.value.trim()) <= lim.mm) { bom = campoN.value; return; }
+      var pos = campoN.selectionStart, a_mais = campoN.value.length - bom.length;
+      campoN.value = bom;
+      try { campoN.setSelectionRange(Math.max(0, pos - a_mais), Math.max(0, pos - a_mais)); } catch (e) {}
+      avisar();
+    });
+  })();
+  window.addEventListener('alea-mini-poopbag', function (ev) { pintarMiniPoopBag(ev.detail); });
+  window.aleaCaixaPoopBag = mostrarCaixaPoopBag;
+  window.aleaDepoisDoPersonalize = function () {
+    if (!extraPoopBagDaPagina()) return;
+    var formP = document.querySelector('[data-personalizar]');
+    var faltaDentro = oQueFalta().some(function (f) { return f.el && formP && formP.contains(f.el); });
+    if (!faltaDentro) { mostrarCaixaPoopBag(); return; }
+    if (caixaPoopBag && !caixaPoopBag.querySelector('[data-extra-caixa]').checked) caixaPoopBag.hidden = true;
+  };
+
+  /* ==================================================== as cores da peça
+     "Apagar o quadrado de escrita e colocar as bolinhas igual do Declaro; quando o
+     cliente clicar na bolinha, aparece a quantidade de quadrado correspondente à cor
+     que ele escolheu" (Cassiano, 15/09/2026, 3ª rodada).
+
+     O Degradê é o caso especial: não abre campo nenhum e mostra o aviso que ele ditou —
+     filamento sazonal não se promete antes de existir. */
+  var caixaCores = document.querySelector('[data-cores-peca]');
+  var camposCores = document.querySelector('[data-cores-campos]');
+  /* v51: o filamento de cor FIXA do produto (Urubu: Clássico/Perolizado, sempre Vermelho), ou null */
+  function filamentoFixoDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).filamentoFixo || null;
+  }
+  /* v42 (áudio 6138: "sempre que ele abrir já vai ter só essas duas palavras, exterior e interior"): produto com
+     `soUmModo` esconde a linha Tricolor/Bicolor/Monocromático — o único modo da página é marcado pela capa ao abrir */
+  (function () {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    if (caixaCores && (((window.ALEA || {}).modelos3d || {})[s] || {}).soUmModo) caixaCores.classList.add('so-um-modo');
+  })();
+  /* v52 (13/10/2026, áudio 9891 do Cassiano, Urubu: "abre duas opções de cor (...) onde fica dourado na chuteira e onde fica
+     branco na chuteira. Só lá."): produto com `ALEA.modelos3d[slug].chuteira` ganha a caixa "Chuteira", logo abaixo das cores
+     da peça, com uma janela por parte (acabamento + cor, a mesma de sempre), JÁ MARCADA na cor do arquivo dele. Ela NÃO entra
+     em camposCores: o modo, a capa e o estoque continuam olhando só o Filamento. Vai pro pedido somada às cores (coresEscolhidas). */
+  function chuteiraDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).chuteira || null;
+  }
+  var caixaChuteira = null;
+  (function montarChuteira() {
+    var CH = chuteiraDoProduto();
+    if (!CH || !caixaCores) return;
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    caixaChuteira = document.createElement('div');
+    caixaChuteira.className = 'cores-peca chuteira-peca';
+    caixaChuteira.setAttribute('data-chuteira', '');
+    caixaChuteira.innerHTML = '<span class="rotulo-grupo">' + CH.titulo + '</span><div class="cores-campos">' +
+      CH.partes.map(function (pt, k) {
+        return '<div class="campo-cor campo-chuteira" data-malha="' + pt.malha + '" data-titulo="' + pt.titulo + '">' +
+          '<span class="titulo-chuteira">' + pt.titulo + '</span>' +
+          '<div class="acabamentos">' + ACAB.map(function (ac) {
+            return '<label class="acabamento"><input type="radio" name="chut_acab_' + k + '" value="' + ac.id + '"> ' + ac.rotulo + '</label>';
+          }).join('') + '</div>' +
+          '<select name="chut_cor_' + k + '" aria-label="' + pt.titulo + '"><option value="">Escolha a cor</option></select></div>';
+      }).join('') + '</div>';
+    caixaCores.insertAdjacentElement('afterend', caixaChuteira);
+    function encherLista(c, acab, cor) {
+      var sel = c.querySelector('select');
+      var lista = FIL[acab] || [];
+      sel.innerHTML = '<option value="">Escolha a cor</option>' +
+        lista.map(function (f) { return '<option value="' + f.site + '">' + f.site + '</option>'; }).join('');
+      /* trocou só o acabamento: a mesma cor fica, se existir nele; se não, a lista pede a cor (nada escolhido por ele) */
+      sel.value = lista.some(function (f) { return f.site === cor; }) ? cor : '';
+    }
+    caixaChuteira.addEventListener('change', function (ev) {
+      var rad = ev.target.closest && ev.target.closest('.acabamento input');
+      if (!rad) return;
+      var c = rad.closest('.campo-chuteira');
+      encherLista(c, rad.value, c.querySelector('select').value);
+      c.classList.remove('faltou');
+    });
+    /* marca as partes (lista = [{ acabamento, cor }] na ordem do config; sem lista = a cor do arquivo) — o "editar" usa */
+    window.aleaMarcarChuteira = function (lista) {
+      Array.prototype.forEach.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c, k) {
+        var e = (lista && lista[k]) || CH.partes[k];
+        var rad = c.querySelector('.acabamento input[value="' + e.acabamento + '"]');
+        if (!rad) return;
+        rad.checked = true;
+        encherLista(c, e.acabamento, e.cor);
+      });
+    };
+    window.aleaMarcarChuteira();
+  })();
+  /* v52: o que a caixa Chuteira tem marcado — [{ titulo, pedido, acabamento, cor, texto, original }] ou null */
+  function chuteiraEscolhida() {
+    var CH = chuteiraDoProduto();
+    if (!CH || !caixaChuteira) return null;
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    return Array.prototype.map.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c, k) {
+      var ac = c.querySelector('.acabamento input:checked'), sel = c.querySelector('select');
+      if (!ac || !sel || !sel.value) return null;
+      var def = ACAB.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
+      var fil = (FIL[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
+      return { titulo: CH.partes[k].titulo, pedido: CH.partes[k].pedido || CH.partes[k].titulo, acabamento: ac.value, cor: sel.value,
+               texto: sel.value + def.sufixo, original: fil ? fil.original : sel.value + def.sufixo };
+    });
+  }
+  /* v31 (msg 2268 do Cassiano, 27/09/2026): a frase pequena entre o título "Cores da peça" e as opções. O texto mora
+     no config.js (`ALEA.fraseCoresDaPeca`); sem ele, nada entra. */
+  (function fraseDasCores() {
+    var txt = (window.ALEA || {}).fraseCoresDaPeca;
+    if (filamentoFixoDoProduto()) return;   // v51: sem escolha de cor, a frase das cores não cabe
+    var tit = caixaCores && caixaCores.querySelector('.rotulo-grupo');
+    if (!txt || !tit || caixaCores.querySelector('.dica-cores')) return;
+    var p = document.createElement('p');
+    p.className = 'dica-cores';
+    p.textContent = txt;
+    tit.insertAdjacentElement('afterend', p);
+  })();
+
+  /* ⚠️ ETAPA 28 (22/09/2026, 21:19): o SORTEIO saiu — "algumas não têm tantas opções por se tratar
+     de filamento". Agora é UMA cor por caixa, FIXA, na ordem que ele ditou, de cima pra baixo:
+     1ª caixa "Ex.: Azul Fosco…", 2ª "Ex.: Verde…", 3ª "Ex.: Branco Perolizado…" (a ordem das 21:23,
+     que substitui a das 21:19; o "Verde" sem acabamento é literal dele). No bicolor valem as duas
+     primeiras; no monocromático, a primeira. */
+  /* ETAPA 29 (21:25): no BICOLOR, "por se tratar de somente 2 janelas, iremos colocar mais de uma":
+     Cor principal "Ex.: Vermelho, Laranja Fosco…" e Cor da base "Ex.: Amarelo Perolizado, Prata…".
+     O tricolor segue a lista de cima; o monocromático, a primeira dela (até ele dizer outra). */
+  var EXEMPLO_POR_CAIXA = ['Ex.: Azul Fosco…', 'Ex.: Verde…', 'Ex.: Branco Perolizado…'];
+  var EXEMPLO_BICOLOR = ['Ex.: Vermelho, Laranja Fosco…', 'Ex.: Amarelo Perolizado, Prata…'];
+  /* ETAPA 30 (21:28): o MONOCROMÁTICO ganhou o dele — "Ex.: Roxo Perolizado, Rosa Fosco, Dourado…" */
+  var EXEMPLO_MONO = ['Ex.: Roxo Perolizado, Rosa Fosco, Dourado…'];
+  function exemploDeCor(k, quantos) {
+    var lista = quantos === 2 ? EXEMPLO_BICOLOR : quantos === 1 ? EXEMPLO_MONO : EXEMPLO_POR_CAIXA;
+    return lista[k - 1] || lista[0];
+  }
+
+  /* v42: os nomes das caixas de cor que o produto dá (config.js modelos3d[slug].partesCor), ou null */
+  function partesCorDoProduto() {
+    var s = botaoComprar && botaoComprar.getAttribute('data-slug');
+    return (((window.ALEA || {}).modelos3d || {})[s] || {}).partesCor ||
+      ((window.ALEA || {}).partesCor || {})[s] || null;   // v53: produto sem 3D (Una: Corpo, Aro)
+  }
+
+  function desenharCamposDeCor(radio) {
+    if (!camposCores) return;
+    camposCores.innerHTML = '';
+    var aviso = radio.getAttribute('data-aviso');
+    if (aviso) {
+      var p = document.createElement('p');
+      p.className = 'aviso-degrade';
+      p.textContent = aviso;
+      camposCores.appendChild(p);
+      return;
+    }
+    var quantos = parseInt(radio.getAttribute('data-campos'), 10) || 0;
+    /* ⚠️ ETAPA 26 (22/09/2026, 21:04-21:08): "cor 1, cor 2, cor 3 fica muito feio pro cliente". O
+       quadradinho da esquerda deixa de ser número e diz ONDE vai a cor — tricolor: Topo, Principal,
+       Base; bicolor: Principal, Base (palavras dele); monocromático: Principal (a peça inteira é a
+       cor principal — dedução minha, avisada a ele). E cada caixa ganha um exemplo como o da cor
+       do nome, com cores SORTEADAS: "Ex.: <cor> Sólido, <cor> Fosco, <cor> Perolizado…". */
+    /* ETAPA 58 (3) (16:11): no BICOLOR "a primeira cor é a do topo, a segunda serve pro meio e a base" */
+    var PARTES = { 3: ['Topo', 'Principal', 'Base'], 2: ['Topo', 'Principal'], 1: ['Principal'] };
+    var partes = PARTES[quantos] || [];
+    /* ETAPA 27 (21:09, "aliás, melhor"): o quadradinho da esquerda SAI de vez; a caixa branca fica
+       onde está (mesmo recuo), e o nome vai EM CIMA dela, como os outros rótulos do formulário:
+       "Cor do topo", "Cor principal", "Cor da base". É um <label> de verdade (clicar no nome põe o
+       cursor na caixa) e herda o estilo do `.personalizar label`. */
+    var NOME_DA_PARTE = { Topo: 'Cor do topo', Principal: 'Cor principal', Base: 'Cor da base' };
+    /* ⚠️ ETAPA 51 (23/09/2026, 13:19, pedido dele): a cor sai de uma LISTA, não mais digitada. "No lugar
+       do Cor Principal, com a mesma letra, tamanho e cor, só vai mudar pra Básico, Fosco e Perolizado,
+       com a mesma bolinha do Monocromático; só quando a pessoa clicar em alguma dessas, deixa clicar na
+       janela pra escolher a cor correspondente ao acabamento." A lista vem de ALEA.filamentos (config.js).
+       No tricolor/bicolor o nome da parte ("Cor do topo"...) passa pra DENTRO da janela, como a primeira
+       linha dela — sem isso o cliente não saberia qual janela é o topo e qual é a base. */
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    /* v42 (áudio 6138, Stria): "exterior e interior, não vai colocar cor exterior e cor interior" — o produto pode dar o
+       nome das caixas (modelos3d[slug].partesCor[quantos]); sem isso, Topo/Principal/Base como sempre */
+    var nomesDoProduto = (partesCorDoProduto() || {})[quantos];
+    var FF = quantos === 1 ? filamentoFixoDoProduto() : null;   // v51
+    if (FF) ACAB = ACAB.filter(function (ac) { return FF.acabamentos.indexOf(ac.id) >= 0; });
+    for (var k = 1; k <= quantos; k++) {
+      var parte = partes[k - 1] || ('Cor ' + k);
+      var titulo = (nomesDoProduto && nomesDoProduto[k - 1]) || NOME_DA_PARTE[parte] || parte;
+      var linha = document.createElement('div');
+      linha.className = 'campo-cor';
+      linha.setAttribute('data-parte', parte.toLowerCase());
+      linha.setAttribute('data-titulo', titulo);
+      var bolinhas = ACAB.map(function (ac) {
+        return '<label class="acabamento"><input type="radio" name="acab_' + k + '" value="' + ac.id + '"> ' +
+          ac.rotulo + '</label>';
+      }).join('');
+      linha.innerHTML = '<div class="acabamentos">' + bolinhas + '</div>' +
+        '<select name="cor_' + k + '" data-parte="' + parte.toLowerCase() + '" disabled ' +
+        'aria-label="' + titulo + '"><option value="">' + (quantos > 1 ? titulo :
+        'Escolha o acabamento acima') + '</option></select>';
+      if (FF) { linha.classList.add('filamento-fixo'); linha.setAttribute('data-titulo', FF.titulo); }
+      camposCores.appendChild(linha);
+    }
+    camposCores.onchange = function (ev) {
+      var rad = ev.target.closest && ev.target.closest('.acabamento input');
+      if (!rad) return;
+      var dono = rad.closest('.campo-cor');
+      var sel = dono.querySelector('select');
+      if (FF) {   // v51: a cor é FIXA — a lista nasce já escolhida (escondida pelo CSS) e só o acabamento muda
+        sel.innerHTML = '<option value="' + FF.cor + '">' + FF.cor + '</option>';
+        sel.value = FF.cor;
+        sel.disabled = false;
+        dono.classList.remove('faltou');
+        return;
+      }
+      var tit = dono.getAttribute('data-titulo') || 'Cor';
+      var lista = FIL[rad.value] || [];
+      sel.innerHTML = '<option value="">' + (quantos > 1 ? tit + ': escolha a cor' : 'Escolha a cor') + '</option>' +
+        lista.map(function (f) {
+          /* v39: cor com peça pronta ganha " · N disponível(is)" na frente (só no monocromático: a peça inteira é dela) */
+          var n = quantos === 1 ? qtdEmEstoque('monocromatico', [{ acabamento: rad.value, cor: f.site }]) : 0;
+          var extra = n > 0 ? ' - ' + n + ' · Em estoque' : '';   // v41: 'Branco - 1 · Em estoque' (áudios 5817 e 5822)
+          return '<option value="' + f.site + '">' + f.site + extra + '</option>';
+        }).join('');
+      sel.disabled = false;
+      dono.classList.remove('faltou');
+      /* v50 (vídeo 6790 + áudio 6791): NÃO focar o select — no iPhone o foco ABRE a lista sozinha; ele toca quando quiser */
+    };
+    return;
+    var primeiro = camposCores.querySelector('input');
+    if (primeiro) primeiro.focus();
+  }
+
+  if (caixaCores) {
+    caixaCores.addEventListener('change', function (ev) {
+      /* v37: mexeu com a mão (evento de verdade, não o do aleaAssumirCorDaCapa) = a escolha passa a ser dele, não da foto */
+      if (ev.isTrusted) caixaCores.removeAttribute('data-cores-da-capa');
+      var r = ev.target.closest('input[name="cores_peca"]');
+      if (r) desenharCamposDeCor(r);
+    });
+  }
+
+  function coresEscolhidas() {
+    if (!caixaCores) return null;
+    var r = caixaCores.querySelector('input[name="cores_peca"]:checked');
+    if (!r) return null;
+    /* ETAPA 51: cada janela devolve acabamento + cor. `cores` é o que o cliente lê ("Azul Fosco");
+       `originais` é o nome EXATO do filamento, que vai só no pedido pro Cassiano; `escolhas` serve pro
+       "editar" da sacola remontar as janelas. */
+    var FIL = (window.ALEA || {}).filamentos || {};
+    var ACAB = (window.ALEA || {}).acabamentos || [];
+    var escolhas = [], lista = [], originais = [], partesNomes = [];
+    var FFc = filamentoFixoDoProduto();
+    Array.prototype.forEach.call(camposCores.querySelectorAll('.campo-cor'), function (c) {
+      var ac = c.querySelector('.acabamento input:checked');
+      var sel = c.querySelector('select');
+      if (!ac || !sel || !sel.value) return;
+      partesNomes.push(c.getAttribute('data-titulo') || '');
+      var def = ACAB.filter(function (x) { return x.id === ac.value; })[0] || { sufixo: '' };
+      var fil = (FIL[ac.value] || []).filter(function (f) { return f.site === sel.value; })[0];
+      escolhas.push({ acabamento: ac.value, cor: sel.value });
+      if (FFc) { partesNomes[partesNomes.length - 1] = FFc.titulo; lista.push(def.rotulo); }   // v51: "Filamento: Perolizado"
+      else lista.push(sel.value + def.sufixo);
+      originais.push(fil ? fil.original : sel.value + def.sufixo);
+    });
+    /* v52: a chuteira entra DEPOIS do Filamento, com o nome dela ("Parte dourada da chuteira: Dourado Perolizado") e o
+       filamento exato no pedido; `chuteira` guarda acabamento + cor pro "editar" (escolhas continua só do Filamento) */
+    var chut = chuteiraEscolhida(), chuteira;
+    if (chut) {
+      if (FFc || partesCorDoProduto()) {
+        chut.forEach(function (x) {
+          if (!x) return;
+          partesNomes.push(x.pedido); lista.push(x.texto); originais.push(x.original);
+        });
+      }
+      chuteira = chut.map(function (x) { return x ? { acabamento: x.acabamento, cor: x.cor } : null; });
+    }
+    return {
+      chuteira: chuteira,
+      modo: r.parentNode.textContent.trim(),
+      cores: lista,
+      originais: originais,
+      escolhas: escolhas,
+      /* v42: só no produto com partesCor (Stria): o nome de cada caixa, na ordem das cores ("Exterior", "Interior") */
+      partes: (partesCorDoProduto() || FFc) ? partesNomes : undefined,
+      a_combinar: !!r.getAttribute('data-aviso'),
+      /* v37: true = o cliente apertou "Pronto" sem escolher e as cores são as da FOTO DE CAPA (aleaAssumirCorDaCapa).
+         Na sacola e no pedido sai IGUAL à escolha à mão; o campo é só pra quem lê o pedido no servidor (e-mail v3). */
+      da_capa: caixaCores.hasAttribute('data-cores-da-capa')
+    };
+  }
+
+  /* ==================================================== o aceite, os dois botões */
+  function campo(nome) {
+    var el = document.querySelector('[data-personalizar] [name="' + nome + '"]');
+    return el ? el.value.trim() : '';
+  }
+
+  function reclamarDoAceite() {
+    var recado = document.querySelector('[data-recado-aceite]');
+    var botoes = document.querySelector('[data-botoes]');
+    var rotulo = document.querySelector('[data-aceite]');
+    if (recado) recado.hidden = false;
+    if (rotulo) rotulo.classList.add('faltou');
+    if (botoes) {
+      botoes.classList.remove('tremendo');
+      void botoes.offsetWidth;        // reinicia a animação se ele clicar duas vezes
+      botoes.classList.add('tremendo');
+    }
+  }
+
+  function montarItem() {
+    var extras = extrasMarcados();
+    return {
+      slug: botaoComprar.getAttribute('data-slug'),
+      nome: botaoComprar.getAttribute('data-nome'),
+      preco: precoTotal(),
+      capa: botaoComprar.getAttribute('data-capa'),
+      /* ETAPA 58 (9): a miniatura é a PEÇA COMO O CLIENTE MONTOU (foto da janela 3D); sem ela, a capa */
+      miniatura: window.aleaMiniatura3D || null,
+      material: botaoComprar.getAttribute('data-material'),
+      personalizacao: {
+        nome_pet: campo('nome_pet'),
+        sem_nome: !campo('nome_pet') && !!(document.querySelector('[data-personalizar]') || { hasAttribute: function () { return false; } }).hasAttribute('data-sem-nome'),
+        cor_nome: corDoNomeEscolhida().texto,
+        cor_nome_original: corDoNomeEscolhida().original,
+        cor_nome_escolha: corDoNomeEscolhida().escolha,
+        cores: coresEscolhidas(),
+        /* v36: o tamanho que o cliente escolheu na página (M ou G nas 3 peças — áudio 3033: "todos são M e G, não tem P"); '' = produto sem tamanhos */
+        tamanho: tamanhoEscolhido(),
+        /* v42: o formato (Stria: Orbis | Quadrum); '' = produto sem formato */
+        formato: formatoEscolhido(),
+        /* 26/09/2026: marcou o "Estou ciente da possível variação de cor" na janela Personalize (personalizar3d.js v9) */
+        ciente_cor: (function () { if (window.aleaCienteCor) return true; try { return !!sessionStorage.getItem('alea_ciente_cor'); } catch (e) { return false; } })()
+      },
+      extras: extras,
+      /* v39: true = a combinação escolhida estava em estoque ("Comprar agora"); false = encomenda */
+      pronta_entrega: estaEmEstoque(),
+      /* o ACEITE vai junto do item, com data e hora. É a prova de que a declaração foi
+         marcada ANTES da compra — e é ela que sustenta a regra de não cancelamento que
+         está escrita na mesma página. Aceite que não fica registrado não serve de nada. */
+      aceite: { marcado: true, quando: new Date().toISOString() }
+    };
+  }
+
+  /* ⚠️ ETAPA 19 (22/09/2026, parte 3, áudios das 20:29-20:30): a trava não é mais só do aceite.
+     "Não pode ficar nunca sem colocar o nome do pet, sem a escolha das cores da peça e sem marcar a
+     declaração. Toda vez que clicar em comprar agora e tiver alguma dessas faltando, essa opção vai
+     mudar a cor e vai fazer aquela animação igual você fez com a declaração." E, no seguinte: se
+     escolheu tricolor/bicolor/monocromático e não digitou as cores, o mesmo.
+     Cada falta ganha a classe `faltou` (a cor), os botões tremem (a animação da declaração), o
+     recado diz O QUE falta, e a tela rola até a primeira falta — no celular ela pode estar acima
+     da dobra, e cor mudando fora da tela ninguém vê. Degradê não pede cor (a cor é combinada).
+     A cor do NOME só é cobrada quando o adicional "nome colorido" está marcado (o campo só abre
+     com ele) — mesmo raciocínio das cores da peça: escolheu a opção, tem que dizer a cor. */
+  function oQueFalta() {
+    var faltas = [];
+    var nome = document.querySelector('[data-personalizar] [name="nome_pet"]');
+    /* ETAPA 58 (8) -> v34: o quadradinho "Sem nome" marcado põe `data-sem-nome` no formulário e o nome não é cobrado
+       (a pergunta "Deseja mesmo não adicionar nome?" saiu). Desmarcado e vazio: a trava de sempre, frase de sempre. */
+    var formSN = document.querySelector('[data-personalizar]');
+    var semNome = formSN && formSN.hasAttribute('data-sem-nome');
+    if (nome && !nome.value.trim() && !semNome) faltas.push({ el: nome.closest('label') || nome, texto: textoFaltaNome() });   // v51
+    /* ETAPA 52: com o detalhe marcado, cobra o acabamento e depois a cor do nome */
+    if (corNomeBox && !corNomeBox.querySelector('.acabamento input').disabled) {
+      var rotNome = corNomeBox.closest('label') || corNomeBox;
+      if (!corNomeBox.querySelector('.acabamento input:checked')) {
+        faltas.push({ el: rotNome, texto: 'Por favor, escolha o acabamento da cor do nome.' });
+      } else if (!corNomeBox.querySelector('select').value) {
+        faltas.push({ el: rotNome, texto: 'Por favor, escolha a cor do nome.' });
+      }
+    }
+    if (caixaCores) {
+      var r = caixaCores.querySelector('input[name="cores_peca"]:checked');
+      if (!r) {
+        /* ETAPA 24: treme e muda de cor o rótulo E cada opção (tricolor, bicolor, monocromático,
+           degradê) — "e todos os nomes que tiverem ali" */
+        faltas.push({ el: caixaCores.querySelector('.rotulo-grupo') || caixaCores, texto: 'Por favor, selecione a cor da peça.' });
+        Array.prototype.forEach.call(caixaCores.querySelectorAll('.cores-opcoes label'), function (l) {
+          faltas.push({ el: l, texto: null });
+        });
+      } else {
+        /* ETAPA 51: cada janela cobra primeiro o ACABAMENTO e depois a COR */
+        Array.prototype.forEach.call(camposCores ? camposCores.querySelectorAll('.campo-cor') : [], function (c) {
+          var parte = c.getAttribute('data-parte');
+          var qual = parte === 'topo' ? 'da cor do topo' : parte === 'base' ? 'da cor da base' : 'da cor principal';
+          var qual2 = parte === 'topo' ? 'a cor do topo' : parte === 'base' ? 'a cor da base' : 'a cor principal';
+          if (partesCorDoProduto()) {   // v42: caixa com nome do produto ("Exterior") -> "a cor do Exterior"
+            var tt = c.getAttribute('data-titulo') || '';
+            qual = 'da cor do ' + tt; qual2 = 'a cor do ' + tt;
+          }
+          if (!c.querySelector('.acabamento input:checked') && filamentoFixoDoProduto()) {
+            faltas.push({ el: c, texto: 'Por favor, escolha o ' + filamentoFixoDoProduto().titulo.toLowerCase() + '.' });   // v51
+          } else if (!c.querySelector('.acabamento input:checked')) {
+            faltas.push({ el: c, texto: 'Por favor, escolha o acabamento ' + qual + '.' });
+          } else if (!c.querySelector('select').value) {
+            faltas.push({ el: c, texto: 'Por favor, escolha ' + qual2 + '.' });
+          }
+        });
+      }
+    }
+    /* v52: a chuteira abre marcada; só cobra se o cliente trocou o acabamento e a cor não existe nele */
+    if (caixaChuteira) {
+      Array.prototype.forEach.call(caixaChuteira.querySelectorAll('.campo-chuteira'), function (c) {
+        if (!c.querySelector('.acabamento input:checked') || !c.querySelector('select').value) {
+          faltas.push({ el: c, texto: 'Por favor, escolha a cor da ' + (c.getAttribute('data-titulo') || '').toLowerCase() + ' da chuteira.' });
+        }
+      });
+    }
+    /* v36: o tamanho (na página, acima do Personalize). Vem DEPOIS das faltas do formulário de propósito: faltando algo lá
+       dentro, a janela abre e mostra aquela falta primeiro; resolvido, a página treme no Tamanho. */
+    /* v42: Formato e Tamanho juntos, na ordem da página (faltasDeEscolha) */
+    faltas = faltas.concat(faltasDeEscolha());
+    if (!caixaAceite || !caixaAceite.checked) {
+      faltas.push({ el: document.querySelector('[data-aceite]'), texto: 'Por favor, aceite os termos da declaração.' });   // ETAPA 32 (21:38): frase dele
+    }
+    return faltas;
+  }
+
+  /* a posição do print do Cassiano (msg 629/654): o pé dos botões encostado no pé da parte VISÍVEL da tela */
+  function irParaOsBotoes(suave) {
+    var botoes = document.querySelector('[data-botoes]');
+    if (!botoes) return;
+    var altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var y = window.scrollY + botoes.getBoundingClientRect().bottom - altura + 16;
+    window.scrollTo({ top: Math.max(0, y), behavior: suave ? 'smooth' : 'auto' });
+  }
+  window.aleaIrParaOsBotoes = irParaOsBotoes;
+
+  function reclamarDoQueFalta(faltas, soAFalta) {   // v43: soAFalta = treme só o que falta, não os botões (áudio 6220)
+    Array.prototype.forEach.call(document.querySelectorAll('.faltou'), function (x) { x.classList.remove('faltou'); });
+    faltas.forEach(function (f) { if (f.el) f.el.classList.add('faltou'); });
+    /* ETAPA 23 (22/09/2026, 20:44): "quero que trema TUDO o que está faltando na tela", não só os
+       botões. Cada falta treme junto (mesma animação), reiniciada a cada clique. */
+    Array.prototype.forEach.call(document.querySelectorAll('.treme-falta'), function (x) { x.classList.remove('treme-falta'); });
+    faltas.forEach(function (f) { if (f.el) { void f.el.offsetWidth; f.el.classList.add('treme-falta'); } });
+    var recado = document.querySelector('[data-recado-aceite]');
+    if (recado) {
+      var itens = faltas.map(function (f) { return f.texto; }).filter(Boolean);
+      /* ETAPA 24 (22/09/2026, 20:45): a frase é SÓ a da PRIMEIRA falta, de cima pra baixo ("será
+         sempre o primeiro item que está faltando") — a lista `faltas` já nasce na ordem da página.
+         As outras faltas não somem: continuam com a cor e tremendo. Era "Complete antes de
+         continuar: nome do pet, cores da peça e declaração." */
+      recado.textContent = itens[0];
+      recado.hidden = false;
+    }
+    var botoes = document.querySelector('[data-botoes]');
+    if (botoes && !soAFalta) {
+      botoes.classList.remove('tremendo');
+      void botoes.offsetWidth;        // reinicia a animação se ele clicar duas vezes
+      botoes.classList.add('tremendo');
+    }
+    var primeira = faltas.filter(function (f) { return f.el; })[0];
+    if (primeira && primeira.el.scrollIntoView) {
+      /* ETAPA 22 (22/09/2026, 20:43): "a tela subiu pro nome do pet, mas o cursor não foi pra
+         janela — coloque o cursor direto nela". O foco vai pro CAMPO da primeira falta (no
+         celular isso já abre o teclado). Tem que ser AQUI, dentro do clique: o iPhone só aceita
+         foco programático durante o gesto. `preventScroll` pra o foco não dar um pulo seco por
+         cima da rolagem suave, que é quem centraliza. */
+      var alvo = primeira.el.matches && primeira.el.matches('input, select') ? primeira.el
+               : primeira.el.querySelector ? (primeira.el.querySelector('select:not([disabled])') ||
+                 primeira.el.querySelector('input')) : null;
+      if (!alvo && caixaTamanho && caixaTamanho.contains(primeira.el)) {   // v36: o foco vai pra 1ª bolinha do Tamanho
+        alvo = caixaTamanho.querySelector('input[name="tamanho"]');
+      }
+      if (!alvo && caixaFormato && caixaFormato.contains(primeira.el)) {   // v42: idem no Formato
+        alvo = caixaFormato.querySelector('input[name="formato"]');
+      }
+      if (!alvo && caixaCores && primeira.el.classList.contains('rotulo-grupo')) {
+        alvo = caixaCores.querySelector('input[name="cores_peca"]');
+      }
+      if (alvo && alvo.focus) { try { alvo.focus({ preventScroll: true }); } catch (e) { alvo.focus(); } }
+      /* ⚠️ ETAPA 25 (22/09/2026, 20:53, com vídeo): centralizar NÃO basta no celular — o teclado
+         sobe, e a barrinha de "completar automaticamente" do iPhone fica POR CIMA do campo. Ele pediu
+         o alinhamento que ele mesmo fez no vídeo: a falta logo ABAIXO do cabeçalho, sobrando a tela
+         de baixo pro teclado e pra barrinha. E SEMPRE, a cada clique — não só quando está fora da
+         tela. O cabeçalho é medido na hora (a altura muda com a tarja e com o tamanho da tela). */
+      if (primeira.el.closest && primeira.el.closest('.janela3d')) { /* dentro da janela: quem posiciona é ela */ }
+      else if (primeira.el.closest && primeira.el.closest('[data-aceite]')) {
+        /* ⚠️ ETAPA 58 (4) (16:13, com print): faltando SÓ a declaração, a tela para com a declaração, a frase e os
+           botões no PÉ da parte visível (logo acima da barra do Safari) — sem rolar até a parte preta — e treme ali */
+        irParaOsBotoes(true);
+      } else {
+        var topo = document.querySelector('.topo');
+        var folga = (topo ? Math.max(0, topo.getBoundingClientRect().bottom) : 0) + 18;
+        var y = window.scrollY + primeira.el.getBoundingClientRect().top - folga;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }
+  }
+
+  /* quem corrige a falta perde a cor na hora — não precisa clicar de novo pra ver sumir */
+  document.addEventListener('input', function (ev) {
+    var dono = ev.target.closest && ev.target.closest('.faltou');
+    if (dono && ev.target.value && ev.target.value.trim()) dono.classList.remove('faltou');
+  });
+  document.addEventListener('change', function (ev) {
+    if (ev.target.matches && ev.target.matches('.campo-cor select') && ev.target.value) {
+      var dono = ev.target.closest('.faltou'); if (dono) dono.classList.remove('faltou');
+    }
+    if (ev.target.name === 'cores_peca' && caixaCores) {
+      Array.prototype.forEach.call(caixaCores.querySelectorAll('.rotulo-grupo, .cores-opcoes label'),
+        function (x) { x.classList.remove('faltou'); });
+    }
+  });
+
+  /* ⚠️ ETAPA 43 (22/09/2026, 22:34, print de referência): ao adicionar pela sacola, aparece uma
+     JANELINHA logo abaixo do cabeçalho — a miniatura da peça à esquerda e a frase "Você adicionou
+     esta criação à sua Sacola de Compras." ("fazer somente a primeira frase"), com × pra fechar. Some
+     sozinha em 5 s. Cores e fonte são as da ālea; só a posição e o desenho seguem o modelo. */
+  var avisoTimer = null;
+  function avisarQueEntrou(capa, miniatura) {
+    var velho = document.querySelector('.aviso-sacola');
+    if (velho) velho.parentNode.removeChild(velho);
+    var a = document.createElement('div');
+    /* 14/10/2026 (fotos 10852/10853 + áudio 10856 do Cassiano): "pequenininha e minimalista igual da Tiffany… na parte
+       baixa e menor", mas "tem que dar pra ver o nosso comedouro legal". Saiu do topo: vai pro canto de baixo (CSS
+       .aviso-sacola.adicionou). A janelinha de CONFIRMAR remoção continua igual. */
+    a.className = 'aviso-sacola adicionou';
+    a.setAttribute('role', 'status');
+    a.innerHTML =
+      '<div class="miniatura"><img alt="" src="' + (miniatura || ('img/produtos/' + capa + '_obj_m.webp')) + '" ' +
+      'onerror="this.onerror=null;this.src=&quot;img/produtos/' + capa + '_m.jpg&quot;"></div>' +
+      '<p>Você adicionou esta criação à sua sacola de compras.</p>' +   // 22:36 minúsculo; 22:38 sem negrito
+      '<button type="button" class="fechar-aviso" aria-label="Fechar aviso">&times;</button>';
+    document.body.appendChild(a);
+    requestAnimationFrame(function () { a.classList.add('visivel'); });
+    function tirar() {
+      a.classList.remove('visivel');
+      setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 300);
+    }
+    a.querySelector('.fechar-aviso').addEventListener('click', tirar);
+    clearTimeout(avisoTimer);
+    avisoTimer = setTimeout(tirar, 3000);   // ETAPA 48 (22:55): 3 s, pedido dele (era 5)
+  }
+
+  /* ⚠️ ETAPA 45 (22:38): o "editar" da sacola traz a pessoa de volta a esta página com TUDO que ela
+     tinha escolhido já preenchido ("pra não precisar fazer tudo novamente"). O endereço chega com
+     `?editar=<id da linha>`; aqui se preenche nome, adicional, cor do nome, cores da peça e cada cor.
+     Ao adicionar/comprar de novo, a linha antiga é SUBSTITUÍDA (mantém a quantidade), não duplicada.
+     ⚠ A DECLARAÇÃO volta DESMARCADA de propósito: ela diz "revisei nome, grafia e cores", e depois de
+     mexer na personalização o aceite antigo não cobre o que mudou. */
+  var editando = null;
+  /* v48: o preenchimento do formulário a partir de um item (o da sacola, no "editar", ou o salvo ao sair pro Poop Bag e voltar).
+     Era o miolo do prepararEdicao; separado pra servir aos dois. Não abre a janela nem mexe no `editando`. */
+  function preencherComItem(item) {
+    var p = item.personalizacao || {};
+    var nome = document.querySelector('[data-personalizar] [name="nome_pet"]');
+    if (nome) nome.value = p.nome_pet || '';
+    /* v42: o formato volta marcado (v43: ANTES do tamanho — a lista de tamanhos depende dele) */
+    if (caixaFormato && p.formato) {
+      var rf = caixaFormato.querySelector('input[name="formato"][value="' + String(p.formato).replace(/"/g, '') + '"]');
+      if (rf) { rf.checked = true; desenharTamanhos(p.formato); }
+    }
+    /* v36: o tamanho volta marcado */
+    if (caixaTamanho && p.tamanho) {
+      var rt = caixaTamanho.querySelector('input[name="tamanho"][value="' + String(p.tamanho).replace(/"/g, '') + '"]');
+      if (rt) rt.checked = true;
+    }
+    (item.extras || []).forEach(function (x) {
+      var rot = document.querySelector('[data-extra][data-extra-id="' + x.id + '"]');
+      if (!rot && x.id === 'poop_bag') rot = mostrarCaixaPoopBag(x.miniatura);   // v46: a caixinha volta marcada, com a miniatura
+      var cx = rot && rot.querySelector('[data-extra-caixa]');
+      if (cx && !cx.checked) { cx.checked = true; cx.dispatchEvent(new Event('change', { bubbles: true })); }
+    });
+    /* ETAPA 52: a cor do nome volta com acabamento e cor (os pedidos antigos, em texto, não voltam) */
+    if (corNomeBox && p.cor_nome_escolha) {
+      var rn = corNomeBox.querySelector('.acabamento input[value="' + p.cor_nome_escolha.acabamento + '"]');
+      if (rn) {
+        rn.checked = true; rn.dispatchEvent(new Event('change', { bubbles: true }));
+        corNomeBox.querySelector('select').value = p.cor_nome_escolha.cor;
+      }
+    }
+    if (caixaCores && p.cores && p.cores.modo) {
+      var r = Array.prototype.filter.call(caixaCores.querySelectorAll('input[name="cores_peca"]'),
+        function (x) { return x.parentNode.textContent.trim() === p.cores.modo; })[0];
+      if (r) {
+        r.checked = true;
+        desenharCamposDeCor(r);
+        /* ETAPA 51: remonta acabamento (bolinha) e cor (lista) de cada janela */
+        Array.prototype.forEach.call(camposCores.querySelectorAll('.campo-cor'), function (c, k) {
+          var e = (p.cores.escolhas || [])[k];
+          if (!e) return;
+          var rad = c.querySelector('.acabamento input[value="' + e.acabamento + '"]');
+          if (!rad) return;
+          rad.checked = true;
+          rad.dispatchEvent(new Event('change', { bubbles: true }));
+          c.querySelector('select').value = e.cor;
+        });
+        if (p.cores.da_capa) caixaCores.setAttribute('data-cores-da-capa', '');   // v37: continua "da capa" ao editar
+      }
+    }
+    if (p.cores && p.cores.chuteira && window.aleaMarcarChuteira) window.aleaMarcarChuteira(p.cores.chuteira);   // v52
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    repintarPreco();
+    /* ETAPA 47 (22:51): "o cliente não quer saber do topo, ele só quer editar — tem que cair direto no
+       NOME DO PET". A tela para com o rótulo "Nome do pet" logo abaixo do cabeçalho (a mesma régua da
+       trava de compra). Reaplica no `load`: as fotos da colmeia, carregando, empurram o formulário. */
+    /* ⚠️ ETAPA 58 (11) (16:24, com 2 prints — substitui a ETAPA 47): "editar" volta pra esta página PARADA na
+       posição dos botões (Personalize aqui, declaração, Comprar à vista) e JÁ com a janela de personalizar aberta,
+       tudo preenchido, a peça de frente, centralizada e parada. */
+    /* v34: o item salvo "sem nome" volta com o quadradinho Sem nome MARCADO (campo vazio e travado) */
+    if (p.sem_nome) {
+      if (window.aleaMarcarSemNome) window.aleaMarcarSemNome(true);
+      else { var fsn = document.querySelector('[data-personalizar]'); if (fsn) fsn.setAttribute('data-sem-nome', ''); }
+    }
+    if (p.cores && p.cores.escolhas) window.aleaMiniatura3D = item.miniatura || null;
+  }
+  (function prepararEdicao() {
+    var m = /[?&]editar=([^&]+)/.exec(location.search);
+    if (!m || !window.aleaCarrinho || !botaoComprar) return;
+    var id = decodeURIComponent(m[1]);
+    var item = window.aleaCarrinho.itens().filter(function (i) { return i.quando === id; })[0];
+    if (!item || item.slug !== botaoComprar.getAttribute('data-slug')) return;
+    editando = id;
+    preencherComItem(item);
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    function abrirEditando() {
+      irParaOsBotoes(false);
+      if (window.aleaAbrirPersonalizar) window.aleaAbrirPersonalizar(null, { parado: true });
+    }
+    if (document.readyState === 'complete') setTimeout(abrirEditando, 50);
+    else window.addEventListener('load', function () { setTimeout(abrirEditando, 50); }, { once: true });
+  })();
+
+  /* ⚠️ v48 — IR VER O POOP BAG E VOLTAR NO MESMO LUGAR (áudio 6402 do Cassiano: "se clicar pra voltar, volta nessa página,
+     nesse lugar"). Ao tocar na miniatura ou no texto da caixinha, a personalização inteira (nome, tamanho, cores, cor do
+     nome, caixinha marcada ou não, miniaturas) e a altura da tela vão pro sessionStorage. Voltando (botão voltar do
+     navegador ou do iPhone): se o navegador devolveu a página congelada (bfcache), já está tudo no lugar e só se apaga o
+     guardado; se recarregou, o guardado repreenche pelos MESMOS campos do "editar" (preencherComItem) e a tela desce até
+     onde estava. A DECLARAÇÃO não volta marcada (mesma regra do "editar": o aceite é marcado de novo, conscientemente).
+     Vale ~2 h; outra página de produto não lê (a chave leva o slug). */
+  function chaveVolta() { return 'alea_volta_' + (botaoComprar ? botaoComprar.getAttribute('data-slug') : ''); }
+  function guardarParaVoltar() {
+    try {
+      var it = montarItem();
+      var caixaAgora = caixaPoopBag && !caixaPoopBag.hidden ? {
+        marcada: caixaPoopBag.querySelector('[data-extra-caixa]').checked,
+        miniatura: (caixaPoopBag.querySelector('img[data-mini]') || {}).getAttribute ? caixaPoopBag.querySelector('img[data-mini]').getAttribute('src') : null
+      } : null;
+      sessionStorage.setItem(chaveVolta(), JSON.stringify({ item: it, y: window.scrollY, caixa: caixaAgora, quando: Date.now() }));
+    } catch (e) { /* aba anônima sem armazenamento: o voltar fica com o que o navegador guardar */ }
+  }
+  window.aleaGuardarParaVoltar = guardarParaVoltar;
+  (function voltarDoPoopBag() {
+    if (editando || !botaoComprar) return;
+    var st = null;
+    try { st = JSON.parse(sessionStorage.getItem(chaveVolta()) || 'null'); } catch (e) { st = null; }
+    window.addEventListener('pageshow', function (ev) {
+      if (ev.persisted) { try { sessionStorage.removeItem(chaveVolta()); } catch (e) {} }   // bfcache: a página voltou intacta
+    });
+    if (!st || !st.item || Date.now() - (st.quando || 0) > 2 * 3600 * 1000) return;
+    var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+    if (nav.type !== 'back_forward') return;
+    try { sessionStorage.removeItem(chaveVolta()); } catch (e) {}
+    preencherComItem(st.item);
+    if (st.caixa) {
+      if (st.caixa.miniatura) window.aleaMiniaturaPoopBag = st.caixa.miniatura;
+      var cx = mostrarCaixaPoopBag(st.caixa.miniatura);
+      var cxx = cx && cx.querySelector('[data-extra-caixa]');
+      if (cxx && cxx.checked !== !!st.caixa.marcada) { cxx.checked = !!st.caixa.marcada; cxx.dispatchEvent(new Event('change', { bubbles: true })); }
+    }
+    repintarPreco();
+    window.aleaVoltouDoPoopBag = true;
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    function descer() { window.scrollTo(0, st.y || 0); }
+    descer();
+    if (document.readyState === 'complete') setTimeout(descer, 60);
+    else window.addEventListener('load', function () { descer(); setTimeout(descer, 120); }, { once: true });
+  })();
+
+  /* v31 — CORES DA PEÇA COMEÇAM VAZIAS A CADA ABERTURA (áudio 2263 do Cassiano, 27/09/2026 — substitui o "form já
+     marcado com a cor da capa" da prévia 4438fdf): "toda vez que abrir a personalização, a parte Cores da peça começa
+     SEM NENHUMA opção marcada", pra o cliente escolher de novo. Quem mostra a cor da CAPA é só a peça 3D (config.js,
+     `modelos3d[slug].original`), que pinta com o original enquanto nada está escolhido.
+     Limpa: Tricolor/Bicolor/Monocromático, as janelas de acabamento e cor. NÃO mexe no Nome do pet nem no detalhe.
+     EXCEÇÃO: editando um item da sacola (`?editar=`), valem as escolhas daquele item. A v30 está em
+     03_site/_versoes_anteriores/cor_da_capa_antes_2026-09-27/. */
+  window.aleaLimparCoresDaPeca = function () {
+    if (editando || !caixaCores || !camposCores) return;
+    Array.prototype.forEach.call(caixaCores.querySelectorAll('input[name="cores_peca"]'), function (r) { r.checked = false; });
+    camposCores.innerHTML = '';
+    caixaCores.classList.remove('faltou');
+    caixaCores.removeAttribute('data-cores-da-capa');
+    nomearBotaoPeloEstoque();   // v39
+  };
+
+  /* ⚠️ v38 — O PERSONALIZE ABRE NAS CORES DA CAPA (print 5275 + áudio 5277 do Cassiano, 02/10/2026: "sempre vai começar
+     nas cores do produto"; substitui o "começa vazio" do áudio 2263, que segue documentado acima). Quem chama: o toque
+     em "Personalize aqui" (só quando a janela ainda não está aberta). Limpa e marca a capa pelos MESMOS campos da
+     escolha à mão (aleaAssumirCorDaCapa, abaixo) — a peça 3D, que já abria na capa, continua igual e agora o
+     formulário bate com ela. Editando um item da sacola (`?editar=`), nada muda: valem as escolhas dele.
+     Produto sem `capa` no config.js = fica vazio, como antes. */
+  window.aleaAbrirNasCoresDaCapa = function () {
+    if (editando || !caixaCores || !camposCores) return false;
+    window.aleaLimparCoresDaPeca();
+    return window.aleaAssumirCorDaCapa();
+  };
+
+  /* ⚠️ v37 — "PRONTO" SEM COR ESCOLHIDA = AS CORES DA FOTO DE CAPA (áudios 3030/3031 + vídeo de tela 3029 do Cassiano,
+     28/09/2026 02:43). Antes: o cliente passava o passo 3 sem escolher, apertava "Pronto", e a compra voltava com "Por
+     favor, selecione a cor da peça.". Palavras dele: "eu não quero que volte. Se a pessoa não escolher as cores, é porque
+     ela escolheu a cor do Luke. Aí você já deixa pronto, que aí é só colocar na sacola" — "a mesma coisa para o Matteo,
+     para o Bowl Wave (...) é porque ela configurou nas cores da foto".
+     Quem chama: o "Pronto" do último passo da janela (personalizar3d.js v12). Só age quando NENHUM Tricolor/Bicolor/
+     Monocromático está marcado; aí marca o modo e cada acabamento + cor de `ALEA.modelos3d[slug].capa` (config.js, áudio
+     2253) pelos MESMOS campos da escolha à mão — então resumo, sacola, pedido e mensagem saem iguais (nome simples do
+     site; o nome exato do filamento vai no pedido, como sempre). Escolheu algo pela metade = vale a escolha dele e a trava
+     de sempre (não misturo a foto com a escolha). Produto sem `capa` = nada muda. Se alguma cor da capa não estiver mais
+     na lista do site, desfaz tudo e fica a trava: pedido com cor errada é pior que pedido travado.
+     O formulário continua começando VAZIO a cada abertura (áudio 2263, aleaLimparCoresDaPeca acima). */
+  window.aleaAssumirCorDaCapa = function () {
+    if (!caixaCores || !camposCores || !botaoComprar) return false;
+    if (caixaCores.querySelector('input[name="cores_peca"]:checked')) return false;
+    var slugC = botaoComprar.getAttribute('data-slug');
+    var capa = ((((window.ALEA || {}).modelos3d || {})[slugC]) || {}).capa;
+    if (!capa || !capa.modo || !capa.escolhas || !capa.escolhas.length) return false;
+    var r = caixaCores.querySelector('input[name="cores_peca"][value="' + capa.modo + '"]');
+    if (!r) return false;
+    r.checked = true;
+    r.dispatchEvent(new Event('change', { bubbles: true }));      // desenha as janelas de cor (e tira a cor de falta)
+    var campos = camposCores.querySelectorAll('.campo-cor');
+    var ok = campos.length === capa.escolhas.length;
+    Array.prototype.forEach.call(campos, function (c, k) {
+      var e = capa.escolhas[k];
+      var rad = e && c.querySelector('.acabamento input[value="' + e.acabamento + '"]');
+      if (!rad) { ok = false; return; }
+      rad.checked = true;
+      rad.dispatchEvent(new Event('change', { bubbles: true }));  // abre a lista de cores daquele acabamento
+      var sel = c.querySelector('select');
+      sel.value = e.cor;
+      if (sel.value !== e.cor) { ok = false; return; }
+      sel.dispatchEvent(new Event('change', { bubbles: true }));  // a peça 3D repinta e a falta some
+    });
+    if (!ok) {
+      Array.prototype.forEach.call(caixaCores.querySelectorAll('input[name="cores_peca"]'), function (x) { x.checked = false; });
+      camposCores.innerHTML = '';
+      return false;
+    }
+    caixaCores.setAttribute('data-cores-da-capa', '');
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // o select da capa não fica com o foco
+    var rec = document.querySelector('[data-recado-aceite]');
+    if (rec && /cor da peça|acabamento da cor|a cor do topo|a cor da base|a cor principal/.test(rec.textContent)) rec.hidden = true;
+    return true;
+  };
+
+  function porNoCarrinho(eDepoisFechar) {
+    var faltas = oQueFalta();
+    if (faltas.length) {
+      /* ETAPA 55: o formulário mora na janela — faltou algo, a janela abre e a falta treme lá dentro */
+      /* ETAPA 57 (15:54): "só é pra abrir a parte de personalizar se ele esqueceu de personalizar alguma coisa
+         obrigatória" — faltando SÓ a declaração (que fica na página), treme a página, como antes */
+      var formP = document.querySelector('[data-personalizar]');
+      var faltaDentro = formP && faltas.some(function (f) { return f.el && formP.contains(f.el); });
+      /* ⚠️ v43 (vídeo 6219 + áudio 6220 do Cassiano, 04/10/2026, VALE PRA TODOS OS ITENS — substitui a ETAPA 55/57 acima):
+         a janela NÃO abre mais sozinha. Faltando Formato/Tamanho (na página), treme o que falta; faltando a personalização,
+         treme SÓ o botão "Personalize agora" e a frase diz "Por favor, selecione a cor da peça.". A declaração NÃO fica
+         vermelha nessa hora: ela só treme quando o resto está completo ("já escolheu a cor, não marcou e apertou de novo"). */
+      var semDeclaracao = faltas.filter(function (f) { return !(f.el && f.el.closest && f.el.closest('[data-aceite]')); });
+      var deEscolha = semDeclaracao.filter(function (f) {
+        return f.el && ((caixaFormato && caixaFormato.contains(f.el)) || (caixaTamanho && caixaTamanho.contains(f.el)));
+      });
+      var botaoP = document.querySelector('.personalizar-3d');
+      if (deEscolha.length) { reclamarDoQueFalta(deEscolha); }
+      else if (faltaDentro && botaoP) {
+        reclamarDoQueFalta([{ el: botaoP, texto: 'Por favor, selecione a cor da peça.' }], true);
+      } else { reclamarDoQueFalta(faltaDentro ? semDeclaracao : faltas); }
+      return;
+    }
+    if (!window.aleaCarrinho) return;
+    var recado = document.querySelector('[data-recado-aceite]');
+    if (recado) recado.hidden = true;
+    if (editando && window.aleaCarrinho.substituir(editando, montarItem())) {
+      editando = null;
+      if (history.replaceState) history.replaceState(null, '', location.pathname);
+      if (window.aleaGaveta) window.aleaGaveta.abrir('carrinho');   // editou: mostra a sacola já corrigida
+      return;
+    }
+    window.aleaCarrinho.adicionar(montarItem());
+    /* ⚠️ ETAPA 37 (22/09/2026, 22:09): os dois botões passam a fazer coisas DIFERENTES.
+       · a SACOLA ao lado só adiciona — "não vai abrir a sacola, pra ele continuar no site e
+         continuar comprando". O aviso de que entrou é a sacola do topo, que já fica cor de kraft
+         e ganha o número, e agora dá um pulinho (ver `.sacola-pulou` no CSS);
+       · o COMPRAR AGORA adiciona e ABRE a sacola, em tela cheia (era: ia direto pro WhatsApp). O
+         WhatsApp continua sendo o botão de fechar pedido DENTRO da sacola. */
+    if (eDepoisFechar) {
+      if (window.aleaGaveta) window.aleaGaveta.abrir('carrinho');
+      return;
+    }
+    avisarQueEntrou(botaoComprar.getAttribute('data-capa'), window.aleaMiniatura3D);
+    Array.prototype.forEach.call(document.querySelectorAll('.topo [data-abrir="carrinho"], [data-add-carrinho]'), function (b) {
+      b.classList.remove('sacola-pulou');
+      void b.offsetWidth;
+      b.classList.add('sacola-pulou');
+    });
+  }
+
+  if (caixaAceite) {
+    caixaAceite.addEventListener('change', function () {
+      if (!caixaAceite.checked) return;
+      var recado = document.querySelector('[data-recado-aceite]');
+      var rotulo = document.querySelector('[data-aceite]');
+      if (recado) recado.hidden = true;
+      if (rotulo) rotulo.classList.remove('faltou');
+    });
+  }
+
+  /* "Comprar agora" põe no carrinho e já leva ao fechamento do pedido. Sem WhatsApp
+     configurado, o fechamento não acontece e a gaveta abre com o aviso — em vez de um
+     botão que parece funcionar e não vai a lugar nenhum. */
+  if (botaoComprar) botaoComprar.addEventListener('click', function () { if (!emBreve) porNoCarrinho(true); });
+  if (botaoSacola) botaoSacola.addEventListener('click', function () { if (!emBreve) porNoCarrinho(false); });
+  /* v49: "Em breve" — sacola e declaração saem; o botão fica desligado (nomearBotaoPeloEstoque escreve "Em breve") */
+  if (emBreve) {
+    if (botaoSacola) botaoSacola.hidden = true;
+    var aceiteEB = document.querySelector('[data-aceite]');
+    if (aceiteEB) aceiteEB.hidden = true;
+    if (botaoComprar) { botaoComprar.disabled = true; botaoComprar.setAttribute('data-em-breve', ''); }
+  }
+
+  /* ==================================================== v39 — o ESTOQUE decide o nome do botão
+     ALEA.estoque[slug] = [{ modo: 'monocromatico', escolhas: [{ acabamento, cor }], qtd }]. Sem lista = encomenda. */
+  function qtdEmEstoque(modo, escolhas) {
+    var slugE = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var lista = (((window.ALEA || {}).estoque || {})[slugE]) || [];
+    var total = 0;
+    lista.forEach(function (e) {
+      if (!(e.qtd > 0) || e.modo !== modo || !e.escolhas || e.escolhas.length !== escolhas.length) return;
+      var igual = e.escolhas.every(function (x, k) { return x.acabamento === escolhas[k].acabamento && x.cor === escolhas[k].cor; });
+      if (igual) total += e.qtd;
+    });
+    return total;
+  }
+  function estaEmEstoque() {
+    var r = caixaCores && caixaCores.querySelector('input[name="cores_peca"]:checked');
+    var c = coresEscolhidas();
+    if (r && c) {
+      if (c.escolhas.length !== (parseInt(r.getAttribute('data-campos'), 10) || 0)) return false;   // escolha pela metade
+      return qtdEmEstoque(r.value, c.escolhas) > 0;
+    }
+    /* nada escolhido: vale a cor da capa (é a que a foto e a peça 3D mostram) */
+    var slugC = botaoComprar && botaoComprar.getAttribute('data-slug');
+    var capa = ((((window.ALEA || {}).modelos3d || {})[slugC]) || {}).capa;
+    return !!(capa && capa.modo && capa.escolhas && qtdEmEstoque(capa.modo, capa.escolhas) > 0);
+  }
+  function nomearBotaoPeloEstoque() {
+    if (!botaoComprar) return;
+    if (emBreve) { if (botaoComprar.textContent.trim() !== 'Em breve') botaoComprar.textContent = 'Em breve'; return; }   // v49
+    var txt = estaEmEstoque() ? 'Comprar agora' : 'Encomendar agora';
+    if (botaoComprar.textContent.trim() !== txt) botaoComprar.textContent = txt;
+    botaoComprar.setAttribute('data-estoque', txt === 'Comprar agora' ? 'sim' : 'nao');
+  }
+  window.aleaNomearBotaoPeloEstoque = nomearBotaoPeloEstoque;
+  if (caixaCores) caixaCores.addEventListener('change', function () { setTimeout(nomearBotaoPeloEstoque, 0); });
+  nomearBotaoPeloEstoque();
+
+  repintarPreco();
+})();
