@@ -537,7 +537,9 @@
       fecharAba();
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharAba(); });
-    window.addEventListener('resize', function () { if (abaAberta()) posicionarAba(); });
+    /* 14/10/2026 (vídeo 10886 + áudios 10885/10887): no iPhone, perto do rodapé preto a barra do Safari mexe e dispara
+       'resize'; o posicionarAba (que é do PC) punha top + 70vh na janela e ela abria CURTA. Só o painel do PC se reposiciona. */
+    window.addEventListener('resize', function () { if (abaAberta() && aba.classList.contains('pc')) posicionarAba(); });
   }
 
   /* ---------------------------------------------------------------- ligações */

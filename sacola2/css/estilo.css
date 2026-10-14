@@ -1680,11 +1680,17 @@ a.continuar-comprando { display: inline-block; text-align: center; }  /* ETAPA 4
 .aviso-sacola.adicionou .miniatura img { height: 68px; }
 .aviso-sacola.adicionou p { padding: 10px 2px 10px 12px; font-size: 13px; line-height: 1.4; }
 .aviso-sacola.adicionou .fechar-aviso { font-size: 20px; padding: 6px 10px; }
+/* 14/10/2026 (áudio 10881): o aviso fica PRETO — rolando até o fim, ele se mistura com o rodapé preto, "como se virasse
+   tudo uma página só". Texto e × claros; a miniatura no mesmo preto. */
+.aviso-sacola.adicionou { background: var(--preto); }
+.aviso-sacola.adicionou .miniatura { background: var(--preto); }
+.aviso-sacola.adicionou p { color: var(--branco); }
+.aviso-sacola.adicionou .fechar-aviso { color: rgba(255, 255, 255, .75); }
 @media (max-width: 640px) {
   /* áudio 10864 + vídeo 10863: no celular, "naquele mesmo lugar, ocupando aquele mesmo espaço de tela" — a faixa da Tiffany,
      de ponta a ponta, colada embaixo; a miniatura fica, pequena, pra ver o comedouro (áudio 10856) */
   .aviso-sacola.adicionou { left: 0; right: 0; width: auto; max-width: none; bottom: 0; border-radius: 0;
-    grid-template-columns: 56px 1fr auto; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -4px 16px -8px rgba(0, 0, 0, .3); }
+    grid-template-columns: 56px 1fr auto; padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: none; }
   .aviso-sacola.adicionou .miniatura { padding: 4px; }
   .aviso-sacola.adicionou .miniatura img { height: 46px; }
   .aviso-sacola.adicionou .fechar-aviso { align-self: center; }
@@ -2850,6 +2856,9 @@ body.loja .faixa-topo:hover, body.loja .faixa-topo:focus-visible { color: #fff; 
 .aba-sacola.janela { inset: 0; top: 0; max-height: none; z-index: 92; /* acima da faixa do frete (90); a confirmacao de remover e 95 */ padding: 0; box-shadow: none; display: flex; flex-direction: column;
   overflow: hidden; animation: jan-entra .32s cubic-bezier(.2, .7, .2, 1); }
 .aba-sacola.janela[hidden] { display: none; }
+/* 14/10/2026 (vídeo 10886): a janela do celular é SEMPRE a tela inteira, em qualquer ponto da página (o top/max-height
+   escrito pelo posicionamento do PC não vale pra ela) */
+.aba-sacola.janela { top: 0 !important; bottom: 0 !important; max-height: none !important; }
 .aba-sacola.janela.saindo { animation: jan-sai .26s ease-in forwards; }
 @keyframes jan-entra { from { transform: translateX(-100%); } to { transform: none; } }
 @keyframes jan-sai { from { transform: none; } to { transform: translateX(-100%); } }
