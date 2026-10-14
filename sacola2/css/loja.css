@@ -381,3 +381,11 @@ body.loja .rodape .frase { margin-bottom: 96px; }
 /* o <span class="nome"> do "× Luke" mora DENTRO do .nome da linha: herda o tamanho do .collab, não o da linha */
 .loja-item .nome .collab .nome, .sacola-tabela .nome .collab .nome { font-family: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit;
   line-height: inherit; max-width: none; }
+/* 14/10/2026 20:2x (vídeos 10909/10911 + áudios 10910/10912 do Cassiano): no iPhone, puxando a página Sacola pra baixo
+   aparecia um "espação" embaixo que depois voltava, e a página andava pro lado. A página termina no último item e fica
+   sempre no mesmo alinhamento: no celular quem rola é o BODY (caixa de rolagem própria), sem quique e só na vertical —
+   o Safari respeita o overscroll-behavior numa caixa de rolagem, não na página. O loja-compra.js rola o body. */
+@media (hover: none) and (pointer: coarse) {
+  html:has(body.pagina-compra) { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body.loja.pagina-compra { height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+}

@@ -775,9 +775,16 @@
     }
   }
 
+  /* 14/10/2026 (vídeos 10909/10911 + áudios 10910/10912): no celular quem rola a página é o BODY (loja.css), pra o iPhone não
+     dar o "espação" embaixo nem andar pro lado; então o rolar vai pra quem rola de verdade */
+  function rolador() {
+    var b = document.body;
+    return getComputedStyle(b).overflowY === 'auto' ? b : (document.scrollingElement || document.documentElement);
+  }
+  function rolarAoTopo() { var r = rolador(); r.scrollTop = 0; window.scrollTo(0, 0); }
   function rolarPara(sel) {
-    var el = raiz.querySelector(sel);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 12, behavior: 'smooth' });
+    var el = raiz.querySelector(sel), r = rolador();
+    if (el) r.scrollTo({ top: el.getBoundingClientRect().top + r.scrollTop - 12, behavior: 'smooth' });
   }
 
   /* ------------------------------------------------------------- concluir
@@ -813,7 +820,7 @@
       concluido = { numero: (r && r.numero) || '', nome: d.nome, previa: L.previa, pagamento: st.pagamento, zap: zap };
       car.limpar(); L.compra.limpar();
       st = { etapa: 'dados', dados: {}, entrega: {}, pagamento: '' };
-      pintar(); window.scrollTo(0, 0);
+      pintar(); rolarAoTopo();
     });
   }
 
@@ -911,7 +918,7 @@
   });
 
   document.addEventListener('alea:carrinho', function () { if (!concluido) pintar(); });
-  window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+  window.addEventListener('hashchange', function () { pintar(); rolarAoTopo(); });
   if (MQ_LARGO) {                                            // mudou de computador pra tela estreita (ou o contrário)
     var mudouTela = function () { if (!concluido && !retorno && tela() !== 'compra') pintar(); };
     if (MQ_LARGO.addEventListener) MQ_LARGO.addEventListener('change', mudouTela); else if (MQ_LARGO.addListener) MQ_LARGO.addListener(mudouTela);

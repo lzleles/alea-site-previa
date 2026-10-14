@@ -2906,3 +2906,9 @@ body.janela-sacola .busca-dica { display: none; }
     linear-gradient(162deg, #F8F5F0 0%, #EAE4DB 54%, #E2D6C6 100%); }
 .aba-sacola.janela .jan-topo::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: url(../img/marca/estampa_off_ladrilho.svg) left top / 900px auto repeat; opacity: .5; filter: brightness(.86); }
+/* 14/10/2026 20:2x (vídeo 10907 + áudio 10908): a janela da sacola no celular "não pode mexer pro lado" — só rola na
+   vertical, nada passa da largura, e a página de trás fica parada (sem quique) enquanto ela está aberta */
+.aba-sacola.janela, .aba-sacola.janela .jan-corpo { overflow-x: hidden; touch-action: pan-y; }
+.aba-sacola.janela .jan-corpo { overscroll-behavior: none; }
+.aba-sacola.janela .aba-linha, .aba-sacola.janela .aba-lado { min-width: 0; }
+html:has(body.janela-sacola) { overflow: hidden; overscroll-behavior: none; }
