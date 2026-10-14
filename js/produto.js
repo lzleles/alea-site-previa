@@ -4,7 +4,10 @@
    objetivo: Controla galeria, tela cheia, personalização, preço, aceite e inclusão de produtos no carrinho.
    entrada: DOM da página, configuração comercial e dados do produto
    saida: Galeria interativa, item personalizado e comandos para o carrinho
-   status: ativo — v54 (13/10/2026, ālea Una com janela 3D: acessoriosPorEscolha, ofício 3.1.28 / áudio 10170)
+   status: ativo — v55 (14/10/2026, Branco no Clássico: a legenda da foto ignora a cor cópia, áudio 10632 do Cassiano)
+   v55 (14/10/2026): nomeDoCliente() pula a cor com `copiaDe` (config.js: Branco do Clássico = o mesmo filamento do Branco
+     Fosco), senão a legenda do filamento na foto passaria de "Branco Fosco" pra "Branco". Só isso mudou; a v54 está em
+     03_site/_versoes_anteriores/cores_alfabetica_antes_2026-10-14/js/.
    v54 (13/10/2026): cfgDaEscolha() também troca o acessório fixo pela escolha (modelos3d[slug].acessoriosPorEscolha, o tubo
      PETG do Una 15 / 22 cm). Só isso mudou; a v53 está em 03_site/_versoes_anteriores/3d_todos_com_cor_antes_2026-10-13/js/.
    v53 (13/10/2026): partesCorDoProduto() também lê `ALEA.partesCor[slug]` (config.js v62) quando o produto não tem
@@ -839,6 +842,7 @@
     for (var i = 0; i < acabs.length; i++) {
       var cores = (A.filamentos || {})[acabs[i].id] || [];
       for (var j = 0; j < cores.length; j++) {
+        if (cores[j].copiaDe) continue;   // v55: a cópia (Branco do Clássico = o do Fosco) não vira legenda
         if (cores[j].original === original) return cores[j].site + (acabs[i].sufixo || '');
       }
     }

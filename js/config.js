@@ -299,7 +299,7 @@ window.ALEA = {
      25/09/2026: a LISTA REAL dele substituiu as de teste (ver o bloco `filamentos` abaixo). */
   filamentos: {
     /* LISTA REAL do Cassiano (25/09/2026, audios 1786-1815, tudo PLA; nomes do site trocados por ele na
-       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443; Transparente translucido audio 8459; + Azul com Glitter msg 9636, no Perolizado msg 9648, glitter da foto dele audio 9651). Gerado por 03_site/07_gerar_filamentos_config_v10_glitter_perolizado_2026-10-13.py
+       msg 1827; sem 4a aba - audio 1830; + Rosa Silk msg 1835; + Preto com Azul msg 5779; + Transparente e Dourado com Glitter msgs 6075/6079; + Rosa Metalizado audio 8443; Transparente translucido audio 8459; + Azul com Glitter msg 9636, no Perolizado msg 9648, glitter da foto dele audio 9651; + Branco no Classico = o do Fosco audio 10632; cores em ordem alfabetica audio 10633). Gerado por 03_site/07_gerar_filamentos_config_v11_alfabetica_branco_classico_2026-10-14.py
        a partir de 03_site/_LISTA_FILAMENTOS_DELE_2026-09-25.json + _TEXTURAS_FILAMENTO.json - nao editar a mao.
        hex = cor OFICIAL do fabricante; eSUN Silk Lime = aproximado (medido na foto oficial da eSUN).
        v4 (26/09/2026): `textura` = filamento com efeito (Marmore: foto IMG_0039 da Chica), `hex_oficial` =
@@ -307,52 +307,53 @@ window.ALEA = {
        v8 (10/10/2026): `translucido` = filamento que deixa ver atraves (Transparente: foto IMG_2984, msg 8460).
        v10 (13/10/2026): `glitter` = particulas da foto da peca impressa dele (Azul com Glitter: IMG_3210, msg 9629). */
     basico: [
-      { site: 'Laranja', hex: '#FF671F', original: 'Bambu Lab · PLA · Lite · Orange (16301)' },
-      { site: 'Vermelho', hex: '#C6001A', original: 'Bambu Lab · PLA · Lite · Red (16200)' },
-      { site: 'Amarelo Girassol', hex: '#FFB549', original: 'Bambu Lab · PLA · Lite · Sunflower Yellow (16401)' },
       { site: 'Amarelo', hex: '#EFE255', original: 'Bambu Lab · PLA · Lite · Yellow (16400)' },
-      { site: 'Azul Bebê', hex: '#4DAFDA', original: 'Bambu Lab · PLA · Lite · Cyan (16600)' },
+      { site: 'Amarelo Girassol', hex: '#FFB549', original: 'Bambu Lab · PLA · Lite · Sunflower Yellow (16401)' },
       { site: 'Azul', hex: '#004EA8', original: 'Bambu Lab · PLA · Lite · Blue (16601)' },
-      { site: 'Verde', hex: '#00BB31', original: 'Bambu Lab · PLA · Lite · Green (16501)' },
-      { site: 'Verde Oliva', hex: '#57604A', original: 'eSUN · PLA · Basic · Olive Green', hex_oficial: '#1B1F11' },
+      { site: 'Azul Bebê', hex: '#4DAFDA', original: 'Bambu Lab · PLA · Lite · Cyan (16600)' },
+      { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White', copiaDe: 'fosco' },
+      { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' },
+      { site: 'Laranja', hex: '#FF671F', original: 'Bambu Lab · PLA · Lite · Orange (16301)' },
+      { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
+      { site: 'Marrom', hex: '#5F3839', original: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' },
       { site: 'Preto', hex: '#272729', original: 'eSUN · PLA · PLA-Basic · Black' },
       { site: 'Roxo', hex: '#603BA0', original: 'Elegoo · PLA · PLA · Purple' },
-      { site: 'Marrom', hex: '#5F3839', original: 'Multfila · PLA · Mult Speed · Marrom (PCI-PLA-046)' },
-      { site: 'Mármore', hex: '#E4E4E4', original: 'SUNLU · PLA · High Speed Marble · Chestnut Brown Marble', textura: { img: 'img/texturas/marmore.png', mm: [78.2, 39.1], contraste: 1 } },
       { site: 'Transparente', hex: '#D9DEE2', original: 'Elegoo · PETG · PETG · Transparente', hex_oficial: '#EEF2F3', rugosidade: 0.25, metal: 0.15, translucido: { opacidade: 0.85 } },
-      { site: 'Dourado com Glitter', hex: '#CEA629', original: 'Bambu Lab · PLA · Sparkle · Classic Gold Sparkle' }
+      { site: 'Verde', hex: '#00BB31', original: 'Bambu Lab · PLA · Lite · Green (16501)' },
+      { site: 'Verde Oliva', hex: '#57604A', original: 'eSUN · PLA · Basic · Olive Green', hex_oficial: '#1B1F11' },
+      { site: 'Vermelho', hex: '#C6001A', original: 'Bambu Lab · PLA · Lite · Red (16200)' }
     ],
     fosco: [
-      { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White' },
       { site: 'Amarelo', hex: '#F7D863', original: 'Elegoo · PLA · Matte · Sunshine Yellow' },
-      { site: 'Laranja', hex: '#E88F13', original: 'Multfila · PLA · Mult Matte · Laranja (4225-PCI-PLM-060)' },
-      { site: 'Rosa Claro', hex: '#F9C2D5', original: 'Elegoo · PLA · Matte · Sakura Pink' },
-      { site: 'Bordô', hex: '#80012C', original: 'Multfila · PLA · Mult Matte · Bordô (4225-PCI-PLM-118)', hex_oficial: '#B32563' },
-      { site: 'Lilás', hex: '#9D85D1', original: 'Elegoo · PLA · Matte · Lavender Purple' },
+      { site: 'Areia', hex: '#CBA881', original: 'Multfila · PLA · Mult Matte · Areia (4225-PCI-PLM-123)' },
       { site: 'Azul Bebê', hex: '#B3F3FD', original: 'Elegoo · PLA · Matte · Ice Blue' },
       { site: 'Azul Marinho', hex: '#1C253B', original: 'Elegoo · PLA · Matte · Navy Blue', hex_oficial: '#2D3F6F' },
-      { site: 'Verde Menta', hex: '#DBEBBA', original: 'Elegoo · PLA · Matte · Mint Green' },
-      { site: 'Cinza', hex: '#C4C6C8', original: 'Bambu Lab · PLA · Matte · Ash Gray (11102)', hex_oficial: '#9B9EA0' },
+      { site: 'Bordô', hex: '#80012C', original: 'Multfila · PLA · Mult Matte · Bordô (4225-PCI-PLM-118)', hex_oficial: '#B32563' },
+      { site: 'Branco', hex: '#F6F6F6', original: 'Elegoo · PLA · Matte · Matte White' },
       { site: 'Cáqui', hex: '#E8DBB7', original: 'Bambu Lab · PLA · Matte · Desert Tan (11401)' },
-      { site: 'Areia', hex: '#CBA881', original: 'Multfila · PLA · Mult Matte · Areia (4225-PCI-PLM-123)' },
       { site: 'Caramelo', hex: '#D3B7A7', original: 'Bambu Lab · PLA · Matte · Latte Brown (11800)' },
-      { site: 'Terracota', hex: '#AC7362', original: 'Multfila · PLA · Mult Matte · Marrom Terracota (4225-PCI-PLM-124)' }
+      { site: 'Cinza', hex: '#C4C6C8', original: 'Bambu Lab · PLA · Matte · Ash Gray (11102)', hex_oficial: '#9B9EA0' },
+      { site: 'Laranja', hex: '#E88F13', original: 'Multfila · PLA · Mult Matte · Laranja (4225-PCI-PLM-060)' },
+      { site: 'Lilás', hex: '#9D85D1', original: 'Elegoo · PLA · Matte · Lavender Purple' },
+      { site: 'Rosa Claro', hex: '#F9C2D5', original: 'Elegoo · PLA · Matte · Sakura Pink' },
+      { site: 'Terracota', hex: '#AC7362', original: 'Multfila · PLA · Mult Matte · Marrom Terracota (4225-PCI-PLM-124)' },
+      { site: 'Verde Menta', hex: '#DBEBBA', original: 'Elegoo · PLA · Matte · Mint Green' }
     ],
     perolizado: [
+      { site: 'Azul', hex: '#1D87E1', original: 'Multfila · PLA · Mult Silk · Azul Safira Metalizado (4226-PCI-PLS-025)', hex_oficial: '#358AE8' },
+      { site: 'Azul Aqua', hex: '#6CCCDD', original: 'eSUN · PLA · Silk · Aqua', hex_oficial: '#6BBFE3', rugosidade: 0.2, metal: 0.18 },
+      { site: 'Azul Céu', hex: '#1B8DCC', original: 'Voolt3D · PLA · V-Silk · Azul Sky (PL-AZ-SY-SK-1)', hex_oficial: '#035EB7' },
+      { site: 'Azul com Glitter', hex: '#283B51', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue', hex_oficial: '#153751', glitter: { img: 'img/texturas/glitter_azul_galaxy.png', mm: [25, 25], cor: '#CCCAC7', forca: 0.5 } },
       { site: 'Branco', hex: '#FFFFFF', original: 'Elegoo · PLA · Silk · Silk White', rugosidade: 0.2, metal: 0.05 },
-      { site: 'Prata', hex: '#C4C3C4', original: 'SUNLU · PLA · Silk PLA+ · Silk Silver', hex_oficial: '#B2C1DA' },
       { site: 'Dourado', hex: '#D09531', original: 'Multfila · PLA · Mult Silk · Ouro Envelhecido (4226-PCI-PLS-048)' },
       { site: 'Laranja', hex: '#F15505', original: 'Voolt3D · PLA · V-Silk · Laranja (PL-LJ-SK-1)' },
-      { site: 'Vermelho', hex: '#DA342E', original: 'Multfila · PLA · Mult Silk · Vermelho Metalizado (4226-PCI-PLS-026)' },
-      { site: 'Rosa', hex: '#E78498', original: 'eSUN · PLA · PLA-Silk · Pink', hex_oficial: '#FF7F6F' },
-      { site: 'Azul Aqua', hex: '#6CCCDD', original: 'eSUN · PLA · Silk · Aqua', hex_oficial: '#6BBFE3', rugosidade: 0.2, metal: 0.18 },
-      { site: 'Azul', hex: '#1D87E1', original: 'Multfila · PLA · Mult Silk · Azul Safira Metalizado (4226-PCI-PLS-025)', hex_oficial: '#358AE8' },
-      { site: 'Azul Céu', hex: '#1B8DCC', original: 'Voolt3D · PLA · V-Silk · Azul Sky (PL-AZ-SY-SK-1)', hex_oficial: '#035EB7' },
-      { site: 'Verde Limão', hex: '#A3E810', original: 'eSUN · PLA · PLA-Silk · Lime' },
-      { site: 'Verde', hex: '#129856', original: 'Voolt3D · PLA · V-Silk · Verde (PL-VD-SK-1)' },
+      { site: 'Prata', hex: '#C4C3C4', original: 'SUNLU · PLA · Silk PLA+ · Silk Silver', hex_oficial: '#B2C1DA' },
       { site: 'Preto com Azul', hex: '#213D4E', original: 'Bambu Lab · PLA · Silk Dual Color · Phantom Blue' },
+      { site: 'Rosa', hex: '#E78498', original: 'eSUN · PLA · PLA-Silk · Pink', hex_oficial: '#FF7F6F' },
       { site: 'Rosa Metalizado', hex: '#BA9594', original: 'Bambu Lab · PLA · Silk+ · Rose Gold (13206)' },
-      { site: 'Azul com Glitter', hex: '#283B51', original: 'Elegoo · PLA · Galaxy · Galaxy Peacock Blue', hex_oficial: '#153751', glitter: { img: 'img/texturas/glitter_azul_galaxy.png', mm: [25, 25], cor: '#CCCAC7', forca: 0.5 } }
+      { site: 'Verde', hex: '#129856', original: 'Voolt3D · PLA · V-Silk · Verde (PL-VD-SK-1)' },
+      { site: 'Verde Limão', hex: '#A3E810', original: 'eSUN · PLA · PLA-Silk · Lime' },
+      { site: 'Vermelho', hex: '#DA342E', original: 'Multfila · PLA · Mult Silk · Vermelho Metalizado (4226-PCI-PLS-026)' }
     ]
   },
   /* O ESTOQUE — peça PRONTA, por produto (03/10/2026, áudios 5727/5729/5731 do Cassiano).
@@ -1175,3 +1176,8 @@ window.ALEA.modelos3d['una'] = {
     base:      { site: 'Branco',  hex: '#F2EEE6', acabamento: 'fosco',      oficial: 'Bambu Lab · PLA · Basic (cor #F2EEE6 do arquivo)' }
   }
 };
+/* v64 (14/10/2026, áudios 10632/10633/10635/10636/10638 do Cassiano — só no site, computador e celular): (1) as cores de cada
+   acabamento em ORDEM ALFABÉTICA; (2) o Clássico ganha "Branco" = o MESMO filamento e a MESMA cor do Branco Fosco (Elegoo PLA
+   Matte White), marcado `copiaDe: 'fosco'` (produto.js v55 não usa a cópia na legenda da foto). Bloco `filamentos` gerado pelo
+   03_site/07_gerar_filamentos_config_v11_alfabetica_branco_classico_2026-10-14.py. A v63 está em
+   03_site/_versoes_anteriores/cores_alfabetica_antes_2026-10-14/js/. */
