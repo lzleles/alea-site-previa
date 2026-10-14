@@ -2881,3 +2881,28 @@ body.janela-sacola { position: fixed; left: 0; right: 0; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .aba-sacola.janela, .aba-sacola.janela.saindo { animation: none; } }
 /* 14/10/2026 (rodada 2, áudio 10859): com a janela da sacola aberta, a dica "Arraste a tela para baixo…" não aparece por cima */
 body.janela-sacola .busca-dica { display: none; }
+/* 14/10/2026 19:58 (foto 10889 da Tiffany + áudio 10891): na aba/janela da sacola, a peça RECORTADA direto na página (sem o
+   quadrado de fundo) e o nome igual ao da página da peça — "ālea Pet Bowl" na fonte de título e o "× Luke" em degradê
+   na linha de baixo (o mesmo degradê do h1, menor). A descrição saiu no carrinho.js. */
+.aba-sacola .aba-linha img { background: transparent; }
+.aba-sacola .aba-nome { font-family: var(--fonte-titulo); font-weight: 500; font-size: 17px; letter-spacing: 0; line-height: 1.15; color: var(--terracota); }
+.aba-sacola .aba-nome .collab { display: block; margin-top: 4px; font-size: .8em; font-weight: 400; letter-spacing: .02em; line-height: 1.2;
+  color: var(--collab-liso); width: -webkit-fit-content; width: fit-content; }
+.aba-sacola .aba-nome .collab .x { font-family: var(--fonte-corpo); font-weight: 300; font-size: 1.25em; line-height: 1; letter-spacing: 0;
+  vertical-align: -.06em; color: var(--collab-x-liso); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .aba-sacola .aba-nome .collab { -webkit-text-fill-color: transparent; -webkit-text-stroke: .35px var(--collab-contorno); filter: var(--collab-halo); }
+  .aba-sacola .aba-nome .collab .x, .aba-sacola .aba-nome .collab .nome { -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .aba-sacola .aba-nome .collab .x { background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-x); font-weight: 500; }
+  .aba-sacola .aba-nome .collab .nome { display: inline-block; background-image: var(--collab-reflexo), var(--collab-volume), var(--collab-cores); }
+}
+/* 14/10/2026 19:58 (foto 10893 + áudio 10894): a faixa do título "Sua Sacola de Compras" no NOSSO degradê com textura — o
+   SUAVE da abertura/feed (3 manchas de cor + papel, estampa off por cima), não o metálico — "só pra mudar um pouco a cor" */
+.aba-sacola.janela .jan-topo { isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(70% 220% at 12% 10%, rgba(108, 150, 167, .38), transparent 62%),
+    radial-gradient(60% 200% at 88% 20%, rgba(175, 149, 89, .36), transparent 60%),
+    radial-gradient(70% 240% at 52% 120%, rgba(157, 62, 32, .26), transparent 64%),
+    linear-gradient(162deg, #F8F5F0 0%, #EAE4DB 54%, #E2D6C6 100%); }
+.aba-sacola.janela .jan-topo::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url(../img/marca/estampa_off_ladrilho.svg) left top / 900px auto repeat; opacity: .5; filter: brightness(.86); }

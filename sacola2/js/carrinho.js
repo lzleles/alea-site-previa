@@ -96,6 +96,8 @@
     /* ETAPA 61 (23/09/2026, conta e compra "iguais às da Tiffany"): a página Finalizar Compra usa a
        MESMA descrição da sacola e o MESMO envio pelo WhatsApp, agora com dados, entrega e pagamento. */
     descrever: function (i) { return descreverItem(i); },
+    descreverCurto: function (i) { return descreverCurto(i); },   // 14/10/2026: página Sacola de Compras (áudio 10896)
+    nomeHTML: function (nome) { return nomeDaPeca(nome); },       // 14/10/2026: o nome com o "× Luke" em degradê (áudio 10891)
     abrirWhatsApp: function (extras) { return abrirWhatsApp(extras); },
     /* 05/10/2026 (pagamento pela InfinitePay): o MESMO texto do pedido, só o link, sem abrir — a página guarda antes
        de ir pagar e mostra o botão na volta, já com a sacola limpa. */
@@ -198,6 +200,19 @@
        que ele aceitou; se ele não aceitar, não tem como ele comprar". O aviso e o quadradinho da janela Personalize ficam;
        o `ciente_cor` continua gravado no item, só não vira texto. Antes:
        if (p.ciente_cor) partes.push('Cliente ciente da variação de cor da tela'); */
+    return partes.join(' · ');
+  }
+  /* 14/10/2026 (foto 10895 + áudio 10896): na PÁGINA Sacola de Compras vai só o que a pessoa confere — formato, tamanho e
+     nome; as CORES saem ("a foto já mostra") e o adicional vira só o nome dele com o preço ("Poop Bag Holder +R$ 60") */
+  function descreverCurto(i) {
+    var p = i.personalizacao || {}, partes = [];
+    if (p.formato) partes.push('Formato: ' + p.formato);
+    if (p.tamanho) partes.push('Tamanho: ' + p.tamanho);
+    if (p.nome_pet) partes.push('Nome: ' + p.nome_pet);
+    else if (p.sem_nome) partes.push('Nome: sem nome');
+    (i.extras || []).forEach(function (x) {
+      partes.push(String(x.rotulo || '').split(',')[0].trim() + ' +' + window.aleaDinheiro(x.preco));
+    });
     return partes.join(' · ');
   }
 
@@ -410,6 +425,14 @@
      um xizinho só pra fechar". E "não é para rolar a página de trás": com a janela aberta só a sacola rola (travarFundo).
      Dentro: as peças com Quantidade − / + e o ×, Subtotal, Finalizar Compra e "Continue Comprando" (fecha). O computador segue
      com a aba do mouse. Antes: 03_site/_versoes_anteriores/sacola_rodada2_antes_2026-10-14/js/carrinho.js */
+  /* 14/10/2026 (foto 10889 da Tiffany + áudio 10891): na aba/janela da sacola vai SÓ o nome da peça, sem a descrição
+     ("ele já escolheu"), e o nome igual ao da página da peça: "ālea Pet Bowl" e o "× Luke" em degradê na linha de baixo */
+  function nomeDaPeca(nome) {
+    var s = String(nome || ''), k = s.lastIndexOf(' × ');
+    function esc(x) { return x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    if (k < 0) return esc(s);
+    return esc(s.slice(0, k)) + ' <span class="collab"><span class="x">×</span> <span class="nome">' + esc(s.slice(k + 3)) + '</span></span>';
+  }
   function pintarJanela() {
     var html = '<div class="jan-topo"><p class="aba-titulo">Sua Sacola de Compras</p>' +
       '<button type="button" class="jan-fechar" data-fechar-aba aria-label="Fechar a sacola">&times;</button></div>';
@@ -417,12 +440,10 @@
       html += '<div class="jan-corpo"><p class="aba-vazia">Sua sacola está vazia.</p></div>';
     } else {
       html += '<div class="jan-corpo">' + itens.map(function (i, n) {
-        var d = descreverItem(i);
         return '<div class="aba-linha"><img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
           'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
-          '<div class="aba-lado"><div class="jan-cabeca"><div class="aba-nome">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
+          '<div class="aba-lado"><div class="jan-cabeca"><div class="aba-nome">' + nomeDaPeca(i.nome) + '</div>' +
           '<button class="tirar-x" type="button" data-tirar="' + n + '" aria-label="Tirar ' + i.nome + ' da sacola">&times;</button></div>' +
-          (d ? '<div class="aba-detalhe">' + d + '</div>' : '') +
           '<div class="aba-qtd"><span>Quantidade</span><span class="passos">' +
             '<button type="button" data-qtd="' + n + '" data-passo="-1" aria-label="Diminuir quantidade">−</button>' +
             '<span class="n">' + qtd(i) + '</span>' +
@@ -457,11 +478,9 @@
       html += '<p class="aba-vazia">Sua sacola está vazia.</p>';
     } else {
       html += '<div class="aba-itens">' + itens.map(function (i) {
-        var d = descreverItem(i);
         return '<div class="aba-linha"><img src="' + (i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp')) + '" alt="" loading="lazy" ' +
           'onerror="this.onerror=null;this.src=&quot;img/produtos/' + i.capa + '_m.jpg&quot;">' +
-          '<div class="aba-lado"><div class="aba-nome">' + String(i.nome).replace(/ × /g, ' × ') + '</div>' +
-          (d ? '<div class="aba-detalhe">' + d + '</div>' : '') +
+          '<div class="aba-lado"><div class="aba-nome">' + nomeDaPeca(i.nome) + '</div>' +
           '<div class="aba-qtd"><span>Quantidade</span><span>' + qtd(i) + '</span></div>' +
           '<div class="aba-valor">' + (i.preco ? window.aleaDinheiroHTML(i.preco * qtd(i)) : 'Sob consulta') + '</div></div></div>';
       }).join('') + '</div>' +

@@ -121,6 +121,10 @@
   function foto(i) { return i.miniatura || ('img/produtos/' + i.capa + '_obj_m.webp'); }
   function fotoReserva(i) { return 'this.onerror=null;this.src=&quot;img/produtos/' + esc(i.capa) + '_m.jpg&quot;'; }
   function descrever(i) { return CAR() && CAR().descrever ? CAR().descrever(i) : ''; }
+  /* 14/10/2026 (foto 10895 + áudios 10891/10896): a página Sacola de Compras mostra o nome igual ao da página da peça e só
+     tamanho, nome e o adicional curto; o Resumo do Pedido e o pedido continuam com a descrição inteira */
+  function descreverCurto(i) { return CAR() && CAR().descreverCurto ? CAR().descreverCurto(i) : descrever(i); }
+  function nomeHTML(nome) { return CAR() && CAR().nomeHTML ? CAR().nomeHTML(nome) : esc(nome); }
   function subtotal() { return CAR() ? CAR().total() : 0; }
   function sobConsulta() { return itens().some(function (i) { return !i.preco; }); }
 
@@ -262,9 +266,13 @@
       if (!j || !j.disponivel || !(j.opcoes || []).length) {
         st.frete = { chave: chave, estado: 'indisponivel', motivo: (j && j.motivo) || '' };
       } else {
-        var manter = j.opcoes.some(function (o) { return o.servico === antes; });
-        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: j.opcoes,
-                     escolhido: manter ? antes : j.opcoes[0].servico };
+        /* 14/10/2026 (áudio 10900): a JADLOG é SEMPRE a 1ª opção e já vem escolhida, mesmo quando outra sai mais barata
+           (Jataí: SEDEX 11,64 x Jadlog 18,29, msg 10849); quem quiser outra abre a lista e escolhe */
+        var ops = j.opcoes.filter(function (o) { return /jadlog/i.test(o.empresa || ''); })
+          .concat(j.opcoes.filter(function (o) { return !/jadlog/i.test(o.empresa || ''); }));
+        var manter = ops.some(function (o) { return o.servico === antes; });
+        st.frete = { chave: chave, estado: 'ok', id_cotacao: j.id_cotacao, expira: j.expira_em, opcoes: ops,
+                     escolhido: manter ? antes : ops[0].servico };
       }
       guardar(); pintar();
     }).catch(function () {
@@ -399,10 +407,10 @@
       '<div class="cab" role="row"><span role="columnheader">Produto</span><span role="columnheader">Preço</span>' +
       '<span role="columnheader">Quantidade</span><span role="columnheader">Total</span><span></span></div>' +
       l.map(function (i, n) {
-        var det = descrever(i);
+        var det = descreverCurto(i);
         return '<div class="lin" role="row" data-linha="' + n + '">' +
           '<div class="prod" role="cell"><img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
-            '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
+            '<div class="nome">' + nomeHTML(i.nome) + (det ? '<small>' + esc(det) + '</small>' : '') + '</div></div>' +
           '<div class="preco" role="cell">' + (i.preco ? dinheiroTela(i.preco) : 'Sob consulta') + '</div>' +
           '<div class="qtd" role="cell"><span class="loja-passos">' +
             '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
@@ -421,10 +429,10 @@
     }
     if (largo()) return h + htmlSacolaLarga(l);
     h += l.map(function (i, n) {
-      var det = descrever(i);
+      var det = descreverCurto(i);
       return '<div class="loja-item" data-linha="' + n + '">' +
         '<img src="' + esc(foto(i)) + '" alt="" loading="lazy" onerror="' + fotoReserva(i) + '">' +
-        '<div class="nome">' + esc(i.nome).replace(/ × /g, ' × ') + (det   /* NOMES COLLAB 26/09: "× Ayla" não se separa */ ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
+        '<div class="nome">' + nomeHTML(i.nome) + (det ? '<small>' + esc(det) + '</small>' : '') + '</div>' +
         '<button type="button" class="tirar" data-tirar-item="' + n + '" aria-label="Tirar ' + esc(i.nome) + ' da sacola">&times;</button>' +
         '<div class="linha-qtd"><span class="loja-passos">' +
           '<button type="button" data-passo="-1" data-item="' + n + '" aria-label="Diminuir">−</button><span>' + qtd(i) + '</span>' +
