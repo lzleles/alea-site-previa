@@ -714,7 +714,7 @@ window.ALEA.tamanhos = {
   'claudia-wave':      ['Pequeno porte', 'Médio e grande porte'],   // idem
   /* POR FORMATO (04/10/2026, áudio 6228: "o Orbis vai ser mini e pequeno e o Quadrum vai ser pequeno e grande"; 6229: o
      Tamanho só aparece depois do Formato). Lista simples = vale pra qualquer formato; objeto = a lista de cada formato. */
-  'stria-planter':     { Orbis: ['Mini', 'Pequeno'], Quadrum: ['Pequeno', 'Grande'] },
+  'stria-planter':     { Sphera: ['Mini', 'Pequeno'], Cubus: ['Pequeno', 'Grande'] },
   /* v56 (06/10/2026, áudio 6895: "pequeno, médio e gigante"; escalas 6902/6910: P 100%, M 180%, G 230% do arquivo dele) */
   'urubu-mascote-flamengo': ['Pequeno', 'Médio', 'Gigante'],
   /* v57 (06/10/2026, msg 7047): os 2 tamanhos com os rótulos do áudio 7054 (acima). Medido nos
@@ -755,7 +755,7 @@ window.ALEA.precoPorEscolha = {
   // Fonte: 80_calculo_preco_grama_2026-10-12/PRECOS_DECIDIDOS_PELO_CASSIANO_v1.md (coluna ele). Antes: Stria 80/170/190/290,
   // Luke 150/190, Matteo 150/180, Claudia 170/220, Caesar 150/180, Ayla 300 (versao anterior no git: ecf1b78).
   // Sem tamanho/formato a chave e vazia (como a Ayla). Peca em ALEA.emBreve continua Em breve: o preco fica so no dado.
-  'stria-planter': { 'Orbis|Mini': 100, 'Orbis|Pequeno': 180, 'Quadrum|Pequeno': 190, 'Quadrum|Grande': 300 },
+  'stria-planter': { 'Sphera|Mini': 100, 'Sphera|Pequeno': 180, 'Cubus|Pequeno': 190, 'Cubus|Grande': 300 },
   'luke-bowl':         { 'Pequeno porte': 150, 'Médio e grande porte': 180 },
   'matteo-texturized': { 'Pequeno porte': 180, 'Médio e grande porte': 220 },
   'claudia-wave':      { 'Pequeno porte': 200, 'Médio e grande porte': 230 },
@@ -768,7 +768,7 @@ window.ALEA.precoPorEscolha = {
   'pen-holder':        { '': 80 },
   'make':              { '': 300 },   // Cella
   'makeup-layer-organizer': { '': 340 },   // Strata (340 desde 13/10/2026, audio 9789; era 330, antes 350)
-  'lamel':             { 'Ovatum': 170, 'Longum': 150 },
+  'lamel':             { 'Ova': 170, 'Altus': 150 },
   'urubu-mascote-flamengo': { 'Pequeno': 310, 'Médio': null, 'Gigante': null },   // Pequeno 310 desde 13/10/2026 (msg 9886; era 300, antes 330). Medio e Gigante: sem preco dele ainda
   'aurea':             { '': 190 },
   'una':               { '15 cm': 100, '22 cm': 120 },
@@ -797,11 +797,11 @@ window.ALEA.freteGratis = { sul_sudeste_centro_oeste: 400, demais: 700, transpor
 /* FORMATOS À VENDA (04/10/2026, ālea Stria Planter, msgs 6122/6124 "ālea Stria Planter — Orbis e Quadrum"): o grupo
    "Formato" (produto.js v42) logo ACIMA do Tamanho, mesma trava (obrigatório) e vai no pedido ("Formato: Orbis"). */
 window.ALEA.formatos = {
-  'stria-planter': ['Orbis', 'Quadrum'],
+  'stria-planter': ['Sphera', 'Cubus'],
   /* v52 (05/10/2026): ālea Lamel — "a família vai ser só ālea Lamel e lá dentro a opção de escolher qual dos dois vasos" (áudio
      6728). Nomes PROVISÓRIOS (o nome de cada objeto no arquivo dele: lamel_vase e lamel_wavy) — ele dá os nomes depois. */
   /* v55 (06/10/2026, fotos 6809/6810 do Cassiano): os nomes DELE — Vase (o oval) vira Ovatum, Wavy (o alto) vira Longum. */
-  'lamel': ['Ovatum', 'Longum'],
+  'lamel': ['Ova', 'Altus'],
   /* v45 (12/10/2026): ālea Unda Organizer — versões Mini e Core (texto dele msg 9013; uma página só, D-20261012-12). */
   'unda-organizer': ['Mini', 'Core']
 };
@@ -819,15 +819,15 @@ window.ALEA.iconeFormato = {
   'stria-planter': {
     modo: 'miniatura',   // v48: "pensando melhor, vamos colocar essa miniatura" (6275); a B (símbolo, só borda) ficou de reserva
     lado: 'depois',      // v48: "na frente da palavra" (6269/6271/6275) lido como DEPOIS do nome; 'antes' se ele disser o contrário
-    miniatura: { Orbis: 'img/stria_formato_orbis.png?v=marmore', Quadrum: 'img/stria_formato_quadrum.png?v=marmore' },   // v48: ?v= pra o celular não mostrar a cinza do cache
-    simbolo:   { Orbis: 'redondo', Quadrum: 'quadrado' }
+    miniatura: { Sphera: 'img/stria_formato_orbis.png?v=marmore', Cubus: 'img/stria_formato_quadrum.png?v=marmore' },   // v48: ?v= pra o celular não mostrar a cinza do cache
+    simbolo:   { Sphera: 'redondo', Cubus: 'quadrado' }
   },
   /* v55 (06/10/2026, foto 6810: "com a miniatura depois da palavra", igual ao Stria): render do .glb do site em Branco (a cor
      em que o Lamel abre) pelo 37_produtos_home_lote_2026-10-05/miniatura_formato_lamel_v1_branco.py. */
   'lamel': {
     modo: 'miniatura',
     lado: 'depois',
-    miniatura: { Ovatum: 'img/lamel_formato_ovatum.png?v=2026-10-06', Longum: 'img/lamel_formato_longum.png?v=2026-10-06' }
+    miniatura: { Ova: 'img/lamel_formato_ovatum.png?v=2026-10-06', Altus: 'img/lamel_formato_longum.png?v=2026-10-06' }
   }
 };
 
@@ -843,10 +843,10 @@ window.ALEA.iconeFormato = {
 window.ALEA.modelos3d['stria-planter'] = {
   glb: 'modelos/stria_orbis_p.glb?v=2026-10-04',
   glbPorEscolha: {
-    'Orbis|Mini':      'modelos/stria_orbis_p.glb?v=2026-10-04',   // v44: o Orbis P de antes virou Mini (6231)
-    'Orbis|Pequeno':   'modelos/stria_orbis_g.glb?v=2026-10-04',   // v44: o Orbis G de antes virou Pequeno (6231)
-    'Quadrum|Pequeno': 'modelos/stria_quadrum_p.glb?v=2026-10-04',
-    'Quadrum|Grande':  'modelos/stria_quadrum_g.glb?v=2026-10-04'
+    'Sphera|Mini':     'modelos/stria_orbis_p.glb?v=2026-10-04',   // v44: o Orbis P de antes virou Mini (6231)
+    'Sphera|Pequeno':  'modelos/stria_orbis_g.glb?v=2026-10-04',   // v44: o Orbis G de antes virou Pequeno (6231)
+    'Cubus|Pequeno':   'modelos/stria_quadrum_p.glb?v=2026-10-04',
+    'Cubus|Grande':    'modelos/stria_quadrum_g.glb?v=2026-10-04'
   },
   semNome: true,
   soUmModo: true,
@@ -889,8 +889,8 @@ window.ALEA.modelos3d['stria-planter'] = {
   window.ALEA.modelos3d['make'] = cfg('modelos/make.glb' + V, P);                // peca_0 fundo, peca_1 gaveta, peca_2 tampa
   window.ALEA.modelos3d['makeup-layer-organizer'] = cfg('modelos/makeup.glb' + V, P);   // peca_0..2 camadas de baixo pra cima, peca_3 copinho
   window.ALEA.modelos3d['lamel'] = cfg('modelos/lamel_vase.glb' + V, { glbPorEscolha: {
-    'Ovatum': 'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase) — v55: era 'Vase'
-    'Longum': 'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy) — v55: era 'Wavy'
+    'Ova':    'modelos/lamel_vase.glb' + V,    // placa 1 (lamel_vase) — v55: era 'Vase'
+    'Altus':  'modelos/lamel_wavy.glb' + V     // placa 2 (lamel_wavy) — v55: era 'Wavy'
   } });
   /* linha retirada do site em 12/10/2026, áudio 9480 do Cassiano; o bloco antigo está em 03_site/_fora_de_uso_site/ (pasta de 2026-10-12) (era o último modelos3d deste bloco) */
 })();

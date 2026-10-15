@@ -150,7 +150,7 @@ window.VITRINE = [
   /* 04/10/2026: 3º produto da HOME (Cassiano, msgs 6048-6096). Capa = os 4 vasos na sala (IMG_2670, áudio 6100). */
   { produto: 'ālea Vase Prismatic',                       nome: 'quatro cores', categoria: 'home', sub: 'decor', preco: 120, pagina: 'vase-prismatic', recorte: false, fotos: ['vaseprismatic_capaq'] },
   /* 04/10/2026: 4º produto da HOME (Cassiano, msgs 6122-6153). Capa = IMG_2690 (6146). SEM preço até ele fatiar (6092). */
-  { produto: 'ālea Stria Planter',                        nome: 'Orbis e Quadrum', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] },
+  { produto: 'ālea Stria Planter',                        nome: 'Sphera e Cubus', categoria: 'home', sub: 'decor', preco: null, pagina: 'stria-planter', recorte: false, fotos: ['striaplanter_capaq'] },
   /* 05/10/2026: os 6 do LOTE msg6689 (áudios 6726/6728/6729/6731 do Cassiano), todos "Em breve" (config.js ALEA.emBreve):
      SEM FOTO por enquanto (fotos: [] -> feed.js v41 mostra o bloco "foto em breve") e sem preço. Subcategorias confirmadas
      por ele (6731): Desk = Laptop Stand, Pen Holder (+ 1 linha retirada do site em 12/10/2026, áudio 9480 do Cassiano; o bloco antigo está em 03_site/_fora_de_uso_site/ (pasta de 2026-10-12)); Aura = Make, Makeup Layer Organizer; Decor = Lamel. */
@@ -559,7 +559,7 @@ window.PRODUTOS = [
     paragrafos: [   // msg 6812, texto DELE
       'A família Lamel nasce da sobreposição visual de lâminas verticais que percorrem toda a peça, criando profundidade, movimento e diferentes percepções conforme o ângulo de observação.',
       'Seu desenho equilibra precisão e leveza: uma estrutura marcada por ritmo e continuidade, onde luz e sombra passam a fazer parte da própria forma.',
-      'Nas versões Ovatum e Longum, a mesma linguagem ganha proporções distintas, permitindo composições individuais ou em conjunto sem perder sua identidade.',
+      'Nas versões Ova e Altus, a mesma linguagem ganha proporções distintas, permitindo composições individuais ou em conjunto sem perder sua identidade.',
       'Um objeto de presença sutil, pensado para integrar o ambiente sem apenas ocupá-lo.'
     ], galeria: [] },
 
